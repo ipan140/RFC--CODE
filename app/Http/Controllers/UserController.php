@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -70,28 +71,42 @@ class UserController extends Controller
      * Menyimpan perubahan data user.
      */
     public function update(Request $request, User $user)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-        ]);
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email,' . $user->id,
+        'password' => 'nullable|min:6',
+        'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
 
-        $data = [
-            'name' => $request->name,
-            'email' => $request->email,
-            'updated_at' => now(),
-        ];
+    $data = [
+        'name' => $request->name,
+        'email' => $request->email,
+        'updated_at' => now(),
+    ];
 
-        // Update password hanya jika diisi
-        if ($request->password) {
-            $request->validate(['password' => 'min:6']);
-            $data['password'] = Hash::make($request->password);
+    // Update password jika diisi
+    if ($request->filled('password')) {
+        $data['password'] = Hash::make($request->password);
+    }
+
+    // Cek apakah ada gambar baru diupload
+    if ($request->hasFile('profile_picture')) {
+        // Hapus foto lama jika ada
+        if ($user->profile_picture && Storage::exists('public/' . $user->profile_picture)) {
+            Storage::delete('public/' . $user->profile_picture);
         }
 
-        $user->update($data);
-
-        return redirect()->route('user.index')->with('success', 'User berhasil diperbarui!');
+        // Simpan gambar baru
+        $file = $request->file('profile_picture');
+        $path = $file->store('profile_pictures', 'public');
+        $data['profile_picture'] = $path;
     }
+
+    $user->update($data);
+
+    return redirect()->route('user.index')->with('success', 'User berhasil diperbarui!');
+}
 
     /**
      * Menghapus user dari database.

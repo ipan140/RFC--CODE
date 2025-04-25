@@ -3,33 +3,31 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Services\AntaresService;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
-        //
+        // Bind AntaresService sebagai singleton
+        $this->app->singleton(AntaresService::class, function ($app) {
+            return new AntaresService();
+        });
     }
 
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
-        //
-          \URL::forceRootUrl(\Config::get('app.url'));
-// And this if you wanna handle https URL scheme
-// It's not usefull for http://www.example.com, it's just to make it more independant from the constant value
-if (\Str::contains(\Config::get('app.url'), 'https://')) {
-    \URL::forceScheme('https');
-    //use \URL:forceSchema('https') if you use laravel < 5.4
-}
+        // Paksa penggunaan HTTPS jika APP_URL berisi "https://"
+        if (Str::contains(config('app.url'), 'https://')) {
+            URL::forceScheme('https');
+        }
     }
 }

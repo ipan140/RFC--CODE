@@ -10,6 +10,6 @@ class Mitra extends Model
     use HasFactory;
 
     protected $fillable = [
-        'nama', 'lokasi', 'email', 'telepon'
+        'nama', 'lokasi', 'email', 'telepon', 'foto_mitra'
     ];
 }

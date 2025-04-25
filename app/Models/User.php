@@ -26,7 +26,11 @@ class User extends Authenticatable
         'status',
         'email_verified_at',
         'remember_token',
+        'api_token',          // ✅ tambahkan ini
+        'created_at',         // ✅ tambahkan ini
+        'updated_at',         // ✅ tambahkan ini
     ];
+    
 
     /**
      * The attributes that should be hidden for serialization.

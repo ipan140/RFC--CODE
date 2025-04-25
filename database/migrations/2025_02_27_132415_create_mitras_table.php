@@ -13,6 +13,7 @@ return new class extends Migration {
             $table->string('lokasi');
             $table->string('email')->unique();
             $table->string('telepon');
+            $table->string('foto_mitra')->nullable(); // Menyimpan path foto
             $table->timestamps();
         });
     }

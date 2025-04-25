@@ -36,6 +36,7 @@
                                 <th>Lokasi</th>
                                 <th>Email</th>
                                 <th>Nomor</th>
+                                <th>Foto</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -47,6 +48,13 @@
                                     <td>{{ $mitra->lokasi }}</td>
                                     <td>{{ $mitra->email }}</td>
                                     <td>{{ $mitra->telepon }}</td>
+                                    <td class="text-center">
+                                        @if($mitra->foto_mitra)
+                                            <img src="{{ asset('storage/' . $mitra->foto_mitra) }}" width="60" class="rounded">
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
                                     <td class="text-center">
                                         <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#showMitraModal{{ $mitra->id }}">
                                             <i class="bi bi-eye"></i>
@@ -73,6 +81,10 @@
                                                 <p><strong>Lokasi:</strong> {{ $mitra->lokasi }}</p>
                                                 <p><strong>Email:</strong> {{ $mitra->email }}</p>
                                                 <p><strong>Nomor:</strong> {{ $mitra->telepon }}</p>
+                                                @if($mitra->foto_mitra)
+                                                    <p><strong>Foto Mitra:</strong></p>
+                                                    <img src="{{ asset('storage/' . $mitra->foto_mitra) }}" class="img-fluid rounded" style="max-width: 200px;">
+                                                @endif
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -85,7 +97,7 @@
                                 <div class="modal fade" id="editMitraModal{{ $mitra->id }}" tabindex="-1">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
-                                            <form action="{{ route('mitra.update', $mitra->id) }}" method="POST">
+                                            <form action="{{ route('mitra.update', $mitra->id) }}" method="POST" enctype="multipart/form-data">
                                                 @csrf
                                                 @method('PUT')
                                                 <div class="modal-header">
@@ -108,6 +120,14 @@
                                                     <div class="mb-3">
                                                         <label class="form-label">Nomor Telepon</label>
                                                         <input type="text" name="telepon" class="form-control" value="{{ $mitra->telepon }}" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Foto Mitra (Opsional)</label>
+                                                        <input type="file" name="foto_mitra" class="form-control" accept="image/*">
+                                                        @if($mitra->foto_mitra)
+                                                            <small class="d-block mt-2">Foto saat ini:</small>
+                                                            <img src="{{ asset('storage/' . $mitra->foto_mitra) }}" class="img-thumbnail mt-1" style="max-width: 120px;">
+                                                        @endif
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
@@ -155,7 +175,7 @@
 <div class="modal fade" id="tambahMitraModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="{{ route('mitra.store') }}" method="POST">
+            <form action="{{ route('mitra.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title">Tambah Mitra</h5>
@@ -165,7 +185,8 @@
                     <input type="text" name="nama" class="form-control mb-3" placeholder="Nama Mitra" required>
                     <input type="text" name="lokasi" class="form-control mb-3" placeholder="Lokasi" required>
                     <input type="email" name="email" class="form-control mb-3" placeholder="Email" required>
-                    <input type="text" name="telepon" class="form-control" placeholder="Nomor Telepon" required>
+                    <input type="text" name="telepon" class="form-control mb-3" placeholder="Nomor Telepon" required>
+                    <input type="file" name="foto_mitra" class="form-control" accept="image/*">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>

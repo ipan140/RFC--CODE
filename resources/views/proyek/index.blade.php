@@ -80,7 +80,7 @@
                                                 <p><strong>Tanggal:</strong> {{ $proyek->tanggal }}</p>
                                                 <p><strong>Foto Proyek:</strong></p>
                                                 @if($proyek->foto_proyek)
-                                                    <img src="{{ asset('storage/' . $proyek->foto_proyek) }}" width="100%">
+                                                    <img src="{{ asset('storage/' . $proyek->foto_proyek) }}" width="100%" >
                                                 @else
                                                     <span class="text-muted">Tidak ada foto</span>
                                                 @endif

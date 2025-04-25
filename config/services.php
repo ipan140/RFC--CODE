@@ -30,5 +30,10 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
+    'antares' => [
+        'api_key' => env('ANTARES_API_KEY'),
+        'base_url' => env('ANTARES_BASE_URL'),
+        'app_path' => env('ANTARES_APP_PATH'),
+    ],
 
 ];

@@ -10,7 +10,7 @@
         position: fixed;
         width: 100%;
         padding: 1rem 5%;
-        background-color: transparent;
+        background-color: #f8f9fa; /* Menambahkan background untuk navbar */
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -35,7 +35,7 @@
 
     .navbar-nav .nav-link {
         font-size: 1.4rem;
-        color: white;
+        color: #333; /* Mengubah warna teks menjadi hitam */
         font-weight: 500;
         transition: 0.3s ease-in-out;
         border-bottom: 2px solid transparent;
@@ -43,10 +43,9 @@
 
     .navbar-nav .nav-link:hover,
     .navbar-nav .nav-link.active {
-        color: #b74b4b;
-        border-bottom: 2px solid #b74b4b;
+        color: #000; /* Mengubah warna hover menjadi hitam */
+        border-bottom: 2px solid rgb(7, 255, 40); /* Mengubah warna bawah menjadi hijau */
     }
-
     /* RFC-App Button */
     .btn-rfc {
         padding: 8px 16px;
@@ -58,15 +57,16 @@
         border: 2px solid rgb(7, 255, 40);
         transition: 0.3s ease-in-out;
     }
+    .btn-rfc:hover {
+        background-color: #000;
+        color: #fff;
+    }
 
     .btn-rfc:hover {
         background-color: rgb(0, 255, 13);
-        color: black;
+        color: white; /* Tetap hitam */
         box-shadow: 0 0 15px rgb(0, 255, 13);
     }
-
-    /* Dark Mode Toggle */
-    /* Dark Mode Toggle - Bulat */
 .btn-darkmode {
     width: 50px; /* Lebar tombol */
     height: 50px; /* Tinggi tombol */
@@ -89,7 +89,6 @@
     color: black;
     box-shadow: 0 0 15px rgb(0, 255, 13);
 }
-
 
     /* Responsive Navbar */
     @media (max-width: 992px) {
@@ -151,7 +150,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(0, 0, 0, 0.3);
     }
 
     .custom-margin {
@@ -240,7 +238,7 @@
 
         <!-- Navbar Items -->
         <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-            <ul class="navbar-nav align-items-center">
+            <ul class="navbar-nav text-center">
                 <li class="nav-item"><a class="nav-link" href="#about">Tentang Kami</a></li>
                 <li class="nav-item"><a class="nav-link" href="#services">Projek</a></li>
                 <li class="nav-item"><a class="nav-link" href="#contact">Kontak</a></li>
@@ -256,3 +254,4 @@
         </div>
     </div>
 </nav>
+

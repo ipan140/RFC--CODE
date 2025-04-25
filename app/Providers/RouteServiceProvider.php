@@ -7,17 +7,18 @@ use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvi
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 class RouteServiceProvider extends ServiceProvider
 {
     /**
      * The path to the "home" route for your application.
-     *
-     * Typically, users are redirected here after authentication.
+     * 
+     * After authentication, we can check the user's role and redirect them to the appropriate dashboard.
      *
      * @var string
      */
-    public const HOME = '/home';
+    public const HOME = '/home'; // Default if no specific redirect is provided.
 
     /**
      * Define your route model bindings, pattern filters, and other route configuration.
@@ -48,5 +49,32 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
+    }
+
+    /**
+     * Override the default redirect after login based on user role.
+     * 
+     * This method is useful for redirecting users after authentication.
+     *
+     * @return string
+     */
+    public static function redirectToHomeBasedOnRole()
+    {
+        if (Auth::check()) {
+            $role = Auth::user()->role;
+            
+            switch ($role) {
+                case 'admin':
+                    return '/dashboardadmin'; // Admin dashboard
+                case 'owner':
+                    return '/dashboardowner'; // Owner dashboard
+                case 'user':
+                    return '/dashboarduser'; // User dashboard
+                default:
+                    return '/'; // Default redirect if role is unknown
+            }
+        }
+
+        return self::HOME;
     }
 }

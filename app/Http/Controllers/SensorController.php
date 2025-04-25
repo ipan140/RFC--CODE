@@ -11,13 +11,13 @@ class SensorController extends Controller
     public function index()
     {
         $sensors = Sensor::all();
-        return view('sensor', compact('sensors'));
+        return view('sensor.index', compact('sensors'));
     }
 
     // Menampilkan form tambah sensor
     public function create()
     {
-        return view('tambah_sensor', [
+        return view('sensor.create', [
             'title' => 'Tambah Sensor',
             'username' => 'Admin',
             'roles' => 'Admin',
@@ -29,6 +29,7 @@ class SensorController extends Controller
     // Menyimpan sensor baru ke database
     public function store(Request $request)
     {
+        // Validasi data input
         $validatedData = $request->validate([
             'nama' => ['required', 'string', 'max:255'],
             'tipe' => ['required', 'string'],
@@ -36,20 +37,23 @@ class SensorController extends Controller
             'longitude' => ['required', 'numeric'],
         ]);
 
+        // Menyimpan data sensor baru
         Sensor::create($validatedData);
 
+        // Redirect ke daftar sensor dengan pesan sukses
         return redirect()->route('sensor.index')->with('success', 'Sensor berhasil ditambahkan!');
     }
 
     // Menampilkan form edit sensor
     public function edit(Sensor $sensor)
     {
-        return view('edit_sensor', compact('sensor'));
+        return view('sensor.edit', compact('sensor'));
     }
 
     // Menyimpan perubahan sensor ke database
     public function update(Request $request, Sensor $sensor)
     {
+        // Validasi data input
         $validatedData = $request->validate([
             'nama' => ['required', 'string', 'max:255'],
             'tipe' => ['required', 'string'],
@@ -57,15 +61,20 @@ class SensorController extends Controller
             'longitude' => ['required', 'numeric'],
         ]);
 
+        // Memperbarui data sensor
         $sensor->update($validatedData);
 
+        // Redirect ke daftar sensor dengan pesan sukses
         return redirect()->route('sensor.index')->with('success', 'Sensor berhasil diperbarui!');
     }
 
     // Menghapus sensor dari database
     public function destroy(Sensor $sensor)
     {
+        // Menghapus data sensor
         $sensor->delete();
+
+        // Redirect ke daftar sensor dengan pesan sukses
         return redirect()->route('sensor.index')->with('success', 'Sensor berhasil dihapus!');
     }
 }

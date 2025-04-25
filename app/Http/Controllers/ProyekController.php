@@ -68,18 +68,37 @@ class ProyekController extends Controller
     /**
      * Memperbarui data proyek.
      */
+
     public function update(Request $request, Proyek $proyek)
     {
         $request->validate([
             'nama' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'klien' => 'required|string|max:255',
-            'deadline' => 'required|date',
+            'tanggal' => 'required|date',
+            'foto_proyek' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $proyek->update($request->all());
+        $data = [
+            'nama' => $request->nama,
+            'deskripsi' => $request->deskripsi,
+            'tanggal' => $request->tanggal,
+        ];
 
-        return redirect()->route('proyek.index')->with('success', 'Proyek berhasil diperbarui.');
+        // Cek apakah ada upload foto baru
+        if ($request->hasFile('foto_proyek')) {
+            // Hapus foto lama kalau ada
+            if ($proyek->foto_proyek && Storage::exists('public/' . $proyek->foto_proyek)) {
+                Storage::delete('public/' . $proyek->foto_proyek);
+            }
+
+            // Simpan foto baru
+            $path = $request->file('foto_proyek')->store('foto_proyek', 'public');
+            $data['foto_proyek'] = $path;
+        }
+
+        $proyek->update($data);
+
+        return redirect()->route('proyek.index')->with('success', 'Proyek berhasil diperbarui!');
     }
 
     /**

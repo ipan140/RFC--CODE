@@ -17,10 +17,10 @@
                 <!-- Products -->
                 <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mt-3">
                     <h6 class="text-uppercase mb-4 font-weight-bold">Products</h6>
-                    <p><a href="#" class="text-white">MDBootstrap</a></p>
-                    <p><a href="#" class="text-white">MDWordPress</a></p>
-                    <p><a href="#" class="text-white">BrandFlow</a></p>
-                    <p><a href="#" class="text-white">Bootstrap Angular</a></p>
+                    <p><i class="fas fa-home mr-3"></i> New York, NY 10012, US</p>
+                    <p><i class="fas fa-envelope mr-3"></i> info@gmail.com</p>
+                    <p><i class="fas fa-phone mr-3"></i> +01 234 567 88</p>
+                    <p><i class="fas fa-print mr-3"></i> +01 234 567 89</p>
                 </div>
                 
                 <hr class="w-100 clearfix d-md-none" />
@@ -49,12 +49,12 @@
                     <a class="btn btn-primary btn-floating m-1" style="background-color: #ac2bac" href="#" role="button">
                         <i class="fab fa-instagram"></i>
                     </a>
-                    <a class="btn btn-primary btn-floating m-1" style="background-color: #0082ca" href="#" role="button">
+                    <!-- <a class="btn btn-primary btn-floating m-1" style="background-color: #0082ca" href="#" role="button">
                         <i class="fab fa-linkedin-in"></i>
                     </a>
                     <a class="btn btn-primary btn-floating m-1" style="background-color: #333333" href="#" role="button">
                         <i class="fab fa-github"></i>
-                    </a>
+                    </a> -->
                 </div>
             </div>
         </section>

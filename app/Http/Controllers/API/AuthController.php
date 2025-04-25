@@ -20,7 +20,7 @@ public function register(Request $request)
         'email' => 'required|string|email|max:255|unique:users',
         'password' => 'required|string|min:8',
         'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        'role' => 'nullable|in:user,admin,stafkeuangan,owner',
+        'role' => 'nullable|in:user,admin,owner',
         'status' => 'nullable|boolean',
     ]);
 
@@ -65,7 +65,6 @@ public function register(Request $request)
         ], 500);
     }
 }
-
 
     // **Login User**
     public function login(Request $request)

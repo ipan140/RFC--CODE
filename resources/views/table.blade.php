@@ -23,7 +23,13 @@
                     <div class="card-body">
                         <h5 class="card-title"><i class="bi bi-table"></i> Tabel Data Sensor</h5>
 
-                        <!-- Table with stripped rows -->
+                        <!-- Tambahkan Tombol Tambah Sensor -->
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahSensorModal">
+                                <i class="bi bi-plus-circle"></i> Tambah Sensor
+                            </button>
+                        </div>
+
                         <div class="table-responsive">
                             <table class="table table-striped table-bordered table-hover align-middle">
                                 <thead class="table-dark text-center">
@@ -34,45 +40,41 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td class="text-center">1</td>
-                                        <td>Nitrogen (N)</td>
-                                        <td class="text-center">7</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center">2</td>
-                                        <td>Phosphorus (P)</td>
-                                        <td class="text-center">9</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center">3</td>
-                                        <td>Kalium (K)</td>
-                                        <td class="text-center">5</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center">4</td>
-                                        <td>Soil pH</td>
-                                        <td class="text-center">6.85</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center">5</td>
-                                        <td>Electrical Conductivity (EC)</td>
-                                        <td class="text-center">18</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center">6</td>
-                                        <td>Soil Temperature</td>
-                                        <td class="text-center">30</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center">7</td>
-                                        <td>Humidity</td>
-                                        <td class="text-center">47</td>
-                                    </tr>
+                                    @php
+                                        $sensorMapping = [
+                                            'ph' => 'Soil pH',
+                                            'pota' => 'Kalium (K)',
+                                            'phospor' => 'Phosphorus (P)',
+                                            'EC' => 'Electrical Conductivity (EC)',
+                                            'Nitrogen' => 'Nitrogen (N)',
+                                            'humidity' => 'Humidity',
+                                            'temp' => 'Soil Temperature'
+                                        ];
+                                        $counter = 1;
+                                    @endphp
+
+                                    @foreach ($sensorMapping as $key => $label)
+                                        @php $value = $data[$key] ?? '-'; @endphp
+                                        <tr>
+                                            <td class="text-center">{{ $counter++ }}</td>
+                                            <td>{{ $label }}</td>
+                                            <td class="text-center">
+                                                <h6>
+                                                    {{
+                                                        is_array($value)
+                                                            ? (isset($value['nilai'])
+                                                                ? $value['nilai']
+                                                                : json_encode($value))
+                                                            : $value
+                                                    }}
+                                                </h6>
+                                            </td>
+                                        </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
                         </div>
-                        <!-- End Table with stripped rows -->
+                        <!-- End Table -->
 
                     </div>
                 </div>
@@ -81,4 +83,34 @@
     </section>
 
 </main>
+
+<!-- Modal Tambah Sensor -->
+<div class="modal fade" id="tambahSensorModal" tabindex="-1" aria-labelledby="tambahSensorModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="tambahSensorModalLabel">Tambah Sensor Baru</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST" action="{{ route('sensor.store') }}">
+            @csrf
+            <div class="mb-3">
+                <label for="sensor_name" class="form-label">Nama Sensor</label>
+                <input type="text" class="form-control" id="sensor_name" name="sensor_name" required>
+            </div>
+            <div class="mb-3">
+                <label for="sensor_value" class="form-label">Nilai Sensor</label>
+                <input type="number" step="any" class="form-control" id="sensor_value" name="sensor_value" required>
+            </div>
+            <div class="mb-3">
+                <label for="sensor_date" class="form-label">Tanggal</label>
+                <input type="date" class="form-control" id="sensor_date" name="sensor_date" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Simpan Sensor</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 @endsection
