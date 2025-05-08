@@ -18,9 +18,7 @@ return new class extends Migration
             $table->string('nama_tanaman');
             $table->text('deskripsi')->nullable();
             $table->date('tanggal_tanam')->nullable();        // Tanggal penanaman
-            $table->float('panjang_daun')->nullable();        // Panjang daun (dalam cm)
-            $table->float('lebar_daun')->nullable();          // Lebar daun (dalam cm)
-            $table->string('foto')->nullable();               // Path atau nama file foto
+            $table->enum('status', ['on going', 'selesai'])->default('on going');
             $table->timestamps();                             // created_at & updated_at
         });
     }

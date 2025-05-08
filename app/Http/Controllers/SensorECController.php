@@ -6,10 +6,9 @@ use App\Models\SensorEC;
 use App\Models\SensorPH;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http; // <- Tambahkan ini
+use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 use Spatie\SimpleExcel\SimpleExcelWriter;
-
 
 class SensorECController extends Controller
 {
@@ -41,10 +40,9 @@ class SensorECController extends Controller
         }
 
         return view('sensor_EC.index', [
-            'data' => $results // Pastikan variabel ini tersedia di blade
+            'data' => $results
         ]);
     }
-
 
     public function getDeviceData($device)
     {
@@ -89,6 +87,10 @@ class SensorECController extends Controller
                 if (json_last_error() === JSON_ERROR_NONE) {
                     $value = $decoded;
                 }
+            }
+
+            if (is_numeric($value)) {
+                $value = $value / 100;
             }
 
             $rawTime = $cin['ct'] ?? ($cin['creationTime'] ?? null);
@@ -148,6 +150,10 @@ class SensorECController extends Controller
                 }
             }
 
+            if (is_numeric($value)) {
+                $value = $value / 100;
+            }
+
             $result[] = [
                 'ri' => $item['ri'] ?? 'no-ri',
                 'time' => $item['ct'] ?? 'no-time',
@@ -157,7 +163,6 @@ class SensorECController extends Controller
 
         return $result;
     }
-
 
     public function store(Request $request)
     {
@@ -177,9 +182,6 @@ class SensorECController extends Controller
         }
     }
 
-    /**
-     * Memperbarui data sensor.
-     */
     public function update(Request $request, SensorPH $sensor)
     {
         $validatedData = $request->validate([
@@ -198,9 +200,6 @@ class SensorECController extends Controller
         }
     }
 
-    /**
-     * Menghapus data sensor dari database.
-     */
     public function destroy(SensorPH $sensor)
     {
         try {
@@ -211,9 +210,10 @@ class SensorECController extends Controller
             return redirect()->back()->with('error', 'Gagal menghapus data.');
         }
     }
+
     public function export()
     {
-        $device = 'EC'; // Ganti sesuai device
+        $device = 'EC';
         $cin = $this->fetchLatestData($device);
 
         if (empty($cin)) {
@@ -224,14 +224,14 @@ class SensorECController extends Controller
         $timeFormatted = $cin['time'] ?? '';
         $resourceId = $cin['ri'] ?? '';
 
-        $filePath = storage_path('app/public/data-EC.csv'); // Ubah nama file jadi 'ph'
+        $filePath = storage_path('app/public/data-EC.csv');
         $writer = SimpleExcelWriter::create($filePath);
 
         $writer->addRow(['Resource ID', 'Waktu', 'Nilai']);
         $writer->addRow([
             $resourceId,
             $timeFormatted,
-            $value,
+            $value
         ]);
 
         return response()->download($filePath)->deleteFileAfterSend();
@@ -239,7 +239,7 @@ class SensorECController extends Controller
 
     public function fetchAndStore()
     {
-        $device = 'EC'; // Ganti sesuai device
+        $device = 'EC';
         $url = "https://platform.antares.id:8443/~/antares-cse/antares-id/{$this->appName}/{$device}/la";
 
         try {
@@ -258,7 +258,6 @@ class SensorECController extends Controller
                 return response()->json(['success' => false, 'message' => 'Data tidak ditemukan dari Antares'], 404);
             }
 
-            // Ambil dan decode nilai
             $value = $cin['con'] ?? null;
             if (is_string($value)) {
                 $value = trim($value, "\"'");
@@ -269,14 +268,15 @@ class SensorECController extends Controller
                 }
             }
 
-            // Cek nilai sensor EC
             if (is_array($value)) {
                 $parsedValue = $value['EC'] ?? 0;
             } else {
                 $parsedValue = is_numeric($value) ? floatval($value) : 0;
             }
 
-            // Format waktu
+            // ✅ Bagi 100
+            $parsedValue = $parsedValue / 100;
+
             $rawTime = $cin['ct'] ?? ($cin['creationTime'] ?? null);
             try {
                 $formattedTime = $rawTime
@@ -286,7 +286,6 @@ class SensorECController extends Controller
                 $formattedTime = now()->format('Y-m-d H:i:s');
             }
 
-            // Simpan ke DB
             SensorEC::updateOrCreate(
                 [
                     'parameter' => 'EC',

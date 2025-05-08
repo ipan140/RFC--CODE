@@ -221,7 +221,7 @@ class SensorNitrogenController extends Controller
             return back()->with('error', 'Tidak ada data untuk diekspor.');
         }
 
-        $value = $cin['value'] ?? '';
+        $value = $cin['value'] ?? 'ppm';
         $timeFormatted = $cin['time'] ?? '';
         $resourceId = $cin['ri'] ?? '';
 
@@ -240,7 +240,7 @@ class SensorNitrogenController extends Controller
 
     public function fetchAndStore()
     {
-        $device = 'Nitrogen'; // Ganti sesuai device (Nitrogen)
+        $device = 'Nitrogen'; // Ganti sesuai device
         $url = "https://platform.antares.id:8443/~/antares-cse/antares-id/{$this->appName}/{$device}/la";
 
         try {
@@ -264,9 +264,17 @@ class SensorNitrogenController extends Controller
             if (is_string($value)) {
                 $value = trim($value, "\"'");
                 $decoded = json_decode($value, true);
+
                 if (json_last_error() === JSON_ERROR_NONE) {
                     $value = $decoded;
                 }
+            }
+
+            // Cek nilai sensor Nitrogen
+            if (is_array($value)) {
+                $parsedValue = $value['Nitrogen'] ?? 0;
+            } else {
+                $parsedValue = is_numeric($value) ? floatval($value) : 0;
             }
 
             // Format waktu
@@ -279,7 +287,7 @@ class SensorNitrogenController extends Controller
                 $formattedTime = now()->format('Y-m-d H:i:s');
             }
 
-            // Simpan ke DB (Model untuk sensor Nitrogen)
+            // Simpan ke DB
             SensorNG::updateOrCreate(
                 [
                     'parameter' => 'Nitrogen',
@@ -287,14 +295,14 @@ class SensorNitrogenController extends Controller
                 ],
                 [
                     'ri'    => $cin['ri'] ?? 'no-ri',
-                    'value' => $value['Nitrogen'] ?? 0
+                    'value' => $parsedValue
                 ]
             );
 
             return response()->json([
                 'success' => true,
                 'message' => 'Data berhasil disimpan!',
-                'data' => $value
+                'data' => $parsedValue
             ]);
         } catch (\Exception $e) {
             return response()->json([

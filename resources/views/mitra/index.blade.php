@@ -2,7 +2,7 @@
 @section('content')
 @include('partials.sidebar')
 
-<main id="main" class="main p-4">
+<!-- <main id="main" class="main p-4"> -->
     <div class="pagetitle">
         <h1><i class="bi bi-people-fill"></i> Mitra yang Join</h1>
         <nav>

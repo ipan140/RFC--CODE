@@ -4,7 +4,7 @@
 @include('partials.sidebar')
 <!-- SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<main id="main" class="main p-4">
+<!-- <main id="main" class="main p-4"> -->
     <div class="pagetitle">
         <nav>
             <ol class="breadcrumb">

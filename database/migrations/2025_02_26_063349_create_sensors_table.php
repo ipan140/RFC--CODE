@@ -4,28 +4,22 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateSensorsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('sensors', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->string('parameter');         // ex: suhu, kelembaban, dll
+            $table->string('ri');                // resource ID
+            $table->timestamp('waktu');          // waktu pengambilan data
+            $table->float('value');              // nilai sensor
+            $table->timestamps();                // created_at & updated_at
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('sensors');
     }
-};
+}

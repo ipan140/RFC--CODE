@@ -113,7 +113,33 @@ class SensorPhosporController extends Controller
             'ri' => '-',
         ];
     }
-
+    private function formatSensorValue($device, $value)
+    {
+        if (!is_numeric($value)) {
+            return '-';
+        }
+    
+        // Format angka dengan koma sebagai pemisah ribuan dan 2 angka desimal
+        $formattedValue = number_format($value, 2, '.', ',');
+    
+        // Tambahkan simbol untuk masing-masing perangkat
+        switch (strtolower($device)) {
+            case 'ph':
+                return $formattedValue;
+            case 'pota':
+            case 'phospor':
+            case 'nitrogen':
+                return "{$formattedValue} ppm";
+            case 'ec':
+                return $formattedValue . " dS/m";
+            case 'humidity':
+                return $formattedValue . " %"; // Tambahkan simbol persen untuk humidity
+            case 'temp':
+                return $formattedValue . " °C";
+            default:
+                return $formattedValue;
+        }
+    }
     private function fetchAllData($device)
     {
         $url = "https://platform.antares.id:8443/~/antares-cse/antares-id/{$this->appName}/{$device}?rcn=4";
@@ -213,7 +239,6 @@ class SensorPhosporController extends Controller
     }
 
 
-
     public function export()
     {
         $device = 'phospor';
@@ -265,9 +290,17 @@ class SensorPhosporController extends Controller
             if (is_string($value)) {
                 $value = trim($value, "\"'");
                 $decoded = json_decode($value, true);
+
                 if (json_last_error() === JSON_ERROR_NONE) {
                     $value = $decoded;
                 }
+            }
+
+            // Cek nilai sensor ph
+            if (is_array($value)) {
+                $parsedValue = $value['phospor'] ?? 0;
+            } else {
+                $parsedValue = is_numeric($value) ? floatval($value) : 0;
             }
 
             // Format waktu
@@ -288,14 +321,14 @@ class SensorPhosporController extends Controller
                 ],
                 [
                     'ri'    => $cin['ri'] ?? 'no-ri',
-                    'value' => $value['phospor'] ?? 0
+                    'value' => $parsedValue
                 ]
             );
 
             return response()->json([
                 'success' => true,
                 'message' => 'Data berhasil disimpan!',
-                'data' => $value
+                'data' => $parsedValue
             ]);
         } catch (\Exception $e) {
             return response()->json([

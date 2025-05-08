@@ -5,10 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\SensorPH;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http; // <- Tambahkan ini
+use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
-use Spatie\SimpleExcel\SimpleExcelWriter; // Tambahkan di bagian paling atas jika belum
-
+use Spatie\SimpleExcel\SimpleExcelWriter;
 
 class SensorPHController extends Controller
 {
@@ -16,13 +15,7 @@ class SensorPHController extends Controller
     protected $appName = 'interest';
 
     protected $deviceList = [
-        'ph',
-        'pota',
-        'phospor',
-        'EC',
-        'Nitrogen',
-        'humidity',
-        'temp'
+        'ph', 'pota', 'phospor', 'EC', 'Nitrogen', 'humidity', 'temp'
     ];
 
     public function index(Request $request)
@@ -34,16 +27,14 @@ class SensorPHController extends Controller
         }
 
         $results = [];
-
         foreach ($this->deviceList as $device) {
             $results[$device] = $this->fetchLatestData($device);
         }
 
         return view('sensor_Ph.index', [
-            'data' => $results // Pastikan variabel ini tersedia di blade
+            'data' => $results
         ]);
     }
-
 
     public function getDeviceData($device)
     {
@@ -59,6 +50,39 @@ class SensorPHController extends Controller
         ]);
     }
 
+    private function parseValue($rawValue)
+    {
+        if (is_string($rawValue)) {
+            $rawValue = trim($rawValue, "\"'");
+            $decoded = json_decode($rawValue, true);
+
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $rawValue = $decoded;
+            }
+        }
+
+        if (is_array($rawValue)) {
+            return $rawValue['ph'] ?? 0;
+        }
+
+        if (is_numeric($rawValue)) {
+            return floatval($rawValue) / 100; // ✅ Auto bagi 100
+        }
+
+        return 0;
+    }
+
+    private function formatTime($rawTime)
+    {
+        try {
+            return $rawTime
+                ? Carbon::createFromFormat('Ymd\THis', substr($rawTime, 0, 15))->format('Y-m-d H:i:s')
+                : now()->format('Y-m-d H:i:s');
+        } catch (\Exception $e) {
+            return now()->format('Y-m-d H:i:s');
+        }
+    }
+
     private function fetchLatestData($device)
     {
         $url = "https://platform.antares.id:8443/~/antares-cse/antares-id/{$this->appName}/{$device}/la";
@@ -69,50 +93,58 @@ class SensorPHController extends Controller
             'Accept' => 'application/json'
         ])->get($url);
 
-        if ($response->successful()) {
-            $cin = $response['m2m:cin'] ?? null;
-
-            if (!$cin) {
-                return [
-                    'value' => 'no-value',
-                    'time' => 'no-time',
-                    'ri' => 'no-ri'
-                ];
-            }
-
-            $value = $cin['con'] ?? null;
-
-            if (is_string($value)) {
-                $value = trim($value, "\"'");
-                $decoded = json_decode($value, true);
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    $value = $decoded;
-                }
-            }
-
-            $rawTime = $cin['ct'] ?? ($cin['creationTime'] ?? null);
-            try {
-                $formattedTime = $rawTime
-                    ? Carbon::createFromFormat('Ymd\THis', substr($rawTime, 0, 15))->format('Y-m-d H:i:s')
-                    : 'no-time';
-            } catch (\Exception $e) {
-                $formattedTime = 'invalid-time';
-            }
-
+        if (!$response->successful()) {
             return [
-                'value' => $value ?? 'no-value',
-                'time' => $formattedTime,
-                'ri' => $cin['ri'] ?? 'no-ri',
+                'value' => 'Gagal ambil data',
+                'time' => '-',
+                'ri' => '-',
+            ];
+        }
+
+        $cin = $response['m2m:cin'] ?? null;
+
+        if (!$cin) {
+            return [
+                'value' => 'no-value',
+                'time' => 'no-time',
+                'ri' => 'no-ri',
             ];
         }
 
         return [
-            'value' => 'Gagal ambil data',
-            'time' => '-',
-            'ri' => '-',
+            'value' => $this->parseValue($cin['con'] ?? null),
+            'time' => $this->formatTime($cin['ct'] ?? ($cin['creationTime'] ?? null)),
+            'ri' => $cin['ri'] ?? 'no-ri',
         ];
     }
-
+    private function formatSensorValue($device, $value)
+    {
+        if (!is_numeric($value)) {
+            return '-';
+        }
+    
+        // Format angka dengan koma sebagai pemisah ribuan dan 2 angka desimal
+        $formattedValue = number_format($value, 2, '.', ',');
+    
+        // Tambahkan simbol untuk masing-masing perangkat
+        switch (strtolower($device)) {
+            case 'ph':
+                return $formattedValue;
+            case 'pota':
+            case 'phospor':
+            case 'nitrogen':
+                return "{$formattedValue} ppm";
+            case 'ec':
+                return $formattedValue . " dS/m";
+            case 'humidity':
+                return $formattedValue . " %"; // Tambahkan simbol persen untuk humidity
+            case 'temp':
+                return $formattedValue . " °C";
+            default:
+                return $formattedValue;
+        }
+    }
+    
     private function fetchAllData($device)
     {
         $url = "https://platform.antares.id:8443/~/antares-cse/antares-id/{$this->appName}/{$device}?rcn=4";
@@ -127,8 +159,7 @@ class SensorPHController extends Controller
             return [['error' => 'Gagal mengambil data dari Antares']];
         }
 
-        $json = $response->json();
-        $cinList = $json['m2m:cnt']['m2m:cin'] ?? [];
+        $cinList = $response->json()['m2m:cnt']['m2m:cin'] ?? [];
 
         if (empty($cinList)) {
             return [['info' => 'Belum ada data untuk device ini']];
@@ -137,26 +168,15 @@ class SensorPHController extends Controller
         $result = [];
 
         foreach ($cinList as $item) {
-            $value = $item['con'] ?? null;
-
-            if (is_string($value)) {
-                $value = trim($value, "'");
-                $decoded = json_decode($value, true);
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    $value = $decoded;
-                }
-            }
-
             $result[] = [
                 'ri' => $item['ri'] ?? 'no-ri',
-                'time' => $item['ct'] ?? 'no-time',
-                'value' => $value ?? 'no-value'
+                'time' => $this->formatTime($item['ct'] ?? null),
+                'value' => $this->parseValue($item['con'] ?? null),
             ];
         }
 
         return $result;
     }
-
 
     public function store(Request $request)
     {
@@ -169,6 +189,7 @@ class SensorPHController extends Controller
         try {
             $validatedData['time'] = Carbon::parse($validatedData['time'])->toDateTimeString();
             SensorPH::create($validatedData);
+
             return redirect()->route('sensor_ph.index')->with('success', 'Data berhasil ditambahkan.');
         } catch (\Exception $e) {
             Log::error('Gagal menambahkan data: ' . $e->getMessage());
@@ -176,9 +197,6 @@ class SensorPHController extends Controller
         }
     }
 
-    /**
-     * Memperbarui data sensor.
-     */
     public function update(Request $request, SensorPH $sensor)
     {
         $validatedData = $request->validate([
@@ -190,6 +208,7 @@ class SensorPHController extends Controller
         try {
             $validatedData['time'] = Carbon::parse($validatedData['time'])->toDateTimeString();
             $sensor->update($validatedData);
+
             return redirect()->route('sensor_ph.index')->with('success', 'Data berhasil diperbarui.');
         } catch (\Exception $e) {
             Log::error('Gagal memperbarui data: ' . $e->getMessage());
@@ -197,13 +216,11 @@ class SensorPHController extends Controller
         }
     }
 
-    /**
-     * Menghapus data sensor dari database.
-     */
     public function destroy(SensorPH $sensor)
     {
         try {
             $sensor->delete();
+
             return redirect()->route('sensor_ph.index')->with('success', 'Data berhasil dihapus.');
         } catch (\Exception $e) {
             Log::error('Gagal menghapus data: ' . $e->getMessage());
@@ -213,25 +230,21 @@ class SensorPHController extends Controller
 
     public function export()
     {
-        $device = 'ph'; // Ganti sesuai device
+        $device = 'ph';
         $cin = $this->fetchLatestData($device);
 
         if (empty($cin)) {
             return back()->with('error', 'Tidak ada data untuk diekspor.');
         }
 
-        $value = $cin['value'] ?? '';
-        $timeFormatted = $cin['time'] ?? '';
-        $resourceId = $cin['ri'] ?? '';
-
-        $filePath = storage_path('app/public/data-ph.csv'); // Ubah nama file jadi 'ph'
+        $filePath = storage_path('app/public/data-ph.csv');
         $writer = SimpleExcelWriter::create($filePath);
 
         $writer->addRow(['Resource ID', 'Waktu', 'Nilai']);
         $writer->addRow([
-            $resourceId,
-            $timeFormatted,
-            $value,
+            $cin['ri'] ?? '',
+            $cin['time'] ?? '',
+            $cin['value'] ?? '',
         ]);
 
         return response()->download($filePath)->deleteFileAfterSend();
@@ -239,7 +252,7 @@ class SensorPHController extends Controller
 
     public function fetchAndStore()
     {
-        $device = 'ph'; // Ganti sesuai device
+        $device = 'ph';
         $url = "https://platform.antares.id:8443/~/antares-cse/antares-id/{$this->appName}/{$device}/la";
 
         try {
@@ -258,42 +271,24 @@ class SensorPHController extends Controller
                 return response()->json(['success' => false, 'message' => 'Data tidak ditemukan dari Antares'], 404);
             }
 
-            // Ambil dan decode nilai
-            $value = $cin['con'] ?? null;
-            if (is_string($value)) {
-                $value = trim($value, "\"'");
-                $decoded = json_decode($value, true);
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    $value = $decoded;
-                }
-            }
+            $parsedValue = $this->parseValue($cin['con'] ?? null);
+            $formattedTime = $this->formatTime($cin['ct'] ?? ($cin['creationTime'] ?? null));
 
-            // Format waktu
-            $rawTime = $cin['ct'] ?? ($cin['creationTime'] ?? null);
-            try {
-                $formattedTime = $rawTime
-                    ? Carbon::createFromFormat('Ymd\THis', substr($rawTime, 0, 15))->format('Y-m-d H:i:s')
-                    : now()->format('Y-m-d H:i:s');
-            } catch (\Exception $e) {
-                $formattedTime = now()->format('Y-m-d H:i:s');
-            }
-
-            // Simpan ke DB
-            SensorPh::updateOrCreate(
+            SensorPH::updateOrCreate(
                 [
                     'parameter' => 'ph',
-                    'waktu'     => $formattedTime,
+                    'waktu' => $formattedTime,
                 ],
                 [
-                    'ri'    => $cin['ri'] ?? 'no-ri',
-                    'value' => $value['ph'] ?? 0
+                    'ri' => $cin['ri'] ?? 'no-ri',
+                    'value' => $parsedValue,
                 ]
             );
 
             return response()->json([
                 'success' => true,
                 'message' => 'Data berhasil disimpan!',
-                'data' => $value
+                'data' => $parsedValue
             ]);
         } catch (\Exception $e) {
             return response()->json([

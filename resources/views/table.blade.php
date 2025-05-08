@@ -41,35 +41,35 @@
                                 </thead>
                                 <tbody>
                                     @php
-                                        $sensorMapping = [
-                                            'ph' => 'Soil pH',
-                                            'pota' => 'Kalium (K)',
-                                            'phospor' => 'Phosphorus (P)',
-                                            'EC' => 'Electrical Conductivity (EC)',
-                                            'Nitrogen' => 'Nitrogen (N)',
-                                            'humidity' => 'Humidity',
-                                            'temp' => 'Soil Temperature'
-                                        ];
-                                        $counter = 1;
+                                    $sensorMapping = [
+                                    'ph' => ['label' => 'Soil pH', 'satuan' => ''],
+                                    'pota' => ['label' => 'Kalium (K)', 'satuan' => 'ppm'],
+                                    'phospor' => ['label' => 'Phosphorus (P)', 'satuan' => 'ppm'],
+                                    'EC' => ['label' => 'Electrical Conductivity (EC)', 'satuan' => 'dS/m'],
+                                    'Nitrogen' => ['label' => 'Nitrogen (N)', 'satuan' => 'ppm'],
+                                    'humidity' => ['label' => 'Moisture (Kelembaban Tanah)', 'satuan' => '%'],
+                                    'temp' => ['label' => 'Soil Temperature', 'satuan' => '°C'],
+                                    ];
+                                    $counter = 1;
                                     @endphp
 
-                                    @foreach ($sensorMapping as $key => $label)
-                                        @php $value = $data[$key] ?? '-'; @endphp
-                                        <tr>
-                                            <td class="text-center">{{ $counter++ }}</td>
-                                            <td>{{ $label }}</td>
-                                            <td class="text-center">
-                                                <h6>
-                                                    {{
-                                                        is_array($value)
-                                                            ? (isset($value['nilai'])
-                                                                ? $value['nilai']
-                                                                : json_encode($value))
-                                                            : $value
-                                                    }}
-                                                </h6>
-                                            </td>
-                                        </tr>
+                                    @foreach ($sensorMapping as $key => $info)
+                                    @php
+                                    $value = $data[$key] ?? '-';
+                                    $satuan = $info['satuan'];
+                                    if (is_array($value)) {
+                                    $value = isset($value['nilai']) ? $value['nilai'] : json_encode($value);
+                                    }
+                                    @endphp
+                                    <tr>
+                                        <td class="text-center">{{ $counter++ }}</td>
+                                        <td>{{ $info['label'] }}</td>
+                                        <td class="text-center">
+                                            <h6>
+                                                {{ $value !== '-' ? str_replace('.', ',', $value) . ($satuan ? ' ' . $satuan : '') : '-' }}
+                                            </h6>
+                                        </td>
+                                    </tr>
                                     @endforeach
                                 </tbody>
                             </table>
@@ -86,31 +86,31 @@
 
 <!-- Modal Tambah Sensor -->
 <div class="modal fade" id="tambahSensorModal" tabindex="-1" aria-labelledby="tambahSensorModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="tambahSensorModalLabel">Tambah Sensor Baru</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form method="POST" action="{{ route('sensor.store') }}">
-            @csrf
-            <div class="mb-3">
-                <label for="sensor_name" class="form-label">Nama Sensor</label>
-                <input type="text" class="form-control" id="sensor_name" name="sensor_name" required>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tambahSensorModalLabel">Tambah Sensor Baru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="mb-3">
-                <label for="sensor_value" class="form-label">Nilai Sensor</label>
-                <input type="number" step="any" class="form-control" id="sensor_value" name="sensor_value" required>
+            <div class="modal-body">
+                <form method="POST" action="{{ route('sensor.store') }}">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="sensor_name" class="form-label">Nama Sensor</label>
+                        <input type="text" class="form-control" id="sensor_name" name="sensor_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sensor_value" class="form-label">Nilai Sensor</label>
+                        <input type="number" step="any" class="form-control" id="sensor_value" name="sensor_value" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sensor_date" class="form-label">Tanggal</label>
+                        <input type="date" class="form-control" id="sensor_date" name="sensor_date" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Simpan Sensor</button>
+                </form>
             </div>
-            <div class="mb-3">
-                <label for="sensor_date" class="form-label">Tanggal</label>
-                <input type="date" class="form-control" id="sensor_date" name="sensor_date" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Simpan Sensor</button>
-        </form>
-      </div>
+        </div>
     </div>
-  </div>
 </div>
 @endsection

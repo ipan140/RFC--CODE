@@ -1,31 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Dashboard')</title>
-    <link href="back/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="back/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-    <link href="back/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
-    <link href="back/vendor/quill/quill.snow.css" rel="stylesheet">
-    <link href="back/vendor/quill/quill.bubble.css" rel="stylesheet">
-    <link href="back/vendor/remixicon/remixicon.css" rel="stylesheet">
-    <link href="back/vendor/simple-datatables/style.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-    <!-- Template Main CSS File -->
-    <link href="back/css/style.css" rel="stylesheet">
-    <!-- leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="crossorigin=""/>
-</head>
-<body>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
-@include('partials.headerFooter')
-@include('partials.sidebar')
+        <title>{{ config('app.name', 'Laravel') }}</title>
 
-<div class="main-content">
-    @yield('content')
-</div>
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-<script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-</body>
+        <!-- Scripts -->
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    </head>
+    <body class="font-sans antialiased">
+        <div class="min-h-screen bg-gray-100">
+            @include('layouts.navigation')
+
+            <!-- Page Heading -->
+            @if (isset($header))
+                <header class="bg-white shadow">
+                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                        {{ $header }}
+                    </div>
+                </header>
+            @endif
+
+            <!-- Page Content -->
+            <main>
+                {{ $slot }}
+            </main>
+        </div>
+    </body>
 </html>

@@ -3,7 +3,7 @@
 @section('content')
 @include('partials.sidebar')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<main id="main" class="main p-4">
+<!-- <main id="main" class="main p-4"> -->
     <div class="pagetitle">
         <nav>
             <ol class="breadcrumb">
@@ -60,7 +60,7 @@
                                     <td class="fw-semibold">Nitrogen</td>
                                     <td>{{ $sensorData['time'] ?? '-' }}</td>
                                     <td>{{ $sensorData['ri'] ?? '-' }}</td>
-                                    <td>{{ $sensorValue }}</td>
+                                    <td>{{ is_numeric($sensorValue) ? $sensorValue . ' ppm' : '-' }}</td>
                                     <td class="d-flex justify-content-center gap-1">
                                         <!-- View -->
                                         <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalView">
@@ -150,7 +150,7 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
-                            <p><strong>Nilai:</strong> {{ $sensorValue }}</p>
+                            <p><strong>Nilai:</strong> {{ !empty($sensorValue) ? $sensorValue . ' ppm' : '-' }}</p>
                             <p><strong>Waktu:</strong> {{ $sensorData['time'] ?? '-' }}</p>
                             <p><strong>Resource Index:</strong> {{ $sensorData['ri'] ?? '-' }}</p>
                         </div>

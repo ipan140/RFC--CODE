@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use App\Services\AntaresService;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
+use Illuminate\Pagination\Paginator; // ✅ Tambahkan ini
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,5 +30,8 @@ class AppServiceProvider extends ServiceProvider
         if (Str::contains(config('app.url'), 'https://')) {
             URL::forceScheme('https');
         }
+
+        // ✅ Aktifkan Bootstrap 5 untuk pagination
+        Paginator::useBootstrapFive();
     }
 }

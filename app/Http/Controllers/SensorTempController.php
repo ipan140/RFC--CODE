@@ -6,10 +6,9 @@ use App\Models\SensorPH;
 use App\Models\SensorTM;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http; // <- Tambahkan ini
+use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 use Spatie\SimpleExcel\SimpleExcelWriter;
-
 
 class SensorTempController extends Controller
 {
@@ -17,13 +16,7 @@ class SensorTempController extends Controller
     protected $appName = 'interest';
 
     protected $deviceList = [
-        'ph',
-        'pota',
-        'phospor',
-        'EC',
-        'Nitrogen',
-        'humidity',
-        'temp'
+        'ph', 'pota', 'phospor', 'EC', 'Nitrogen', 'humidity', 'temp'
     ];
 
     public function index(Request $request)
@@ -35,16 +28,12 @@ class SensorTempController extends Controller
         }
 
         $results = [];
-
         foreach ($this->deviceList as $device) {
             $results[$device] = $this->fetchLatestData($device);
         }
 
-        return view('sensor_temp.index', [
-            'data' => $results // Pastikan variabel ini tersedia di blade
-        ]);
+        return view('sensor_temp.index', ['data' => $results]);
     }
-
 
     public function getDeviceData($device)
     {
@@ -82,7 +71,6 @@ class SensorTempController extends Controller
             }
 
             $value = $cin['con'] ?? null;
-
             if (is_string($value)) {
                 $value = trim($value, "\"'");
                 $decoded = json_decode($value, true);
@@ -90,6 +78,12 @@ class SensorTempController extends Controller
                     $value = $decoded;
                 }
             }
+
+            if (is_array($value)) {
+                $value = $value[$device] ?? null;
+            }
+
+            $value = $this->formatTemp($value, $device);
 
             $rawTime = $cin['ct'] ?? ($cin['creationTime'] ?? null);
             try {
@@ -141,12 +135,18 @@ class SensorTempController extends Controller
             $value = $item['con'] ?? null;
 
             if (is_string($value)) {
-                $value = trim($value, "'");
+                $value = trim($value, "\"'");
                 $decoded = json_decode($value, true);
                 if (json_last_error() === JSON_ERROR_NONE) {
                     $value = $decoded;
                 }
             }
+
+            if (is_array($value)) {
+                $value = $value[$device] ?? null;
+            }
+
+            $value = $this->formatTemp($value, $device);
 
             $result[] = [
                 'ri' => $item['ri'] ?? 'no-ri',
@@ -157,7 +157,6 @@ class SensorTempController extends Controller
 
         return $result;
     }
-
 
     public function store(Request $request)
     {
@@ -177,9 +176,6 @@ class SensorTempController extends Controller
         }
     }
 
-    /**
-     * Memperbarui data sensor.
-     */
     public function update(Request $request, SensorPH $sensor)
     {
         $validatedData = $request->validate([
@@ -198,9 +194,6 @@ class SensorTempController extends Controller
         }
     }
 
-    /**
-     * Menghapus data sensor dari database.
-     */
     public function destroy(SensorPH $sensor)
     {
         try {
@@ -211,31 +204,29 @@ class SensorTempController extends Controller
             return redirect()->back()->with('error', 'Gagal menghapus data.');
         }
     }
+
     public function export()
     {
-        $device = 'temp'; // Ganti sesuai device
+        $device = 'temp';
         $cin = $this->fetchLatestData($device);
 
         if (empty($cin)) {
             return back()->with('error', 'Tidak ada data untuk diekspor.');
         }
 
-        $value = $cin['value'] ?? '';
-        $timeFormatted = $cin['time'] ?? '';
-        $resourceId = $cin['ri'] ?? '';
-
-        $filePath = storage_path('app/public/data-temp.csv'); // Ubah nama file jadi 'ph'
+        $filePath = storage_path('app/public/data-temp.csv');
         $writer = SimpleExcelWriter::create($filePath);
 
         $writer->addRow(['Resource ID', 'Waktu', 'Nilai']);
         $writer->addRow([
-            $resourceId,
-            $timeFormatted,
-            $value,
+            $cin['ri'] ?? '',
+            $cin['time'] ?? '',
+            $cin['value'] ?? '',
         ]);
 
         return response()->download($filePath)->deleteFileAfterSend();
     }
+
     public function fetchAndStore()
     {
         $device = 'temp';
@@ -266,6 +257,12 @@ class SensorTempController extends Controller
                 }
             }
 
+            if (is_array($value)) {
+                $value = $value[$device] ?? null;
+            }
+
+            $parsedValue = $this->formatTemp($value, $device);
+
             $rawTime = $cin['ct'] ?? ($cin['creationTime'] ?? null);
             try {
                 $formattedTime = $rawTime
@@ -282,14 +279,14 @@ class SensorTempController extends Controller
                 ],
                 [
                     'ri' => $cin['ri'] ?? 'no-ri',
-                    'value' => $value['temp'] ?? 0
+                    'value' => $parsedValue
                 ]
             );
 
             return response()->json([
                 'success' => true,
-                'message' => 'Data temperatur berhasil disimpan!',
-                'data' => $value
+                'message' => 'Data berhasil disimpan!',
+                'data' => $parsedValue
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -297,5 +294,13 @@ class SensorTempController extends Controller
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    private function formatTemp($value, $device)
+    {
+        if ($device === 'temp' && is_numeric($value)) {
+            return $value / 10;
+        }
+        return $value;
     }
 }

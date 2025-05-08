@@ -1,0 +1,271 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Carbon\Carbon;
+
+class ChartController extends Controller
+{
+    protected string $apiKey = 'a74d1dcd4e6e87bf:b84bfdd53b7d2f84';
+    protected string $appName = 'interest';
+
+    protected array $deviceList = [
+        'ph',
+        'pota',
+        'phospor',
+        'EC',
+        'Nitrogen',
+        'humidity',
+        'temp',
+    ];
+
+    public function index(Request $request)
+    {
+        $deviceParam = $request->query('device');
+
+        if ($deviceParam) {
+            return $this->getDeviceData($deviceParam);
+        }
+
+        $results = [];
+        $historyData = [];
+
+        // Ambil data dari semua perangkat
+        foreach ($this->deviceList as $device) {
+            $results[$device] = $this->fetchLatestData($device);
+            $historyData[$device] = $this->fetchRecentValues($device);
+        }
+
+        return view('chart.index', [
+            'data' => $results,
+            'chartData' => $this->prepareChartData($results),
+            'reportSeries' => $this->prepareReportSeries($historyData),
+            'trafficChartData' => $this->prepareChartData($results),
+        ]);
+    }
+
+    public function getDeviceData(string $device)
+    {
+        $device = strtolower($device);
+
+        if (!in_array($device, $this->deviceList)) {
+            abort(404, 'Device tidak ditemukan.');
+        }
+
+        return view('device', [
+            'device' => $device,
+            'items' => $this->fetchAllData($device),
+        ]);
+    }
+
+    private function fetchLatestData(string $device): array
+    {
+        $url = "https://platform.antares.id:8443/~/antares-cse/antares-id/{$this->appName}/{$device}/la";
+
+        $response = Http::withHeaders([
+            'X-M2M-Origin' => $this->apiKey,
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json'
+        ])->get($url);
+
+        if ($response->successful()) {
+            $raw = $response->json('m2m:cin.con');
+
+            if (empty($raw)) {
+                return ['nilai' => null];
+            }
+
+            $nilai = $this->parseRawValue($device, $raw);
+
+            if (is_numeric($nilai)) {
+                $nilai = $this->adjustValue($device, $nilai);
+                return ['nilai' => $this->formatNumber($nilai, $device)];
+            }
+        }
+
+        return ['nilai' => null];
+    }
+
+    private function fetchAllData(string $device): array
+    {
+        $url = "https://platform.antares.id:8443/~/antares-cse/antares-id/{$this->appName}/{$device}?rcn=4";
+
+        $response = Http::withHeaders([
+            'X-M2M-Origin' => $this->apiKey,
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json'
+        ])->get($url);
+
+        if (!$response->successful()) {
+            return [['error' => 'Gagal mengambil data dari Antares']];
+        }
+
+        $cinList = $response->json('m2m:cnt.m2m:cin') ?? [];
+
+        if (empty($cinList)) {
+            return [['info' => 'Belum ada data untuk device ini']];
+        }
+
+        return collect($cinList)->map(function ($item) {
+            $parsedValue = $this->parseRawValue(null, $item['con'] ?? null);
+
+            return [
+                'ri' => $item['ri'] ?? 'no-ri',
+                'time' => $item['ct'] ?? 'no-time',
+                'value' => $parsedValue,
+            ];
+        })->toArray();
+    }
+
+    private function fetchRecentValues(string $device): array
+    {
+        $url = "https://platform.antares.id:8443/~/antares-cse/antares-id/{$this->appName}/{$device}?rcn=4";
+
+        $response = Http::withHeaders([
+            'X-M2M-Origin' => $this->apiKey,
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json'
+        ])->get($url);
+
+        if (!$response->successful()) {
+            return [];
+        }
+
+        $cinList = $response->json('m2m:cnt.m2m:cin') ?? [];
+
+        return collect(array_slice($cinList, -7)) // Ambil 7 data terakhir
+            ->map(function ($item) use ($device) {
+                $nilai = $this->parseRawValue($device, $item['con'] ?? null);
+                return is_numeric($nilai) ? $this->adjustValue($device, $nilai) : null;
+            })
+            ->filter() // Hapus nilai null
+            ->values() // Reset index
+            ->toArray();
+    }
+
+    private function prepareChartData(array $results): array
+    {
+        return [
+            'pH' => $this->parseNumber($results['ph']['nilai'] ?? null),
+            'EC' => $this->parseNumber($results['EC']['nilai'] ?? null),
+            'Soil Moisture' => $this->parseNumber($results['humidity']['nilai'] ?? null),
+            'Soil Temperature' => $this->parseNumber($results['temp']['nilai'] ?? null),
+            'Nitrogen' => $this->parseNumber($results['Nitrogen']['nilai'] ?? null),
+            'Phospor' => $this->parseNumber($results['phospor']['nilai'] ?? null),
+            'Potassium' => $this->parseNumber($results['pota']['nilai'] ?? null),
+        ];
+    }
+
+    private function prepareReportSeries(array $historyData): array
+    {
+        return [
+            ['name' => 'pH', 'data' => $historyData['ph'] ?? []],
+            ['name' => 'EC', 'data' => $historyData['EC'] ?? []],
+            ['name' => 'Soil Moisture', 'data' => $historyData['humidity'] ?? []],
+        ];
+    }
+
+    private function adjustValue(string $device, $value)
+    {
+        if (!is_numeric($value)) return $value;
+
+        $device = strtolower($device);
+
+        $adjustments = [
+            'ph' => 100,
+            'ec' => 100,
+            'humidity' => 10,
+            'moisture' => 10,
+            'temp' => 10,
+        ];
+
+        $integerDevices = ['pota', 'phospor', 'nitrogen'];
+
+        if (isset($adjustments[$device])) {
+            return $value / $adjustments[$device];
+        } elseif (in_array($device, $integerDevices)) {
+            return (int)$value;
+        }
+
+        return $value;
+    }
+
+    private function formatNumber($value, string $device): string
+    {
+        if (!is_numeric($value)) return $value;
+
+        $formatted = (fmod($value, 1) !== 0.0)
+            ? number_format($value, 2, ',', '.')
+            : number_format($value, 0, ',', '.');
+
+        return match (strtolower($device)) {
+            'ec' => "$formatted dS/m",
+            'humidity' => "$formatted %",
+            'temp' => "$formatted °C",
+            default => $formatted,
+        };
+    }
+
+    private function parseNumber($value): ?float
+    {
+        if (is_null($value)) return null;
+
+        $clean = preg_replace('/[^\d,.-]/', '', str_replace(',', '.', $value));
+        return is_numeric($clean) ? (float)$clean : null;
+    }
+
+    private function parseRawValue(?string $device, $raw)
+    {
+        if (is_string($raw)) {
+            $cleaned = trim($raw, "'\"");
+            $decoded = json_decode($cleaned, true);
+
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $decoded['nilai'] ?? $decoded[$device] ?? null;
+            }
+
+            return $cleaned;
+        }
+
+        return $raw;
+    }
+
+    public function dashboardChart()
+    {
+        $chartData = [];
+        $chartLabels = [];
+
+        foreach ($this->deviceList as $device) {
+            $allData = $this->fetchAllData($device);
+
+            $formattedData = collect($allData)
+                ->filter(fn($item) => isset($item['time'], $item['value']) && is_array($item['value']))
+                ->sortByDesc('time')
+                ->take(10)
+                ->reverse()
+                ->values();
+
+            $labels = [];
+            $values = [];
+
+            foreach ($formattedData as $entry) {
+                $labels[] = Carbon::parse($entry['time'])->format('H:i');
+                $rawValue = $entry['value']['nilai'] ?? $entry['value'][$device] ?? 0;
+                $values[] = $this->adjustValue($device, $rawValue);
+            }
+
+            if (empty($chartLabels)) {
+                $chartLabels = $labels;
+            }
+
+            $chartData[$device] = $values;
+        }
+
+        return view('dashboard.chart', [
+            'chartLabels' => json_encode($chartLabels),
+            'chartData' => json_encode($chartData),
+        ]);
+    }
+}

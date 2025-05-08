@@ -4,7 +4,7 @@
 @include('partials.sidebar')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<main id="main" class="main p-4">
+<!-- <main id="main" class="main p-4"> -->
     <div class="pagetitle">
         <nav>
             <ol class="breadcrumb">
@@ -19,10 +19,10 @@
     <section class="section">
         @if(isset($data['phospor']))
         @php
-            $sensorData = $data['phospor'];
-            $sensorValue = is_array($sensorData['value'] ?? null)
-                ? ($sensorData['value']['value'] ?? '-')
-                : ($sensorData['value'] ?? '-');
+        $sensorData = $data['phospor'];
+        $sensorValue = is_array($sensorData['value'] ?? null)
+        ? ($sensorData['value']['value'] ?? '-')
+        : ($sensorData['value'] ?? '-');
         @endphp
 
         <div class="card shadow-sm mb-4">
@@ -59,7 +59,7 @@
                                 <td class="fw-semibold">phospor</td>
                                 <td>{{ $sensorData['time'] ?? '-' }}</td>
                                 <td>{{ $sensorData['ri'] ?? '-' }}</td>
-                                <td>{{ $sensorValue }}</td>
+                                <td>{{ is_numeric($sensorValue) ? $sensorValue . ' ppm' : '-' }}</td>
                                 <td class="d-flex justify-content-center gap-1">
                                     <!-- View -->
                                     <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalView">
@@ -149,7 +149,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <p><strong>Nilai:</strong> {{ $sensorValue }}</p>
+                        <p><strong>Nilai:</strong> {{ !empty($sensorValue) ? $sensorValue . ' ppm' : '-' }}</p>
                         <p><strong>Waktu:</strong> {{ $sensorData['time'] ?? '-' }}</p>
                         <p><strong>Resource Index:</strong> {{ $sensorData['ri'] ?? '-' }}</p>
                     </div>
@@ -168,7 +168,7 @@
 </main>
 
 <script>
-    document.getElementById('btn-fetch-phospor').addEventListener('click', function () {
+    document.getElementById('btn-fetch-phospor').addEventListener('click', function() {
         fetch("{{ route('sensor_phospor.fetch-store') }}")
             .then(response => response.json())
             .then(data => {

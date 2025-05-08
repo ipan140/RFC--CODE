@@ -2,8 +2,8 @@
 
 @section('content')
 @include('partials.sidebar')
-
-<main id="main" class="main p-4">
+<!-- 
+<main id="main" class="main p-4"> -->
     <div class="pagetitle">
         <h1><i class="bi bi-flower1"></i> Data Tanaman</h1>
         <nav>
@@ -17,9 +17,7 @@
     <section class="section">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h5 class="card-title">
-                    <i class="bi bi-leaf"></i> Daftar Tanaman
-                </h5>
+                <h5 class="card-title"><i class="bi bi-leaf"></i> Daftar Tanaman</h5>
 
                 <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#tambahTanamanModal">
                     <i class="bi bi-plus-circle"></i> Tambah Tanaman
@@ -29,7 +27,7 @@
                 <div class="modal fade" id="tambahTanamanModal" tabindex="-1">
                     <div class="modal-dialog">
                         <div class="modal-content">
-                            <form action="{{ route('tanaman.store') }}" method="POST" enctype="multipart/form-data">
+                            <form action="{{ route('tanaman.store') }}" method="POST">
                                 @csrf
                                 <div class="modal-header bg-success text-white">
                                     <h5 class="modal-title">Tambah Tanaman</h5>
@@ -49,16 +47,11 @@
                                         <input type="date" name="tanggal_tanam" class="form-control" required>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Panjang Daun (cm)</label>
-                                        <input type="number" name="panjang_daun" class="form-control" step="0.01" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Lebar Daun (cm)</label>
-                                        <input type="number" name="lebar_daun" class="form-control" step="0.01" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Foto</label>
-                                        <input type="file" name="foto" class="form-control">
+                                        <label class="form-label">Status</label>
+                                        <select name="status" class="form-control" required>
+                                            <option value="on going">On Going</option>
+                                            <option value="selesai">Selesai</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="modal-footer">
@@ -79,9 +72,7 @@
                                 <th>Nama</th>
                                 <th>Deskripsi</th>
                                 <th>Tanggal Tanam</th>
-                                <th>Panjang Daun</th>
-                                <th>Lebar Daun</th>
-                                <th>Foto</th>
+                                <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -92,16 +83,12 @@
                                 <td>{{ $tanaman->nama_tanaman }}</td>
                                 <td>{{ $tanaman->deskripsi }}</td>
                                 <td class="text-center">
-                                    {{ \Carbon\Carbon::parse($tanaman->tanggal_tanam)->format('Y-m-d H:i') }}
+                                    {{ \Carbon\Carbon::parse($tanaman->tanggal_tanam)->format('Y-m-d') }}
                                 </td>
-                                <td class="text-center">{{ $tanaman->panjang_daun }} cm</td>
-                                <td class="text-center">{{ $tanaman->lebar_daun }} cm</td>
                                 <td class="text-center">
-                                    @if ($tanaman->foto)
-                                        <img src="{{ asset('storage/' . $tanaman->foto) }}" alt="Foto Tanaman" width="60">
-                                    @else
-                                        <span class="text-muted">-</span>
-                                    @endif
+                                    <span class="badge bg-{{ $tanaman->status == 'on going' ? 'success' : 'secondary' }}">
+                                        {{ ucfirst($tanaman->status) }}
+                                    </span>
                                 </td>
                                 <td class="text-center">
                                     <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#detailModal{{ $tanaman->id }}">
@@ -128,15 +115,9 @@
                                             <p><strong>Nama:</strong> {{ $tanaman->nama_tanaman }}</p>
                                             <p><strong>Deskripsi:</strong> {{ $tanaman->deskripsi }}</p>
                                             <p><strong>Tanggal Tanam:</strong> 
-                                                {{ \Carbon\Carbon::parse($tanaman->tanggal_tanam)->format('d-m-Y H:i') }}
+                                                {{ \Carbon\Carbon::parse($tanaman->tanggal_tanam)->format('d-m-Y') }}
                                             </p>
-                                            <p><strong>Panjang Daun:</strong> {{ $tanaman->panjang_daun }} cm</p>
-                                            <p><strong>Lebar Daun:</strong> {{ $tanaman->lebar_daun }} cm</p>
-                                            @if ($tanaman->foto)
-                                                <img src="{{ asset('storage/' . $tanaman->foto) }}" class="img-fluid" alt="Foto Tanaman">
-                                            @else
-                                                <p class="text-muted">Tidak ada foto</p>
-                                            @endif
+                                            <p><strong>Status:</strong> {{ ucfirst($tanaman->status) }}</p>
                                         </div>
                                         <div class="modal-footer">
                                             <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -149,7 +130,7 @@
                             <div class="modal fade" id="editModal{{ $tanaman->id }}" tabindex="-1">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
-                                        <form action="{{ route('tanaman.update', $tanaman->id) }}" method="POST" enctype="multipart/form-data">
+                                        <form action="{{ route('tanaman.update', $tanaman->id) }}" method="POST">
                                             @csrf
                                             @method('PUT')
                                             <div class="modal-header">
@@ -170,16 +151,11 @@
                                                     <input type="date" name="tanggal_tanam" class="form-control" value="{{ \Carbon\Carbon::parse($tanaman->tanggal_tanam)->format('Y-m-d') }}" required>
                                                 </div>
                                                 <div class="mb-3">
-                                                    <label class="form-label">Panjang Daun (cm)</label>
-                                                    <input type="number" name="panjang_daun" class="form-control" value="{{ $tanaman->panjang_daun }}" step="0.01" required>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Lebar Daun (cm)</label>
-                                                    <input type="number" name="lebar_daun" class="form-control" value="{{ $tanaman->lebar_daun }}" step="0.01" required>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Foto</label>
-                                                    <input type="file" name="foto" class="form-control">
+                                                    <label class="form-label">Status</label>
+                                                    <select name="status" class="form-control" required>
+                                                        <option value="on going" {{ $tanaman->status == 'on going' ? 'selected' : '' }}>On Going</option>
+                                                        <option value="selesai" {{ $tanaman->status == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                                                    </select>
                                                 </div>
                                             </div>
                                             <div class="modal-footer">
@@ -216,7 +192,7 @@
 
                             @empty
                             <tr>
-                                <td colspan="8" class="text-center">Belum ada data tanaman.</td>
+                                <td colspan="6" class="text-center">Belum ada data tanaman.</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -226,5 +202,5 @@
             </div>
         </div>
     </section>
-</main>
+<!-- </main> -->
 @endsection

@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Tanaman extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected $table = 'tanaman';
 
@@ -15,14 +17,23 @@ class Tanaman extends Model
         'nama_tanaman',
         'deskripsi',
         'tanggal_tanam',
-        'panjang_daun',
-        'lebar_daun',
-        'foto',
+        'status',
     ];
 
     protected $casts = [
         'tanggal_tanam' => 'date',
-        'panjang_daun' => 'float',
-        'lebar_daun' => 'float',
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('tanaman')
+            ->logOnly([
+                'nama_tanaman',
+                'deskripsi',
+                'tanggal_tanam',
+                'status',
+            ])
+            ->logOnlyDirty();
+    }
 }

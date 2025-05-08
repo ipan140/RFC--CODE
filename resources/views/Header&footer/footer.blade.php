@@ -58,10 +58,10 @@
                 </div>
             </div>
         </section>
-    </div>
-    
+        
     <!-- Copyright -->
-    <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
-        &copy; 2023 Rooftop Farming Center. All rights reserved.
+    <div class="text-center p-3">
+        &copy; 2025 Rooftop Farming Center. All rights reserved.
+    </div>
     </div>
 </footer>

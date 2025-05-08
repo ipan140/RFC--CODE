@@ -15,13 +15,7 @@ class SensorHumidityController extends Controller
     protected $appName = 'interest';
 
     protected $deviceList = [
-        'ph', 
-        'pota', 
-        'phospor', 
-        'EC', 
-        'Nitrogen', 
-        'humidity', 
-        'temp'
+        'humidity',
     ];
 
     public function index(Request $request)
@@ -32,11 +26,8 @@ class SensorHumidityController extends Controller
             return $this->getDeviceData($deviceParam);
         }
 
-        $results = [];
-
-        foreach ($this->deviceList as $device) {
-            $results[$device] = $this->fetchLatestData($device);
-        }
+        // Ambil data humidity
+        $results['humidity'] = $this->fetchLatestData('humidity');
 
         return view('sensor_humidity.index', ['data' => $results]);
     }
@@ -59,6 +50,7 @@ class SensorHumidityController extends Controller
     {
         $url = "https://platform.antares.id:8443/~/antares-cse/antares-id/{$this->appName}/{$device}/la";
 
+        // Lakukan request HTTP
         $response = Http::withHeaders([
             'X-M2M-Origin' => $this->apiKey,
             'Content-Type' => 'application/json',
@@ -66,34 +58,65 @@ class SensorHumidityController extends Controller
         ])->get($url);
 
         if ($response->successful()) {
+            // Ambil data CIN
             $cin = $response['m2m:cin'] ?? null;
+
+            // Jika CIN tidak ada, kembalikan nilai default
             if (!$cin) {
                 return ['value' => 'no-value', 'time' => 'no-time', 'ri' => 'no-ri'];
             }
 
+            // Ambil dan proses nilai dari CIN
             $value = $cin['con'] ?? null;
             if (is_string($value)) {
                 $value = trim($value, "\"'");
+
+                // Decode jika JSON
                 $decoded = json_decode($value, true);
                 if (json_last_error() === JSON_ERROR_NONE) {
                     $value = $decoded;
                 }
             }
 
+            // Jika perangkat adalah humidity, bagi dengan 100
+            if ($device === 'humidity' && is_numeric($value)) {
+                $value = $value / 100;
+            }
+
+            // Proses waktu, dengan pengecekan yang lebih baik
             try {
                 $formattedTime = Carbon::createFromFormat('Ymd\THis', substr($cin['ct'], 0, 15))->format('Y-m-d H:i:s');
             } catch (\Exception $e) {
                 $formattedTime = 'invalid-time';
             }
 
+            // Kembalikan data yang sudah diformat
             return [
-                'value' => $value ?? 'no-value',
+                'value' => $this->formatSensorValue($device, $value) ?? 'no-value',
                 'time' => $formattedTime,
                 'ri' => $cin['ri'] ?? 'no-ri',
             ];
         }
 
+        // Jika request gagal, kembalikan nilai default
         return ['value' => 'Gagal ambil data', 'time' => '-', 'ri' => '-'];
+    }
+
+    private function formatSensorValue($device, $value)
+    {
+        if (!is_numeric($value)) {
+            return '-';
+        }
+
+        // Format angka dengan dua desimal dan koma sebagai pemisah ribuan
+        $formattedValue = number_format($value, 2, '.', ',');
+
+        // Tambahkan simbol persen untuk humidity
+        if (strtolower($device) === 'humidity') {
+            return $formattedValue . " %"; // Tambahkan simbol persen untuk humidity
+        }
+
+        return $formattedValue;
     }
 
     private function fetchAllData($device)
@@ -121,6 +144,8 @@ class SensorHumidityController extends Controller
             $value = $item['con'] ?? null;
             if (is_string($value)) {
                 $value = trim($value, "'");
+
+                // Decode jika JSON
                 $decoded = json_decode($value, true);
                 if (json_last_error() === JSON_ERROR_NONE) {
                     $value = $decoded;
@@ -208,35 +233,39 @@ class SensorHumidityController extends Controller
 
     public function fetchAndStore()
     {
-        $device = 'humidity'; // Ganti sesuai device untuk Humidity
+        $device = 'humidity'; // Ganti sesuai device
         $url = "https://platform.antares.id:8443/~/antares-cse/antares-id/{$this->appName}/{$device}/la";
-    
+
         try {
             $response = Http::withHeaders([
                 'X-M2M-Origin' => $this->apiKey,
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json'
             ])->get($url);
-    
+
             if (!$response->successful()) {
                 return response()->json(['success' => false, 'message' => 'Gagal mengambil data dari Antares'], 500);
             }
-    
+
             $cin = $response['m2m:cin'] ?? null;
             if (!$cin) {
                 return response()->json(['success' => false, 'message' => 'Data tidak ditemukan dari Antares'], 404);
             }
-    
+
             // Ambil dan decode nilai
             $value = $cin['con'] ?? null;
             if (is_string($value)) {
-                $value = trim($value, "\"'"); // Remove quotes if present
+                $value = trim($value, "\"'");
                 $decoded = json_decode($value, true);
+
                 if (json_last_error() === JSON_ERROR_NONE) {
                     $value = $decoded;
                 }
             }
-    
+
+            // Cek nilai sensor humidity
+            $parsedValue = is_numeric($value) ? $value / 100 : 0;
+
             // Format waktu
             $rawTime = $cin['ct'] ?? ($cin['creationTime'] ?? null);
             try {
@@ -246,8 +275,8 @@ class SensorHumidityController extends Controller
             } catch (\Exception $e) {
                 $formattedTime = now()->format('Y-m-d H:i:s');
             }
-    
-            // Simpan ke DB untuk Sensor Humidity
+
+            // Simpan ke DB
             SensorHM::updateOrCreate(
                 [
                     'parameter' => 'humidity',
@@ -255,14 +284,14 @@ class SensorHumidityController extends Controller
                 ],
                 [
                     'ri'    => $cin['ri'] ?? 'no-ri',
-                    'value' => $value['humidity'] ?? 0 // Ganti sesuai dengan key untuk nilai humidity
+                    'value' => $parsedValue
                 ]
             );
-    
+
             return response()->json([
                 'success' => true,
                 'message' => 'Data berhasil disimpan!',
-                'data' => $value
+                'data' => $parsedValue
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -271,5 +300,4 @@ class SensorHumidityController extends Controller
             ], 500);
         }
     }
-    
 }

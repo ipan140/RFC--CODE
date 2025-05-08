@@ -222,7 +222,7 @@ class SensorPotaController extends Controller
 
     public function fetchAndStore()
     {
-        $device = 'pota';
+        $device = 'pota'; // Ganti sesuai device
         $url = "https://platform.antares.id:8443/~/antares-cse/antares-id/{$this->appName}/{$device}/la";
 
         try {
@@ -241,15 +241,25 @@ class SensorPotaController extends Controller
                 return response()->json(['success' => false, 'message' => 'Data tidak ditemukan dari Antares'], 404);
             }
 
+            // Ambil dan decode nilai
             $value = $cin['con'] ?? null;
             if (is_string($value)) {
                 $value = trim($value, "\"'");
                 $decoded = json_decode($value, true);
+
                 if (json_last_error() === JSON_ERROR_NONE) {
                     $value = $decoded;
                 }
             }
 
+            // Cek nilai sensor ph
+            if (is_array($value)) {
+                $parsedValue = $value['pota'] ?? 0;
+            } else {
+                $parsedValue = is_numeric($value) ? floatval($value) : 0;
+            }
+
+            // Format waktu
             $rawTime = $cin['ct'] ?? ($cin['creationTime'] ?? null);
             try {
                 $formattedTime = $rawTime
@@ -259,21 +269,22 @@ class SensorPotaController extends Controller
                 $formattedTime = now()->format('Y-m-d H:i:s');
             }
 
+            // Simpan ke DB
             SensorPT::updateOrCreate(
                 [
                     'parameter' => 'pota',
-                    'waktu' => $formattedTime,
+                    'waktu'     => $formattedTime,
                 ],
                 [
-                    'ri' => $cin['ri'] ?? 'no-ri',
-                    'value' => $value['pota'] ?? 0
+                    'ri'    => $cin['ri'] ?? 'no-ri',
+                    'value' => $parsedValue
                 ]
             );
 
             return response()->json([
                 'success' => true,
                 'message' => 'Data berhasil disimpan!',
-                'data' => $value
+                'data' => $parsedValue
             ]);
         } catch (\Exception $e) {
             return response()->json([

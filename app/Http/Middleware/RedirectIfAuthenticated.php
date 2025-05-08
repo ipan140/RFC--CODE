@@ -10,17 +10,17 @@ class RedirectIfAuthenticated
 {
     public function handle(Request $request, Closure $next, ...$guards)
     {
-        // Pastikan jika sudah login dan ada role, langsung diarahkan ke dashboard yang sesuai
+        // Jika user sudah login, arahkan berdasarkan role-nya
         if (Auth::check()) {
             $role = Auth::user()->role;
 
             switch ($role) {
                 case 'admin':
-                    return redirect()->route('dashboard.admin');
+                    return redirect()->route('admin.dashboard');
                 case 'owner':
-                    return redirect()->route('dashboard.owner');
+                    return redirect()->route('owner.dashboard');
                 case 'user':
-                    return redirect()->route('dashboard.user');
+                    return redirect()->route('user.dashboard');
                 default:
                     return redirect('/'); // fallback jika role tidak dikenali
             }

@@ -12,21 +12,24 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tanaman_id')->constrained('tanaman')->onDelete('cascade');
             $table->string('nama_periode');
-            $table->date('tanggal_mulai');
-            $table->date('tanggal_selesai')->nullable();
-            $table->text('keterangan')->nullable();
-            $table->enum('status', ['Sudah', 'Belum'])->default('Belum');
+            $table->timestamp('waktu');  
+            $table->text('pupuk')->nullable();
+            $table->float('panjang_daun')->nullable();        // Panjang daun (dalam cm)
+            $table->float('lebar_daun')->nullable();          // Lebar daun (dalam cm)
+            $table->string('foto')->nullable(); // Menyimpan nama file foto
+            $table->float('ph')->nullable();
+            $table->float('pota')->nullable();
+            $table->float('phospor')->nullable();
+            $table->float('EC')->nullable();
+            $table->float('Nitrogen')->nullable();
+            $table->float('humidity')->nullable();
+            $table->float('temp')->nullable();
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        // Jika ada tabel lain yang tergantung pada periode_tanams, hapus terlebih dahulu
-        Schema::dropIfExists('riwayat_tanamans');
-        Schema::dropIfExists('sensor_data');
-
-        // Hapus tabel periode_tanams
         Schema::dropIfExists('periode_tanams');
     }
 };

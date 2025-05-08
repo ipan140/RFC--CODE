@@ -6,18 +6,17 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Support\Facades\Auth;
+
 class RoleMiddleware
 {
-    /**
-     * Handle an incoming request.
-     */
-    public function handle(Request $request, Closure $next, $roles): Response
+    public function handle($request, Closure $next, ...$roles)
     {
-        $user = $request->user();
-
-        $roleArray = explode('|', $roles); // Bisa pakai "admin|user"
-        if (!$user || !in_array($user->role, $roleArray)) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        if (!Auth::check() || !in_array(Auth::user()->role, $roles)) {
+            abort(403, 'Akses ditolak.');
         }
 
         return $next($request);

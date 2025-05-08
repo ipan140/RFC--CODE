@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Tanaman;
-use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
 class TanamanController extends Controller
@@ -21,28 +20,18 @@ class TanamanController extends Controller
             'nama_tanaman' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'tanggal_tanam' => 'required|date',
-            'panjang_daun' => 'required|numeric',
-            'lebar_daun' => 'required|numeric',
-            'foto' => 'nullable|image|max:2048',
+            'status' => 'required|in:on going,selesai',
         ]);
 
-        // Gabungkan tanggal dari input dan waktu sekarang
         $tanggalTanam = Carbon::parse($request->tanggal_tanam)
-            ->setTimeFromTimeString(now()->format('H:i:s')); // Atur waktu ke sekarang
+            ->setTimeFromTimeString(now()->format('H:i:s'));
 
-        $data = [
+        Tanaman::create([
             'nama_tanaman' => $request->nama_tanaman,
             'deskripsi' => $request->deskripsi,
             'tanggal_tanam' => $tanggalTanam,
-            'panjang_daun' => $request->panjang_daun,
-            'lebar_daun' => $request->lebar_daun,
-        ];
-
-        if ($request->hasFile('foto')) {
-            $data['foto'] = $request->file('foto')->store('foto_tanaman', 'public');
-        }
-
-        Tanaman::create($data);
+            'status' => $request->status,
+        ]);
 
         return redirect()->back()->with('success', 'Data tanaman berhasil ditambahkan.');
     }
@@ -55,27 +44,16 @@ class TanamanController extends Controller
             'nama_tanaman' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'tanggal_tanam' => 'required|date',
-            'panjang_daun' => 'required|numeric',
-            'lebar_daun' => 'required|numeric',
-            'foto' => 'nullable|image|max:2048',
+            'status' => 'required|in:on going,selesai',
         ]);
 
-        $data = $request->only([
-            'nama_tanaman',
-            'deskripsi',
-            'tanggal_tanam',
-            'panjang_daun',
-            'lebar_daun',
-        ]);
-
-        if ($request->hasFile('foto')) {
-            // Hapus foto lama jika ada
-            if ($tanaman->foto) {
-                Storage::disk('public')->delete($tanaman->foto);
-            }
-
-            $data['foto'] = $request->file('foto')->store('foto_tanaman', 'public');
-        }
+        $data = [
+            'nama_tanaman' => $request->nama_tanaman,
+            'deskripsi' => $request->deskripsi,
+            'tanggal_tanam' => Carbon::parse($request->tanggal_tanam)
+                ->setTimeFromTimeString(now()->format('H:i:s')),
+            'status' => $request->status,
+        ];
 
         $tanaman->update($data);
 
@@ -85,11 +63,6 @@ class TanamanController extends Controller
     public function destroy($id)
     {
         $tanaman = Tanaman::findOrFail($id);
-
-        if ($tanaman->foto) {
-            Storage::disk('public')->delete($tanaman->foto);
-        }
-
         $tanaman->delete();
 
         return redirect()->back()->with('success', 'Data tanaman berhasil dihapus.');
