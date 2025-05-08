@@ -9,7 +9,7 @@
     padding: 10px;
     }
 </style>
-  <main id="main" class="main">
+  <!-- <main id="main" class="main"> -->
 
     <div class="pagetitle">
     <h1>Denah Sensor</h1>
@@ -100,3 +100,8 @@
     <!-- map script end -->
   </main>   
   @endsection
+  <!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>

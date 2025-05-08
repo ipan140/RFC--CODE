@@ -2,7 +2,7 @@
 @section('content')
 @include('partials.sidebar')
 
-<main id="main" class="main p-4">
+<!-- <main id="main" class="main p-4"> -->
     <div class="pagetitle">
         <h1><i class="bi bi-folder-fill"></i> Daftar Proyek</h1>
         <nav>
@@ -80,7 +80,7 @@
                                                 <p><strong>Tanggal:</strong> {{ $proyek->tanggal }}</p>
                                                 <p><strong>Foto Proyek:</strong></p>
                                                 @if($proyek->foto_proyek)
-                                                    <img src="{{ asset('storage/' . $proyek->foto_proyek) }}" width="100%">
+                                                    <img src="{{ asset('storage/' . $proyek->foto_proyek) }}" width="100%" >
                                                 @else
                                                     <span class="text-muted">Tidak ada foto</span>
                                                 @endif
