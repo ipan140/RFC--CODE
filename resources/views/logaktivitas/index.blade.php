@@ -16,6 +16,7 @@
                     <table class="table table-bordered table-hover table-striped align-middle mb-0">
                         <thead class="table-dark text-center">
                             <tr>
+                                <th>No</th> {{-- Tambahkan kolom nomor --}}
                                 <th>Log</th>
                                 <th>Event</th>
                                 <th>Model</th>
@@ -28,6 +29,7 @@
                         <tbody class="text-center">
                             @forelse($logs as $log)
                                 <tr>
+                                    <td>{{ $loop->iteration + ($logs->currentPage() - 1) * $logs->perPage() }}</td> {{-- Nomor urut --}}
                                     <td>{{ $log->log_name }}</td>
                                     <td>
                                         @if($log->event === 'created')
@@ -56,7 +58,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center text-muted">Belum ada data log.</td>
+                                    <td colspan="8" class="text-center text-muted">Belum ada data log.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -64,7 +66,7 @@
                 </div>
 
                 {{-- Pagination --}}
-                <div class="d-flex justify-content-center p-3">
+                <div class="p-3">
                     {{ $logs->links('pagination::bootstrap-5') }}
                 </div>
             </div>

@@ -2,111 +2,98 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\RiwayatTanaman;
 use App\Models\Tanaman;
 use App\Models\PeriodeTanam;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Spatie\SimpleExcel\SimpleExcelWriter;
 
 class RiwayatTanamanController extends Controller
 {
     public function index(Request $request)
     {
         $query = PeriodeTanam::with('tanaman');
-    
+
         if ($request->filled('filter_tanaman_id')) {
             $query->where('tanaman_id', $request->filter_tanaman_id);
         }
-    
+
         if ($request->filled('tanggal_mulai')) {
             $query->whereDate('waktu', '>=', $request->tanggal_mulai);
         }
-    
+
         if ($request->filled('tanggal_akhir')) {
             $query->whereDate('waktu', '<=', $request->tanggal_akhir);
         }
-    
-        $periode_tanams = $query->orderBy('waktu', 'desc')->get();
+
+        // Pagination 10 data per halaman
+        $periode_tanams = $query->orderBy('waktu', 'desc')->paginate(10);
+
         $tanamans = Tanaman::all();
-    
+
         return view('riwayat_tanaman.index', compact('periode_tanams', 'tanamans'));
     }
-    
 
-    // public function store(Request $request)
-    // {
-    //     $validated = $request->validate([
-    //         'tanaman_id'        => 'required|exists:tanaman,id',
-    //         'periode_tanam_id'  => 'nullable|exists:periode_tanam,id',
-    //         'nama_periode'      => 'nullable|string|max:255',
-    //         'waktu'             => 'nullable|date',
-    //         'pupuk'             => 'nullable|string|max:255',
-    //         'panjang_daun'      => 'nullable|numeric',
-    //         'lebar_daun'        => 'nullable|numeric',
-    //         'foto'              => 'nullable|image|max:2048',
-    //         'ph'                => 'nullable|numeric',
-    //         'potasium'          => 'nullable|numeric',
-    //         'phospor'           => 'nullable|numeric',
-    //         'EC'                => 'nullable|numeric',
-    //         'Nitrogen'          => 'nullable|numeric',
-    //         'humidity'          => 'nullable|numeric',
-    //         'temp'              => 'nullable|numeric',
-    //     ]);
 
-    //     if ($request->hasFile('foto')) {
-    //         $validated['foto'] = $request->file('foto')->store('foto_riwayat', 'public');
-    //     }
+    public function export(Request $request)
+    {
+        $query = PeriodeTanam::with('tanaman');
 
-    //     RiwayatTanaman::create($validated);
+        if ($request->filled('filter_tanaman_id')) {
+            $query->where('tanaman_id', $request->filter_tanaman_id);
+        }
 
-    //     return redirect()->route('riwayat_tanaman.index')->with('success', 'Data riwayat tanam berhasil ditambahkan.');
-    // }
+        if ($request->filled('tanggal_mulai')) {
+            $query->whereDate('waktu', '>=', $request->tanggal_mulai);
+        }
 
-    // public function update(Request $request, $id)
-    // {
-    //     $riwayat = RiwayatTanaman::findOrFail($id);
+        if ($request->filled('tanggal_akhir')) {
+            $query->whereDate('waktu', '<=', $request->tanggal_akhir);
+        }
 
-    //     $validated = $request->validate([
-    //         'tanaman_id'        => 'required|exists:tanaman,id',
-    //         'periode_tanam_id'  => 'nullable|exists:periode_tanam,id',
-    //         'nama_periode'      => 'nullable|string|max:255',
-    //         'waktu'             => 'nullable|date',
-    //         'pupuk'             => 'nullable|string|max:255',
-    //         'panjang_daun'      => 'nullable|numeric',
-    //         'lebar_daun'        => 'nullable|numeric',
-    //         'foto'              => 'nullable|image|max:2048',
-    //         'ph'                => 'nullable|numeric',
-    //         'potasium'          => 'nullable|numeric',
-    //         'phospor'           => 'nullable|numeric',
-    //         'EC'                => 'nullable|numeric',
-    //         'Nitrogen'          => 'nullable|numeric',
-    //         'humidity'          => 'nullable|numeric',
-    //         'temp'              => 'nullable|numeric',
-    //     ]);
+        $periode_tanams = $query->orderBy('waktu', 'desc')->get();
 
-    //     if ($request->hasFile('foto')) {
-    //         if ($riwayat->foto && Storage::disk('public')->exists($riwayat->foto)) {
-    //             Storage::disk('public')->delete($riwayat->foto);
-    //         }
+        if ($periode_tanams->isEmpty()) {
+            return back()->with('error', 'Tidak ada data untuk diekspor.');
+        }
 
-    //         $validated['foto'] = $request->file('foto')->store('foto_riwayat', 'public');
-    //     }
+        $filePath = storage_path('app/public/riwayat_tanam.csv');
+        $writer = SimpleExcelWriter::create($filePath);
 
-    //     $riwayat->update($validated);
+        $writer->addRow([
+            'Nama Tanaman',
+            'Nama Periode',
+            'Waktu',
+            'Pupuk',
+            'Panjang Daun',
+            'Lebar Daun',
+            'pH',
+            'Potasium',
+            'Phospor',
+            'EC',
+            'Nitrogen',
+            'Humidity',
+            'Suhu',
+        ]);
 
-    //     return redirect()->route('riwayat_tanaman.index')->with('success', 'Data riwayat tanam berhasil diperbarui.');
-    // }
+        foreach ($periode_tanams as $periode) {
+            $writer->addRow([
+                $periode->tanaman->nama_tanaman ?? '-',
+                $periode->nama_periode ?? '-',
+                $periode->waktu ?? '-',
+                $periode->pupuk ?? '-',
+                $periode->panjang_daun ?? '-',
+                $periode->lebar_daun ?? '-',
+                $periode->ph ?? '-',
+                $periode->pota ?? '-',
+                $periode->phospor ?? '-',
+                $periode->EC ?? '-',
+                $periode->Nitrogen ?? '-',
+                $periode->humidity ?? '-',
+                $periode->temp ?? '-',
+            ]);
+        }
 
-    // public function destroy($id)
-    // {
-    //     $riwayat = RiwayatTanaman::findOrFail($id);
-
-    //     if ($riwayat->foto && Storage::disk('public')->exists($riwayat->foto)) {
-    //         Storage::disk('public')->delete($riwayat->foto);
-    //     }
-
-    //     $riwayat->delete();
-
-    //     return redirect()->route('riwayat_tanaman.index')->with('success', 'Data riwayat tanam berhasil dihapus.');
-    // }
+        return response()->download($filePath)->deleteFileAfterSend();
+    }
 }

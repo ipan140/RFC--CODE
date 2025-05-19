@@ -208,6 +208,7 @@ Route::middleware(['auth', 'role:admin,owner,user'])->group(function () {
 
     // === Riwayat dan Manajemen Tanam ===
     Route::resource('riwayat_tanaman', RiwayatTanamanController::class);
+    Route::get('/riwayat-tanaman/export', [RiwayatTanamanController::class, 'export'])->name('riwayat_tanaman.export');
     Route::resource('periode_tanam', PeriodeTanamController::class);
     Route::resource('tanaman', TanamanController::class);
 });

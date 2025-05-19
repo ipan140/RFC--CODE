@@ -23,11 +23,13 @@ class PeriodeTanamController extends Controller
             $query->where('tanaman_id', $request->filter_tanaman_id);
         }
 
-        $periode_tanams = $query->orderBy('created_at', 'desc')->get();
+        // Ganti get() dengan paginate
+        $periode_tanams = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
         $tanamans = Tanaman::all();
 
         return view('periode_tanam.index', compact('periode_tanams', 'tanamans'));
     }
+
 
     public function create()
     {
@@ -66,7 +68,11 @@ class PeriodeTanamController extends Controller
         ];
 
         $data = $request->only([
-            'tanaman_id', 'nama_periode', 'pupuk', 'panjang_daun', 'lebar_daun' // Keterangan diganti menjadi pupuk
+            'tanaman_id',
+            'nama_periode',
+            'pupuk',
+            'panjang_daun',
+            'lebar_daun' // Keterangan diganti menjadi pupuk
         ]);
 
         $data['tanggal_mulai'] = $request->filled('waktu') ? Carbon::parse($request->waktu) : Carbon::now();
@@ -119,7 +125,11 @@ class PeriodeTanamController extends Controller
         ]);
 
         $data = $request->only([
-            'tanaman_id', 'nama_periode', 'pupuk', 'panjang_daun', 'lebar_daun' // Keterangan diganti menjadi pupuk
+            'tanaman_id',
+            'nama_periode',
+            'pupuk',
+            'panjang_daun',
+            'lebar_daun' // Keterangan diganti menjadi pupuk
         ]);
 
         if ($request->hasFile('foto')) {

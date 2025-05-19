@@ -3,7 +3,7 @@
 @section('content')
 @include('partials.sidebar')
 
-<!-- <main id="main" class="main p-4"> -->
+{{-- <main id="main" class="main"> --}}
     <div class="pagetitle d-flex justify-content-between align-items-center mb-3">
         <div>
             <h1><i class="bi bi-calendar-plus"></i> Tanaman</h1>
@@ -69,7 +69,7 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $periode->tanaman->nama_tanaman ?? '-' }}</td>
                                 <td>{{ $periode->nama_periode }}</td>
-                                <td>{{ \Carbon\Carbon::parse($periode->tanggal_mulai)->format('Y-m-d H:i:s') }}</td>
+                                <td>{{ $periode->waktu ?? '-' }}</td>
                                 <td>{{ $periode->pupuk ?? '-' }}</td>
                                 <td>{{ $periode->panjang_daun ?? '-' }}</td>
                                 <td>{{ $periode->lebar_daun ?? '-' }}</td>
@@ -95,13 +95,12 @@
                                     <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editModal{{ $periode->id }}">
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
-                                    <form action="{{ route('periode_tanam.destroy', $periode->id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button onclick="return confirm('Yakin ingin menghapus?')" class="btn btn-sm btn-danger">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
+                                    <button type="button"
+                                        class="btn btn-sm btn-danger btn-hapus-swal"
+                                        data-id="{{ $periode->id }}"
+                                        data-nama="{{ $periode->nama_periode }}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
 
@@ -114,61 +113,28 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <dl class="row">
-                                                <dt class="col-sm-4">Nama Tanaman</dt>
-                                                <dd class="col-sm-8">{{ $periode->tanaman->nama_tanaman ?? '-' }}</dd>
-
-                                                <dt class="col-sm-4">Nama Periode</dt>
-                                                <dd class="col-sm-8">{{ $periode->nama_periode }}</dd>
-
-                                                <dt class="col-sm-4">Tanggal Mulai & Waktu</dt>
-                                                <dd class="col-sm-8">{{ $periode->created_at }}</dd>
-
-                                                <dt class="col-sm-4">Panjang Daun</dt>
-                                                <dd class="col-sm-8">{{ $periode->panjang_daun ?? '-' }} cm</dd>
-
-                                                <dt class="col-sm-4">Lebar Daun</dt>
-                                                <dd class="col-sm-8">{{ $periode->lebar_daun ?? '-' }} cm</dd>
-
-                                                <dt class="col-sm-4">Temp (°C)</dt>
-                                                <dd class="col-sm-8">{{ $periode->temp ?? '-' }}</dd>
-
-                                                <dt class="col-sm-4">Humidity (%)</dt>
-                                                <dd class="col-sm-8">{{ $periode->humidity ?? '-' }}</dd>
-
-                                                <dt class="col-sm-4">pH</dt>
-                                                <dd class="col-sm-8">{{ $periode->ph ?? '-' }}</dd>
-
-                                                <dt class="col-sm-4">EC</dt>
-                                                <dd class="col-sm-8">{{ $periode->EC ?? '-' }}</dd>
-
-                                                <dt class="col-sm-4">Nitrogen</dt>
-                                                <dd class="col-sm-8">{{ $periode->Nitrogen ?? '-' }}</dd>
-
-                                                <dt class="col-sm-4">Fosfor</dt>
-                                                <dd class="col-sm-8">{{ $periode->phospor ?? '-' }}</dd>
-
-                                                <dt class="col-sm-4">Kalium</dt>
-                                                <dd class="col-sm-8">{{ $periode->pota ?? '-' }}</dd>
-
-                                                <dt class="col-sm-4">Pupuk / Keterangan</dt>
-                                                <dd class="col-sm-8">{{ $periode->pupuk ?? '-' }}</dd>
-
-                                                <dt class="col-sm-4">Foto</dt>
-                                                <dd class="col-sm-8">
+                                            <ul class="list-group">
+                                                <li class="list-group-item"><strong>Tanaman:</strong> {{ $periode->tanaman->nama_tanaman ?? '-' }}</li>
+                                                <li class="list-group-item"><strong>Nama Periode:</strong> {{ $periode->nama_periode }}</li>
+                                                <li class="list-group-item"><strong>Waktu:</strong> {{ $periode->waktu }}</li>
+                                                <li class="list-group-item"><strong>Pupuk:</strong> {{ $periode->pupuk }}</li>
+                                                <li class="list-group-item"><strong>Panjang Daun:</strong> {{ $periode->panjang_daun }} cm</li>
+                                                <li class="list-group-item"><strong>Lebar Daun:</strong> {{ $periode->lebar_daun }} cm</li>
+                                                <li class="list-group-item"><strong>Foto:</strong><br>
                                                     @if ($periode->foto)
-                                                    <img src="{{ asset('uploads/foto_periode/' . $periode->foto) }}"
-                                                        style="width: 150px; height: 150px; object-fit: cover;">
+                                                        <img src="{{ asset('uploads/foto_periode/' . $periode->foto) }}" alt="Foto" class="img-fluid mt-2">
                                                     @else
-                                                    <span>-</span>
+                                                        Tidak ada foto.
                                                     @endif
-                                                </dd>
-                                            </dl>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
 
                             {{-- Modal Edit --}}
                             <div class="modal fade" id="editModal{{ $periode->id }}" tabindex="-1">
@@ -185,8 +151,9 @@
                                                 <div class="col-md-6">
                                                     <label>Tanaman</label>
                                                     <select name="tanaman_id" class="form-select" required>
+                                                        <option value="">-- Pilih Tanaman --</option>
                                                         @foreach ($tanamans as $tanaman)
-                                                        <option value="{{ $tanaman->id }}" {{ $periode->tanaman_id == $tanaman->id ? 'selected' : '' }}>
+                                                        <option value="{{ $tanaman->id }}" {{ $tanaman->id == $periode->tanaman_id ? 'selected' : '' }}>
                                                             {{ $tanaman->nama_tanaman }}
                                                         </option>
                                                         @endforeach
@@ -198,27 +165,29 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label>Panjang Daun (cm)</label>
-                                                    <input type="number" name="panjang_daun" step="0.01" class="form-control" value="{{ $periode->panjang_daun }}" required>
+                                                    <input type="number" step="0.01" name="panjang_daun" class="form-control" value="{{ $periode->panjang_daun }}" required>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label>Lebar Daun (cm)</label>
-                                                    <input type="number" name="lebar_daun" step="0.01" class="form-control" value="{{ $periode->lebar_daun }}" required>
+                                                    <input type="number" step="0.01" name="lebar_daun" class="form-control" value="{{ $periode->lebar_daun }}" required>
                                                 </div>
                                                 <div class="col-md-12">
                                                     <label>Pupuk / Keterangan</label>
                                                     <textarea name="pupuk" class="form-control" rows="2">{{ $periode->pupuk }}</textarea>
                                                 </div>
                                                 <div class="col-md-12">
-                                                    <label>Foto (opsional)</label>
+                                                    <label>Foto Baru (jika ingin mengganti)</label>
                                                     <input type="file" name="foto" class="form-control">
                                                     @if ($periode->foto)
-                                                    <small class="text-muted">Foto saat ini: {{ $periode->foto }}</small>
+                                                    <div class="mt-2">
+                                                        <img src="{{ asset('uploads/foto_periode/' . $periode->foto) }}" alt="Foto" style="width: 100px;">
+                                                    </div>
                                                     @endif
                                                 </div>
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                                <button type="submit" class="btn btn-warning">Simpan Perubahan</button>
+                                                <button type="submit" class="btn btn-warning">Update</button>
                                             </div>
                                         </form>
                                     </div>
@@ -232,6 +201,10 @@
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+
+                <div class="mt-3">
+                    {{ $periode_tanams->links('pagination::bootstrap-5') }}
                 </div>
             </div>
         </div>
@@ -286,5 +259,57 @@
             </div>
         </div>
     </div>
+
+    {{-- Hidden form untuk delete --}}
+    <form id="formDelete" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
 </main>
+
+{{-- SweetAlert2 --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const deleteButtons = document.querySelectorAll('.btn-hapus-swal');
+
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const id = this.dataset.id;
+                const nama = this.dataset.nama;
+
+                Swal.fire({
+                    title: 'Yakin ingin menghapus?',
+                    text: "Data '" + nama + "' akan dihapus permanen!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const form = document.getElementById('formDelete');
+                        form.setAttribute('action', `/periode_tanam/${id}`);
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
+
+@if (session('success'))
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: "{{ session('success') }}",
+        timer: 2500,
+        showConfirmButton: false
+    });
+</script>
+@endif
+
 @endsection

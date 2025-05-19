@@ -52,12 +52,16 @@
     <!-- Tanaman (Semua Role) -->
     <li class="nav-item">
       <a class="nav-link collapsed text-success" data-bs-toggle="collapse" href="#tanaman-nav">
-        <i class="bi bi-seedling text-success me-2"></i>
+        <i class="bi bi-tree-fill text-success me-2"></i>
         <span>Tanaman</span>
         <i class="bi bi-chevron-down ms-auto text-success"></i>
       </a>
       <ul id="tanaman-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-        <li><a href="{{ url("/$prefix/tanaman") }}" class="text-success"><i class="bi bi-seedling me-2"></i> Periode Tanam</a></li>
+        <li>
+          <a href="{{ url("/$prefix/tanaman") }}" class="text-success">
+            <i class="bi bi-tree me-2"></i> Periode Tanam
+          </a>
+        </li>
         <li><a href="{{ url("/$prefix/periode_tanam") }}" class="text-success"><i class="bi bi-calendar-range me-2"></i> Daftar Tanaman</a></li>
         <li><a href="{{ url("/$prefix/riwayat_tanaman") }}" class="text-success"><i class="bi bi-info-square me-2"></i> Riwayat Tanaman</a></li>
       </ul>

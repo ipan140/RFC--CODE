@@ -13,7 +13,7 @@ class ProyekController extends Controller
      */
     public function index()
     {
-        $proyeks = Proyek::all();
+        $proyeks = Proyek::paginate(10);  // Pagination 10 item per halaman
         return view('proyek.index', compact('proyeks'));
     }
 

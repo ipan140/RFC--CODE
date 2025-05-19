@@ -10,9 +10,10 @@ class TanamanController extends Controller
 {
     public function index()
     {
-        $tanamans = Tanaman::all();
+        $tanamans = Tanaman::latest()->paginate(10); // Menambahkan pagination & urutan terbaru
         return view('tanaman.index', compact('tanamans'));
     }
+
 
     public function store(Request $request)
     {

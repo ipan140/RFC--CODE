@@ -25,68 +25,74 @@ class SensorController extends Controller
         'temp',
     ];
 
-    // Show a list of all sensors and the latest data for each device
+    // Tampilkan daftar semua sensor manual
     public function index()
-{
-    $sensorsManual = Sensor::all()
-        ->filter(fn($item) => is_numeric($item->value))
-        ->map(fn($item) => [
-            'id' => $item->id,
-            'parameter' => $item->parameter,
-            'ri' => $item->ri,
-            'time' => $item->waktu,
-            'value' => $item->value,
-            'source' => 'manual'
+    {
+        // Ambil data sensor terfilter dari database, langsung dengan query
+        $sensorsManual = Sensor::whereRaw('value REGEXP "^[0-9]+(\.[0-9]+)?$"')
+            ->orderByDesc('waktu')
+            ->paginate(10);
+
+        // Mapping data sesuai kebutuhan
+        $dataSensor = $sensorsManual->getCollection()->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'parameter' => $item->parameter,
+                'ri' => $item->ri,
+                'time' => $item->waktu,
+                'value' => $item->value,
+                'source' => 'manual'
+            ];
+        });
+
+        // Replace collection dengan data hasil map
+        $sensorsManual->setCollection($dataSensor);
+
+        return view('sensor.index', [
+            'dataSensor' => $sensorsManual,
         ]);
+    }
 
-    return view('sensor.index', [
-        'dataSensor' => $sensorsManual,
-    ]);
-}
 
-    // Show the form to create a new sensor
+    // Form tambah data sensor manual
     public function create()
     {
         return view('sensor.create');
     }
 
-    // Store a new sensor in the database
+    // Simpan data sensor manual
     public function store(Request $request)
     {
         $validated = $request->validate([
             'parameter' => 'required|string|max:255',
             'value' => 'required|numeric',
-            'time' => 'required|date',
+            'waktu' => 'required|date',
             'ri' => 'required|string|max:255',
         ]);
 
-        // Store the data
-        Sensor::create([
-            'parameter' => $validated['parameter'],
-            'value' => $validated['value'],
-            'time' => $validated['time'],
-            'ri' => $validated['ri'],
-        ]);
+        Sensor::create($validated);
 
         return redirect()->route('sensor.index')->with('success', 'Data sensor berhasil ditambahkan.');
     }
 
-
-    // Show the form to edit an existing sensor
+    // Form edit sensor manual
     public function edit(Sensor $sensor)
     {
         return view('sensor.edit', compact('sensor'));
     }
 
-    // Update an existing sensor
+    // Update data sensor manual
     public function update(Request $request, Sensor $sensor)
     {
         $validatedData = $request->validate([
-            'nama' => 'required|string|max:255',
-            'tipe' => 'required|string',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
+            'parameter' => 'required|string|max:255',
+            'value' => 'required|numeric',
+            'waktu' => 'required|date_format:Y-m-d\TH:i',
+            'ri' => 'required|string|max:255',
         ]);
+
+        // Ubah waktu ke format yang sesuai DB: 'Y-m-d H:i:s'
+        $validatedData['waktu'] = Carbon::createFromFormat('Y-m-d\TH:i', $validatedData['waktu'])->format('Y-m-d H:i:s');
 
         try {
             $sensor->update($validatedData);
@@ -97,7 +103,13 @@ class SensorController extends Controller
         }
     }
 
-    // Delete an existing sensor
+
+    public function show(Sensor $sensor)
+    {
+        return view('sensor.show', compact('sensor'));
+    }
+
+    // Hapus data sensor
     public function destroy(Sensor $sensor)
     {
         try {
@@ -109,7 +121,7 @@ class SensorController extends Controller
         }
     }
 
-    // Fetch and display data for a specific device
+    // Ambil dan tampilkan data realtime dari device Antares
     public function getDeviceData($device)
     {
         if (!in_array($device, $this->deviceList)) {
@@ -124,7 +136,7 @@ class SensorController extends Controller
         ]);
     }
 
-    // Fetch the latest data for a specific device
+    // Ambil data terakhir dari satu device
     private function fetchLatestData($device)
     {
         $url = "https://platform.antares.id:8443/~/antares-cse/antares-id/{$this->appName}/{$device}/la";
@@ -136,20 +148,12 @@ class SensorController extends Controller
         ])->get($url);
 
         if (!$response->successful()) {
-            return [
-                'value' => 'Gagal ambil data',
-                'time' => '-',
-                'ri' => '-',
-            ];
+            return ['value' => 'Gagal ambil data', 'time' => '-', 'ri' => '-'];
         }
 
         $cin = $response->json('m2m:cin') ?? null;
         if (!$cin) {
-            return [
-                'value' => 'no-value',
-                'time' => 'no-time',
-                'ri' => 'no-ri',
-            ];
+            return ['value' => 'no-value', 'time' => 'no-time', 'ri' => 'no-ri'];
         }
 
         $value = $this->parseValue($cin['con'] ?? null, $device);
@@ -162,7 +166,7 @@ class SensorController extends Controller
         ];
     }
 
-    // Fetch all data for a specific device
+    // Ambil semua data dari satu device
     private function fetchAllData($device)
     {
         $url = "https://platform.antares.id:8443/~/antares-cse/antares-id/{$this->appName}/{$device}?rcn=4";
@@ -183,31 +187,22 @@ class SensorController extends Controller
             return [['info' => 'Belum ada data untuk device ini']];
         }
 
-        $result = [];
-        foreach ($cinList as $item) {
-            $value = $this->parseValue($item['con'] ?? null, $device);
-            $formattedTime = $this->formatTime($item['ct'] ?? null);
-
-            $result[] = [
+        return collect($cinList)->map(function ($item) use ($device) {
+            return [
                 'ri' => $item['ri'] ?? 'no-ri',
-                'time' => $formattedTime,
-                'value' => $value ?? 'no-value',
+                'time' => $this->formatTime($item['ct'] ?? null),
+                'value' => $this->parseValue($item['con'] ?? null, $device),
             ];
-        }
-
-        return $result;
+        })->toArray();
     }
 
-    // Parse value based on device type
+    // Parsing nilai dari data Antares
     private function parseValue($value, $device = null)
     {
         if (is_string($value)) {
             $value = trim($value, "\"'");
-
-            // Coba parse JSON jika memungkinkan
             if (Str::startsWith($value, '{') || Str::startsWith($value, '[')) {
                 $decoded = json_decode($value, true);
-
                 if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
                     $value = $decoded;
                 } else {
@@ -235,9 +230,7 @@ class SensorController extends Controller
         return null;
     }
 
-
-
-    // Format timestamp to readable time
+    // Format waktu dari Antares ke format Laravel
     private function formatTime($rawTime)
     {
         if (!$rawTime) return 'no-time';
@@ -250,7 +243,7 @@ class SensorController extends Controller
         }
     }
 
-    // Fetch and store all device data
+    // Ambil data terbaru dari semua device dan simpan ke DB
     public function fetchAndStoreAll()
     {
         $results = [];
@@ -284,9 +277,7 @@ class SensorController extends Controller
                     continue;
                 }
 
-                // Parse nilai
-                $valueRaw = $cin['con'] ?? null;
-                $value = $this->parseValue($valueRaw, $device);
+                $value = $this->parseValue($cin['con'] ?? null, $device);
 
                 if (!is_numeric($value)) {
                     $results[] = [
@@ -297,7 +288,6 @@ class SensorController extends Controller
                     continue;
                 }
 
-                // Waktu format
                 $rawTime = $cin['ct'] ?? ($cin['creationTime'] ?? null);
                 try {
                     $waktu = Carbon::createFromFormat('Ymd\THis', substr($rawTime, 0, 15))->format('Y-m-d H:i:s');
@@ -305,16 +295,13 @@ class SensorController extends Controller
                     $waktu = now()->format('Y-m-d H:i:s');
                 }
 
-                // Simpan data
                 Sensor::updateOrCreate(
                     [
                         'parameter' => strtoupper($device),
-                        'ri'        => $cin['ri'] ?? 'no-ri',
-                        'waktu'     => $waktu,
+                        'ri' => $cin['ri'] ?? 'no-ri',
+                        'waktu' => $waktu,
                     ],
-                    [
-                        'value'     => $value
-                    ]
+                    ['value' => $value]
                 );
 
                 $results[] = [
@@ -338,16 +325,7 @@ class SensorController extends Controller
         ]);
     }
 
-
-
-    // Show detailed data for a sensor
-    public function show($id)
-    {
-        $sensor = Sensor::findOrFail($id);
-        return view('sensor.show', compact('sensor'));
-    }
-
-    // Export sensor data to CSV
+    // Export semua data sensor ke file CSV
     public function export()
     {
         $filePath = storage_path('app/public/data-semua-sensor.csv');
