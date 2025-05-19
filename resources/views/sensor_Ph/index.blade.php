@@ -1,10 +1,10 @@
 @extends('partials.headerFooter')
 
 @section('content')
-@include('partials.sidebar')
-<!-- SweetAlert -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<!-- <main id="main" class="main p-4"> -->
+    @include('partials.sidebar')
+    <!-- SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- <main id="main" class="main p-4"> -->
     <div class="pagetitle">
         <nav>
             <ol class="breadcrumb">
@@ -29,67 +29,81 @@
                     <a href="{{ route('ph.export') }}" class="btn btn-success">
                         <i class="bi bi-download me-1"></i> Export Data
                     </a>
-                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalTambah">
+                    {{-- <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalTambah">
                         <i class="bi bi-plus-circle me-1"></i> Tambah Data
-                    </button>
-                    <button type="button" class="btn btn-primary" id="btn-fetch-ph">
-                        <i class="bi bi-cloud-download me-1"></i> Fetch & Simpan Data
-                    </button>
+                    </button> --}}
+                    @php
+                        $userRole = auth()->user()->role;
+                    @endphp
+
+                    @if(in_array($userRole, ['admin', 'owner']))
+                        <button type="button" class="btn btn-primary" id="btn-fetch-ph">
+                            <i class="bi bi-cloud-download me-1"></i> Fetch & Simpan Data
+                        </button>
+                    @endif
+
                 </div>
 
                 @if(isset($data['ph']) && is_array($data['ph']))
-                @php
-                $sensorData = $data['ph'];
-                $sensorValue = is_array($sensorData['value'] ?? null)
-                ? ($sensorData['value']['value'] ?? '-')
-                : ($sensorData['value'] ?? '-');
-                @endphp
+                    @php
+                        $sensorData = $data['ph'];
+                        $sensorValue = is_array($sensorData['value'] ?? null)
+                            ? ($sensorData['value']['value'] ?? '-')
+                            : ($sensorData['value'] ?? '-');
+                    @endphp
 
-                <div class="table-responsive">
-                    <table class="table table-sm table-bordered align-middle mb-0">
-                        <thead class="bg-dark text-white text-center">
-                            <tr>
-                                <th>Parameter</th>
-                                <th>Waktu</th>
-                                <th>Resource Index (RI)</th>
-                                <th>Data Sensor</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-center">
-                            <tr>
-                                <td class="fw-semibold">pH</td>
-                                <td>{{ $sensorData['time'] ?? '-' }}</td>
-                                <td>{{ $sensorData['ri'] ?? '-' }}</td>
-                                <td>{{ $sensorValue }}</td>
-                                <td class="d-flex justify-content-center gap-1">
-                                    <!-- View Button -->
-                                    <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalView">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-
-                                    <!-- Edit Button -->
-                                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEdit">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </button>
-
-                                    <!-- Delete Form -->
-                                    <form action="{{ route('sensor_ph.destroy', $sensorData['ri']) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus data?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-danger btn-sm">
-                                            <i class="bi bi-trash"></i>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered align-middle mb-0">
+                            <thead class="bg-dark text-white text-center">
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Waktu</th>
+                                    <th>Resource Index (RI)</th>
+                                    <th>Data Sensor</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-center">
+                                <tr>
+                                    <td class="fw-semibold">pH</td>
+                                    <td>{{ $sensorData['time'] ?? '-' }}</td>
+                                    <td>{{ $sensorData['ri'] ?? '-' }}</td>
+                                    <td>{{ $sensorValue }}</td>
+                                    <td class="d-flex justify-content-center gap-1">
+                                        <!-- View Button -->
+                                        <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalView">
+                                            <i class="bi bi-eye"></i>
                                         </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+
+                                        <!-- Edit Button -->
+                                        @php
+                                            $userRole = auth()->user()->role;
+                                        @endphp
+
+                                        @if (in_array($userRole, ['admin', 'owner']))
+                                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEdit">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+
+                                            <!-- Delete Form -->
+                                            <form action="{{ route('sensor_ph.destroy', $sensorData['ri']) }}" method="POST"
+                                                class="d-inline" onsubmit="return confirm('Yakin ingin menghapus data?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="btn btn-danger btn-sm">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 @else
-                <div class="alert alert-warning text-center">
-                    Data sensor pH tidak ditemukan atau tidak valid.
-                </div>
+                    <div class="alert alert-warning text-center">
+                        Data sensor pH tidak ditemukan atau tidak valid.
+                    </div>
                 @endif
             </div>
         </div>
@@ -133,11 +147,13 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="value" class="form-label">Nilai pH</label>
-                            <input type="number" step="any" class="form-control" name="value" value="{{ $sensorValue }}" required>
+                            <input type="number" step="any" class="form-control" name="value" value="{{ $sensorValue }}"
+                                required>
                         </div>
                         <div class="mb-3">
                             <label for="time" class="form-label">Waktu</label>
-                            <input type="datetime-local" class="form-control" name="time" value="{{ \Carbon\Carbon::parse($sensorData['time'])->format('Y-m-d\TH:i') }}" required>
+                            <input type="datetime-local" class="form-control" name="time"
+                                value="{{ \Carbon\Carbon::parse($sensorData['time'])->format('Y-m-d\TH:i') }}" required>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -168,42 +184,42 @@
         </div>
 
     </section>
-</main>
-<script>
-    document.getElementById('btn-fetch-ph').addEventListener('click', function() {
-        fetch("{{ route('sensor_ph.fetch-store') }}")
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        text: data.message,
-                        confirmButtonColor: '#3085d6',
-                        confirmButtonText: 'OK'
-                    }).then(() => {
-                        location.reload(); // Reload data setelah berhasil fetch
-                    });
-                } else {
+    </main>
+    <script>
+        document.getElementById('btn-fetch-ph').addEventListener('click', function () {
+            fetch("{{ route('sensor_ph.fetch-store') }}")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: data.message,
+                            confirmButtonColor: '#3085d6',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload(); // Reload data setelah berhasil fetch
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: data.message || 'Gagal memproses data.',
+                            confirmButtonColor: '#d33',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(error => {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Gagal!',
-                        text: data.message || 'Gagal memproses data.',
+                        title: 'Kesalahan!',
+                        text: 'Tidak dapat terhubung ke server.',
                         confirmButtonColor: '#d33',
                         confirmButtonText: 'OK'
                     });
-                }
-            })
-            .catch(error => {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Kesalahan!',
-                    text: 'Tidak dapat terhubung ke server.',
-                    confirmButtonColor: '#d33',
-                    confirmButtonText: 'OK'
+                    console.error(error);
                 });
-                console.error(error);
-            });
-    });
-</script>
+        });
+    </script>
 @endsection

@@ -44,13 +44,13 @@
             <i class="bi bi-list toggle-sidebar-btn"></i>
         </div>
 
-        <div class="search-bar">
+        {{-- <div class="search-bar">
             <form class="search-form d-flex align-items-center" method="POST" action="#">
                 @csrf
                 <input type="text" name="query" placeholder="Search" title="Enter search keyword">
                 <button type="submit" title="Search"><i class="bi bi-search"></i></button>
             </form>
-        </div>
+        </div> --}}
 
         <nav class="header-nav ms-auto">
             <ul class="d-flex align-items-center">
@@ -59,20 +59,25 @@
                 </li>
 
                 {{-- Notifications --}}
-                <li class="nav-item dropdown">
-                    <a class="nav-link nav-icon" href="{{ route('logaktivitas.index') }}">
-                        <i class="bi bi-bell"></i>
-                        @php
+                <li class="nav-item dropdown position-relative">
+                <a class="nav-link nav-icon" href="{{ route('logaktivitas.index') }}">
+                    <i class="bi bi-bell"></i>
+
+                    @php
                         $notifications = [
-                        ['type' => 'warning', 'title' => '1 Sensor Malfunction', 'message' => 'Ph Sensor Malfunction', 'time' => '30 min. ago'],
-                        ['type' => 'success', 'title' => '6 Sensors Ready to go', 'message' => '', 'time' => '2 hrs. ago']
+                            ['type' => 'warning', 'title' => '1 Sensor Malfunction', 'message' => 'Ph Sensor Malfunction', 'time' => '30 min. ago'],
+                            ['type' => 'success', 'title' => '6 Sensors Ready to go', 'message' => '', 'time' => '2 hrs. ago']
                         ];
-                        @endphp
-                        @if (count($notifications))
-                        <span class="badge bg-success badge-number">{{ count($notifications) }}</span>
-                        @endif
-                    </a>
-                </li>
+                    @endphp
+
+                    @if (count($notifications))
+                        <span class="position-absolute top-0 start-100 translate-middle p-1 bg-success border border-light rounded-circle">
+                            <span class="visually-hidden">New alerts</span>
+                        </span>
+                    @endif
+                </a>
+            </li>
+
 
                 {{-- Profile --}}
                 <li class="nav-item dropdown pe-3">

@@ -36,12 +36,18 @@
                         <a href="{{ url('/export/temp') }}" class="btn btn-success">
                             <i class="bi bi-download me-1"></i> Export Data
                         </a>
-                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalTambah">
+                        {{-- <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalTambah">
                             <i class="bi bi-plus-circle me-1"></i> Tambah Data
-                        </button>
-                        <button type="button" class="btn btn-primary" id="btn-fetch-temp">
-                            <i class="bi bi-cloud-download me-1"></i> Fetch & Simpan Data
-                        </button>
+                        </button> --}}
+                        @php
+                            $userRole = auth()->user()->role;
+                        @endphp
+
+                        @if(in_array($userRole, ['admin', 'owner']))
+                            <button type="button" class="btn btn-primary" id="btn-fetch-temp">
+                                <i class="bi bi-cloud-download me-1"></i> Fetch & Simpan Data
+                            </button>
+                        @endif
                     </div>
 
                     <div class="table-responsive">
@@ -65,16 +71,22 @@
                                         <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalView">
                                             <i class="bi bi-eye"></i>
                                         </button>
-                                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEdit">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </button>
-                                        <form action="{{ route('sensor_temp.destroy', $sensorData['ri']) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus data?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="btn btn-danger btn-sm">
-                                                <i class="bi bi-trash"></i>
+                                        @php
+                                            $userRole = auth()->user()->role;
+                                        @endphp
+
+                                        @if (in_array($userRole, ['admin', 'owner']))
+                                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEdit">
+                                                <i class="bi bi-pencil-square"></i>
                                             </button>
-                                        </form>
+                                            <form action="{{ route('sensor_temp.destroy', $sensorData['ri']) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus data?')" class="d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="btn btn-danger btn-sm">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        @endif
                                     </td>
                                 </tr>
                             </tbody>

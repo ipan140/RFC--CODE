@@ -20,10 +20,9 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::all();
+        $users = User::paginate(10); // 10 data per halaman
         return view('user.index', compact('users'));
     }
-
     /**
      * Menampilkan form tambah user (admin).
      */

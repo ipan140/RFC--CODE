@@ -17,16 +17,16 @@
         <div class="card shadow-sm">
             <div class="card-body">
                 <h5 class="card-title"><i class="bi bi-table"></i> Tabel Proyek</h5>
-    
+
                 @if(session('success'))
                     <div class="alert alert-success">{{ session('success') }}</div>
                 @endif
-    
+
                 <!-- Tombol Tambah Proyek -->
                 <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#tambahProyekModal">
                     <i class="bi bi-folder-plus"></i> Tambah Proyek
                 </button>
-    
+
                 <div class="table-responsive">
                     <table class="table table-striped table-bordered table-hover align-middle">
                         <thead class="table-success text-center">
@@ -42,7 +42,7 @@
                         <tbody>
                             @foreach($proyeks as $index => $proyek)
                                 <tr>
-                                    <td class="text-center">{{ $index + 1 }}</td>
+                                    <td class="text-center">{{ $proyeks->firstItem() + $index }}</td>
                                     <td>{{ $proyek->nama }}</td>
                                     <td>{{ $proyek->deskripsi }}</td>
                                     <td>{{ $proyek->tanggal }}</td>
@@ -65,7 +65,7 @@
                                         </button>
                                     </td>
                                 </tr>
-    
+
                                 <!-- Modal Show Proyek -->
                                 <div class="modal fade" id="showProyekModal{{ $proyek->id }}" tabindex="-1">
                                     <div class="modal-dialog">
@@ -91,7 +91,7 @@
                                         </div>
                                     </div>
                                 </div>
-    
+
                                 <!-- Modal Edit Proyek -->
                                 <div class="modal fade" id="editProyekModal{{ $proyek->id }}" tabindex="-1">
                                     <div class="modal-dialog">
@@ -129,7 +129,7 @@
                                         </div>
                                     </div>
                                 </div>
-    
+
                                 <!-- Modal Hapus Proyek -->
                                 <div class="modal fade" id="deleteProyekModal{{ $proyek->id }}" tabindex="-1">
                                     <div class="modal-dialog">
@@ -152,15 +152,21 @@
                                         </div>
                                     </div>
                                 </div>
-    
+
                             @endforeach
                         </tbody>
                     </table>
+
+                    <!-- Pagination Links -->
+                    <div class="mt-3">
+                        {{ $proyeks->links() }}
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 </main>
+
 <!-- Modal Tambah Proyek -->
 <div class="modal fade" id="tambahProyekModal" tabindex="-1">
     <div class="modal-dialog">

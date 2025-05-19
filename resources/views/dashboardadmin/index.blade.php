@@ -65,7 +65,7 @@
             @endforeach
         </div><!-- End Sensor Cards -->
 
-        <div class="row mt-4">
+        {{-- <div class="row mt-4">
             <!-- Sensor Traffic Chart -->
             <div class="col-lg-6">
                 <div class="card info-card">
@@ -108,7 +108,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
     </section>
 </main><!-- End Main -->

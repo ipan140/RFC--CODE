@@ -11,7 +11,7 @@ class MitraController extends Controller
     // Tampilkan semua mitra
     public function index()
     {
-        $mitras = Mitra::all();
+        $mitras = Mitra::paginate(10); // 10 data per halaman, bisa kamu sesuaikan
         return view('mitra.index', compact('mitras'));
     }
 
