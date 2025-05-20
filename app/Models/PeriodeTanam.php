@@ -34,7 +34,7 @@ class PeriodeTanam extends Model
     {
         return LogOptions::defaults()
             ->logOnly($this->fillable)
-            ->useLogName('periode_tanam')
+            ->useLogName('Periodetanam')
             ->logOnlyDirty()
             ->setDescriptionForEvent(fn(string $eventName) => "Periode Tanam telah di-{$eventName}");
     }
@@ -42,12 +42,12 @@ class PeriodeTanam extends Model
     // Relasi: PeriodeTanam milik satu Tanaman
     public function tanaman()
     {
-        return $this->belongsTo(Tanaman::class, 'tanaman_id');
+        return $this->belongsTo(Tanaman::class);
     }
 
-    // Relasi: PeriodeTanam memiliki banyak RiwayatTanaman
-    public function riwayats()
+    // Relasi: PeriodeTanam memiliki banyak InputHarian
+    public function inputHarian()
     {
-        return $this->hasMany(RiwayatTanaman::class);
+        return $this->hasMany(InputHarian::class, 'periode_tanam_id');
     }
 }

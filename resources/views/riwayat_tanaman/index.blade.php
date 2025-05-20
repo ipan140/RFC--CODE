@@ -75,25 +75,25 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($periode_tanams as $periode)
+                            @forelse ($inputHarians as $inputHarian)
                                 <tr>
-                                    <td>{{ $loop->iteration + ($periode_tanams->currentPage() - 1) * $periode_tanams->perPage() }}</td>
-                                    <td>{{ $periode->tanaman->nama_tanaman ?? '-' }}</td>
-                                    <td>{{ $periode->nama_periode ?? '-' }}</td>
-                                    <td>{{ $periode->waktu ?? '-' }}</td>
-                                    <td>{{ $periode->pupuk ?? '-' }}</td>
-                                    <td>{{ $periode->panjang_daun ?? '-' }}</td>
-                                    <td>{{ $periode->lebar_daun ?? '-' }}</td>
-                                    <td>{{ $periode->ph ?? '-' }}</td>
-                                    <td>{{ $periode->pota ?? '-' }}</td>
-                                    <td>{{ $periode->phospor ?? '-' }}</td>
-                                    <td>{{ $periode->EC ?? '-' }}</td>
-                                    <td>{{ $periode->Nitrogen ?? '-' }}</td>
-                                    <td>{{ $periode->humidity ?? '-' }}</td>
-                                    <td>{{ $periode->temp ?? '-' }}</td>
+                                    <td>{{ $loop->iteration + ($inputHarians->currentPage() - 1) * $inputHarians->perPage() }}</td>
+                                    <td>{{ $inputHarian->tanaman->nama_tanaman ?? '-' }}</td>
+                                    <td>{{ $inputHarian->nama_periode ?? '-' }}</td>
+                                    <td>{{ $inputHarian->waktu ?? '-' }}</td>
+                                    <td>{{ $inputHarian->pupuk ?? '-' }}</td>
+                                    <td>{{ $inputHarian->panjang_daun ?? '-' }}</td>
+                                    <td>{{ $inputHarian->lebar_daun ?? '-' }}</td>
+                                    <td>{{ $inputHarian->ph ?? '-' }}</td>
+                                    <td>{{ $inputHarian->pota ?? '-' }}</td>
+                                    <td>{{ $inputHarian->phospor ?? '-' }}</td>
+                                    <td>{{ $inputHarian->EC ?? '-' }}</td>
+                                    <td>{{ $inputHarian->Nitrogen ?? '-' }}</td>
+                                    <td>{{ $inputHarian->humidity ?? '-' }}</td>
+                                    <td>{{ $inputHarian->temp ?? '-' }}</td>
                                     <td>
-                                        @if ($periode->foto)
-                                            <img src="{{ asset('uploads/foto_periode/' . $periode->foto) }}" alt="Foto Periode"
+                                        @if ($inputHarian->foto)
+                                            <img src="{{ asset('uploads/foto_periode/' . $inputHarian->foto) }}" alt="Foto Periode"
                                                 class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
                                         @else
                                             <span class="text-muted">-</span>
@@ -109,7 +109,7 @@
                     </table>
 
                     <div class="mt-3">
-                        {{ $periode_tanams->withQueryString()->links() }}
+                        {{ $inputHarians->withQueryString()->links() }}
                     </div>
                 </div>
             </div>

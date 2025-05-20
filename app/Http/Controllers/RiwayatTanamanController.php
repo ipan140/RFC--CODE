@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\InputHarian;
 use App\Models\Tanaman;
 use App\Models\PeriodeTanam;
 use Illuminate\Http\Request;
@@ -11,33 +12,33 @@ use Spatie\SimpleExcel\SimpleExcelWriter;
 class RiwayatTanamanController extends Controller
 {
     public function index(Request $request)
-    {
-        $query = PeriodeTanam::with('tanaman');
+{
+    $query = InputHarian::with('tanaman');
 
-        if ($request->filled('filter_tanaman_id')) {
-            $query->where('tanaman_id', $request->filter_tanaman_id);
-        }
-
-        if ($request->filled('tanggal_mulai')) {
-            $query->whereDate('waktu', '>=', $request->tanggal_mulai);
-        }
-
-        if ($request->filled('tanggal_akhir')) {
-            $query->whereDate('waktu', '<=', $request->tanggal_akhir);
-        }
-
-        // Pagination 10 data per halaman
-        $periode_tanams = $query->orderBy('waktu', 'desc')->paginate(10);
-
-        $tanamans = Tanaman::all();
-
-        return view('riwayat_tanaman.index', compact('periode_tanams', 'tanamans'));
+    // Filter opsional (jika ada)
+    if ($request->filled('filter_tanaman_id')) {
+        $query->where('tanaman_id', $request->filter_tanaman_id);
     }
+
+    if ($request->filled('tanggal_mulai')) {
+        $query->whereDate('waktu', '>=', $request->tanggal_mulai);
+    }
+
+    if ($request->filled('tanggal_akhir')) {
+        $query->whereDate('waktu', '<=', $request->tanggal_akhir);
+    }
+
+    $inputHarians = $query->orderBy('waktu', 'desc')->paginate(10);
+
+    $tanamans = Tanaman::all();
+
+    return view('riwayat_tanaman.index', compact('inputHarians', 'tanamans'));
+}
 
 
     public function export(Request $request)
     {
-        $query = PeriodeTanam::with('tanaman');
+        $query = InputHarian::with('tanaman');
 
         if ($request->filled('filter_tanaman_id')) {
             $query->where('tanaman_id', $request->filter_tanaman_id);
@@ -51,9 +52,9 @@ class RiwayatTanamanController extends Controller
             $query->whereDate('waktu', '<=', $request->tanggal_akhir);
         }
 
-        $periode_tanams = $query->orderBy('waktu', 'desc')->get();
+        $input_harians = $query->orderBy('waktu', 'desc')->get();
 
-        if ($periode_tanams->isEmpty()) {
+        if ($input_harians->isEmpty()) {
             return back()->with('error', 'Tidak ada data untuk diekspor.');
         }
 
@@ -76,21 +77,21 @@ class RiwayatTanamanController extends Controller
             'Suhu',
         ]);
 
-        foreach ($periode_tanams as $periode) {
+        foreach ($input_harians as $inputHarian) {
             $writer->addRow([
-                $periode->tanaman->nama_tanaman ?? '-',
-                $periode->nama_periode ?? '-',
-                $periode->waktu ?? '-',
-                $periode->pupuk ?? '-',
-                $periode->panjang_daun ?? '-',
-                $periode->lebar_daun ?? '-',
-                $periode->ph ?? '-',
-                $periode->pota ?? '-',
-                $periode->phospor ?? '-',
-                $periode->EC ?? '-',
-                $periode->Nitrogen ?? '-',
-                $periode->humidity ?? '-',
-                $periode->temp ?? '-',
+                $inputHarian->tanaman->nama_tanaman ?? '-',
+                $inputHarian->nama_periode ?? '-',
+                $inputHarian->waktu ?? '-',
+                $inputHarian->pupuk ?? '-',
+                $inputHarian->panjang_daun ?? '-',
+                $inputHarian->lebar_daun ?? '-',
+                $inputHarian->ph ?? '-',
+                $inputHarian->pota ?? '-',
+                $inputHarian->phospor ?? '-',
+                $inputHarian->EC ?? '-',
+                $inputHarian->Nitrogen ?? '-',
+                $inputHarian->humidity ?? '-',
+                $inputHarian->temp ?? '-',
             ]);
         }
 

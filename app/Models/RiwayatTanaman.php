@@ -34,7 +34,7 @@ class RiwayatTanaman extends Model
         return $this->belongsTo(Tanaman::class);
     }
 
-    public function periodeTanam()
+    public function InputHarian()
     {
         return $this->belongsTo(PeriodeTanam::class);
     }

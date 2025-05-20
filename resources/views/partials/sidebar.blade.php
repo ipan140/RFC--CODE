@@ -59,10 +59,15 @@
       <ul id="tanaman-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
         <li>
           <a href="{{ url("/$prefix/tanaman") }}" class="text-success">
-            <i class="bi bi-tree me-2"></i> Periode Tanam
+            <i class="bi bi-tree me-2"></i> Tanaman
           </a>
         </li>
-        <li><a href="{{ url("/$prefix/periode_tanam") }}" class="text-success"><i class="bi bi-calendar-range me-2"></i> Daftar Tanaman</a></li>
+        <li><a href="{{ url("/$prefix/periode_tanam") }}" class="text-success"><i class="bi bi-calendar-range me-2"></i>Periode Tanam</a></li>
+        <li>
+          <a href="{{ url("$prefix/input_harian") }}" class="text-success">
+            <i class="bi bi-calendar-range me-2"></i>Inputan Harian Tanam
+          </a>
+        </li>
         <li><a href="{{ url("/$prefix/riwayat_tanaman") }}" class="text-success"><i class="bi bi-info-square me-2"></i> Riwayat Tanaman</a></li>
       </ul>
     </li>
