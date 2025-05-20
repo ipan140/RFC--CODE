@@ -2,247 +2,106 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PeriodeTanam;
+use App\Models\InputHarian;
 use App\Models\Tanaman;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Http;
-use Carbon\Carbon;
+use Spatie\SimpleExcel\SimpleExcelWriter;
 
 class PeriodeTanamController extends Controller
 {
-    protected $apiKey = 'a74d1dcd4e6e87bf:b84bfdd53b7d2f84';
-    protected $appName = 'interest';
-    protected $deviceList = ['ph', 'pota', 'phospor', 'EC', 'Nitrogen', 'humidity', 'temp'];
-
+    /**
+     * Menampilkan daftar input harian yang belum selesai
+     */
     public function index(Request $request)
     {
-        $query = PeriodeTanam::with('tanaman');
+        $query = InputHarian::whereHas('tanaman', function ($q) {
+            $q->where('status', '!=', 'selesai');
+        })->with('tanaman');
 
+        // Filter tanggal
+        if ($request->filled('tanggal_mulai') && $request->filled('tanggal_akhir')) {
+            $query->whereBetween('waktu', [$request->tanggal_mulai, $request->tanggal_akhir]);
+        } elseif ($request->filled('tanggal_mulai')) {
+            // Jika hanya tanggal_mulai diisi, cari data di tanggal tersebut
+            $query->whereDate('waktu', $request->tanggal_mulai);
+        }
+
+        // Filter tanaman
         if ($request->filled('filter_tanaman_id')) {
             $query->where('tanaman_id', $request->filter_tanaman_id);
         }
 
-        // Ganti get() dengan paginate
-        $periode_tanams = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
-        $tanamans = Tanaman::all();
+        $inputHarians = $query->orderBy('waktu', 'desc')->paginate(10);
+        $tanamans = Tanaman::where('status', '!=', 'selesai')->get();
 
-        return view('periode_tanam.index', compact('periode_tanams', 'tanamans'));
+        return view('periode_tanam.index', compact('inputHarians', 'tanamans'));
     }
 
-
-    public function create()
+    /**
+     * Mengekspor data input harian ke CSV
+     */
+    public function export(Request $request)
     {
-        $tanamans = Tanaman::all();
-        return view('periode_tanam.create', compact('tanamans'));
-    }
+        $query = InputHarian::whereHas('tanaman', function ($q) {
+            $q->where('status', '!=', 'selesai');
+        })->with('tanaman');
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'tanaman_id'   => 'required|exists:tanaman,id',
-            'nama_periode' => 'required|string|max:255',
-            'pupuk'        => 'nullable|string', // Keterangan diganti menjadi pupuk
-            'foto'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'waktu'        => 'nullable|date',
-            'panjang_daun' => 'nullable|numeric',
-            'lebar_daun'   => 'nullable|numeric',
+        // Filter tanggal
+        if ($request->filled('tanggal_mulai') && $request->filled('tanggal_akhir')) {
+            $query->whereBetween('waktu', [$request->tanggal_mulai, $request->tanggal_akhir]);
+        } elseif ($request->filled('tanggal_mulai')) {
+            $query->whereDate('waktu', $request->tanggal_mulai);
+        }
 
-            'ph'           => 'nullable|numeric',
-            'pota'         => 'nullable|numeric',
-            'phospor'      => 'nullable|numeric',
-            'EC'           => 'nullable|numeric',
-            'Nitrogen'     => 'nullable|numeric',
-            'humidity'     => 'nullable|numeric',
-            'temp'         => 'nullable|numeric',
+        // Filter tanaman
+        if ($request->filled('filter_tanaman_id')) {
+            $query->where('tanaman_id', $request->filter_tanaman_id);
+        }
+
+        $input_harians = $query->orderBy('waktu', 'desc')->get();
+
+        if ($input_harians->isEmpty()) {
+            return back()->with('error', 'Tidak ada data untuk diekspor.');
+        }
+
+        $filePath = storage_path('app/public/Periode_tanam.csv');
+        $writer = SimpleExcelWriter::create($filePath);
+
+        $writer->addRow([
+            'Nama Tanaman',
+            'Nama Periode',
+            'Waktu',
+            'Pupuk',
+            'Panjang Daun',
+            'Lebar Daun',
+            'pH',
+            'Potasium',
+            'Phospor',
+            'EC',
+            'Nitrogen',
+            'Humidity',
+            'Suhu',
         ]);
 
-        $mapping = [
-            'ph'       => 'ph',
-            'pota'     => 'pota',
-            'phospor'  => 'phospor',
-            'EC'       => 'EC',
-            'Nitrogen' => 'Nitrogen',
-            'humidity' => 'humidity',
-            'temp'     => 'temp',
-        ];
-
-        $data = $request->only([
-            'tanaman_id',
-            'nama_periode',
-            'pupuk',
-            'panjang_daun',
-            'lebar_daun' // Keterangan diganti menjadi pupuk
-        ]);
-
-        $data['tanggal_mulai'] = $request->filled('waktu') ? Carbon::parse($request->waktu) : Carbon::now();
-
-        foreach ($mapping as $inputKey => $dbField) {
-            if ($request->filled($inputKey)) {
-                $data[$dbField] = $this->adjustValue($inputKey, $request->input($inputKey));
-            } else {
-                $sensorValue = $this->fetchSensorValueFromAntares($inputKey);
-                if ($sensorValue !== null) {
-                    $data[$dbField] = $this->adjustValue($inputKey, $sensorValue);
-                }
-            }
+        foreach ($input_harians as $inputHarian) {
+            $writer->addRow([
+                $inputHarian->tanaman->nama_tanaman ?? '-',
+                $inputHarian->nama_periode ?? '-',
+                $inputHarian->waktu ?? '-',
+                $inputHarian->pupuk ?? '-',
+                $inputHarian->panjang_daun ?? '-',
+                $inputHarian->lebar_daun ?? '-',
+                $inputHarian->ph ?? '-',
+                $inputHarian->pota ?? '-',
+                $inputHarian->phospor ?? '-',
+                $inputHarian->EC ?? '-',
+                $inputHarian->Nitrogen ?? '-',
+                $inputHarian->humidity ?? '-',
+                $inputHarian->temp ?? '-',
+            ]);
         }
 
-        if ($request->hasFile('foto')) {
-            $foto = $request->file('foto');
-            $fotoName = time() . '.' . $foto->getClientOriginalExtension();
-            $foto->move(public_path('uploads/foto_periode'), $fotoName);
-            $data['foto'] = $fotoName;
-        }
-
-        PeriodeTanam::create($data);
-
-        return redirect()->back()->with('success', 'Data Periode Tanam berhasil disimpan!');
-    }
-
-    public function show(PeriodeTanam $periodeTanam)
-    {
-        $periodeTanam->load('tanaman');
-        return view('periode_tanam.show', compact('periodeTanam'));
-    }
-
-    public function edit(PeriodeTanam $periodeTanam)
-    {
-        $tanamans = Tanaman::all();
-        return view('periode_tanam.edit', compact('periodeTanam', 'tanamans'));
-    }
-
-    public function update(Request $request, PeriodeTanam $periodeTanam)
-    {
-        $request->validate([
-            'tanaman_id'   => 'required|exists:tanaman,id',
-            'nama_periode' => 'required|string|max:255',
-            'pupuk'        => 'nullable|string', // Keterangan diganti menjadi pupuk
-            'foto'         => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'waktu'        => 'nullable|date',
-            'panjang_daun' => 'nullable|numeric',
-            'lebar_daun'   => 'nullable|numeric',
-        ]);
-
-        $data = $request->only([
-            'tanaman_id',
-            'nama_periode',
-            'pupuk',
-            'panjang_daun',
-            'lebar_daun' // Keterangan diganti menjadi pupuk
-        ]);
-
-        if ($request->hasFile('foto')) {
-            if ($periodeTanam->foto && file_exists(public_path('uploads/foto_periode/' . $periodeTanam->foto))) {
-                unlink(public_path('uploads/foto_periode/' . $periodeTanam->foto));
-            }
-
-            $foto = $request->file('foto');
-            $fotoName = time() . '.' . $foto->getClientOriginalExtension();
-            $foto->move(public_path('uploads/foto_periode'), $fotoName);
-            $data['foto'] = $fotoName;
-        }
-
-        if ($request->filled('waktu')) {
-            $data['tanggal_mulai'] = Carbon::parse($request->waktu);
-        }
-
-        $periodeTanam->update($data);
-
-        return redirect()->route('periode_tanam.index')->with('success', 'Periode Tanam berhasil diperbarui.');
-    }
-
-    public function destroy(PeriodeTanam $periodeTanam)
-    {
-        if ($periodeTanam->foto && file_exists(public_path('uploads/foto_periode/' . $periodeTanam->foto))) {
-            unlink(public_path('uploads/foto_periode/' . $periodeTanam->foto));
-        }
-
-        $periodeTanam->delete();
-
-        return redirect()->route('periode_tanam.index')->with('success', 'Periode Tanam berhasil dihapus.');
-    }
-
-    private function fetchSensorValueFromAntares($device)
-    {
-        $url = "https://platform.antares.id:8443/~/antares-cse/antares-id/{$this->appName}/{$device}/la";
-
-        try {
-            $response = Http::withHeaders([
-                'X-M2M-Origin' => $this->apiKey,
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json'
-            ])->get($url);
-
-            if (!$response->successful()) {
-                return null;
-            }
-
-            $cin = $response['m2m:cin'] ?? null;
-            $value = $cin['con'] ?? null;
-
-            if (is_string($value)) {
-                $value = trim($value, "\"'");
-                $decoded = json_decode($value, true);
-
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    $value = $decoded;
-                }
-            }
-
-            if (is_array($value) && isset($value[$device])) {
-                return floatval($value[$device]);
-            }
-
-            return is_numeric($value) ? floatval($value) : null;
-        } catch (\Exception $e) {
-            return null;
-        }
-    }
-
-    private function adjustValue($device, $value)
-    {
-        if (!is_numeric($value)) return $value;
-
-        $device = strtolower($device);
-
-        $adjustments = [
-            'ph' => 100,
-            'EC' => 100,
-            'humidity' => 10,
-            'moisture' => 10,
-            'temp' => 10,
-        ];
-
-        $integerDevices = ['pota', 'phospor', 'Nitrogen'];
-
-        if (isset($adjustments[$device])) {
-            return $value / $adjustments[$device];
-        } elseif (in_array($device, $integerDevices)) {
-            return (int) $value;
-        }
-
-        return $value;
-    }
-
-    private function formatNumber($value, $device)
-    {
-        if (!is_numeric($value)) return $value;
-
-        $formatted = fmod($value, 1) !== 0.0 ? number_format($value, 2, ',', '.') : number_format($value, 0, ',', '.');
-
-        return match (strtolower($device)) {
-            'ec' => $formatted . ' dS/m',
-            'humidity' => $formatted . ' %',
-            'temp' => $formatted . ' °C',
-            default => $formatted
-        };
-    }
-
-    private function parseNumber($value)
-    {
-        if (is_null($value)) return null;
-        $clean = str_replace(['.', ',', 'dS/m', '%', '°C'], ['', '.', '', '', ''], $value);
-        return is_numeric($clean) ? (float) $clean : null;
+        return response()->download($filePath)->deleteFileAfterSend();
     }
 }

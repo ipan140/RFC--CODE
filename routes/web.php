@@ -25,7 +25,8 @@ use App\Http\Controllers\{
     RiwayatTanamanController,
     PeriodeTanamController,
     DashboardOwnerController,
-    ChartController
+    ChartController,
+    InputanHarianController
 };
 use App\Http\Controllers\ActivityLogController;
 
@@ -76,6 +77,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         'sensor_Nitrogen' => SensorNitrogenController::class,
         'riwayat_tanaman' => RiwayatTanamanController::class,
         'periode_tanam' => PeriodeTanamController::class,
+        'input_harian' => InputanHarianController::class, // Tambahkan resource ini di sini
     ]);
 });
 
@@ -119,6 +121,7 @@ Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->grou
         'sensor_temp' => SensorTempController::class,
         'sensor_humidity' => SensorHumidityController::class,
         'sensor_Nitrogen' => SensorNitrogenController::class,
+        'input_harian' => InputanHarianController::class, // Tambahkan resource ini di sini
     ]);
 });
 /*
@@ -153,6 +156,7 @@ Route::middleware(['auth', 'role:user'])->prefix('user')->name('user.')->group(f
         'sensor_temp' => SensorTempController::class,
         'sensor_humidity' => SensorHumidityController::class,
         'sensor_Nitrogen' => SensorNitrogenController::class,
+        'input_harian' => InputanHarianController::class, // Tambahkan resource ini di sini
     ]);
 });
 
@@ -209,8 +213,10 @@ Route::middleware(['auth', 'role:admin,owner,user'])->group(function () {
     // === Riwayat dan Manajemen Tanam ===
     Route::resource('riwayat_tanaman', RiwayatTanamanController::class);
     Route::get('/riwayat-tanaman/export', [RiwayatTanamanController::class, 'export'])->name('riwayat_tanaman.export');
-    Route::resource('periode_tanam', PeriodeTanamController::class);
+    Route::resource('Periode_tanam', PeriodeTanamController::class);
     Route::resource('tanaman', TanamanController::class);
+    Route::resource('input_harian', InputanHarianController::class);
+    Route::get('/periode_tanam/export', [PeriodeTanamController::class, 'export'])->name('periode_tanam.export');
 });
 
 Route::middleware(['auth'])->group(function () {

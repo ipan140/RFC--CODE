@@ -4,11 +4,11 @@
 @include('partials.sidebar')
 
 <div class="pagetitle">
-    <h1><i class="bi bi-flower1"></i> Data Tanaman</h1>
+    <h1><i class="bi bi-flower1"></i> Periode Tanam</h1>
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="bi bi-house-door-fill"></i> Home</a></li>
-            <li class="breadcrumb-item active">Tanaman</li>
+            <li class="breadcrumb-item active">Periode Tanam</li>
         </ol>
     </nav>
 </div>
@@ -16,7 +16,7 @@
 <section class="section">
     <div class="card shadow-sm">
         <div class="card-body">
-            <h5 class="card-title"><i class="bi bi-leaf"></i> Daftar Tanaman</h5>
+            <h5 class="card-title"><i class="bi bi-leaf"></i> Periode Tanam</h5>
 
             <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#tambahTanamanModal">
                 <i class="bi bi-plus-circle"></i> Tambah Tanaman
