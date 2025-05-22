@@ -39,7 +39,7 @@ class AntaresController extends Controller
         $trafficChart = $this->prepareChartData($results);
         $reportSeries = $this->prepareReportSeries($historyData);
 
-        return view('dashboardadmin.index', [
+        return view('table.index', [
             'data' => $results,
             'chartData' => $trafficChart,
             'reportSeries' => $reportSeries,

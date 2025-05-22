@@ -32,7 +32,6 @@ class ChartController extends Controller
         $results = [];
         $historyData = [];
 
-        // Ambil data dari semua perangkat
         foreach ($this->deviceList as $device) {
             $results[$device] = $this->fetchLatestData($device);
             $historyData[$device] = $this->fetchRecentValues($device);
@@ -43,6 +42,7 @@ class ChartController extends Controller
             'chartData' => $this->prepareChartData($results),
             'reportSeries' => $this->prepareReportSeries($historyData),
             'trafficChartData' => $this->prepareChartData($results),
+            'timeSeriesChart' => $this->prepareTimeSeriesChart($historyData),
         ]);
     }
 
@@ -135,13 +135,13 @@ class ChartController extends Controller
 
         $cinList = $response->json('m2m:cnt.m2m:cin') ?? [];
 
-        return collect(array_slice($cinList, -7)) // Ambil 7 data terakhir
+        return collect(array_slice($cinList, -7))
             ->map(function ($item) use ($device) {
                 $nilai = $this->parseRawValue($device, $item['con'] ?? null);
                 return is_numeric($nilai) ? $this->adjustValue($device, $nilai) : null;
             })
-            ->filter() // Hapus nilai null
-            ->values() // Reset index
+            ->filter()
+            ->values()
             ->toArray();
     }
 
@@ -164,6 +164,37 @@ class ChartController extends Controller
             ['name' => 'pH', 'data' => $historyData['ph'] ?? []],
             ['name' => 'EC', 'data' => $historyData['EC'] ?? []],
             ['name' => 'Soil Moisture', 'data' => $historyData['humidity'] ?? []],
+        ];
+    }
+
+    private function prepareTimeSeriesChart(array $historyDataRaw): array
+    {
+        $series = [];
+        $labels = [];
+
+        $sampleDevice = 'ph';
+        $entries = $this->fetchAllData($sampleDevice);
+
+        $labels = collect($entries)
+            ->sortByDesc('time')
+            ->take(7)
+            ->reverse()
+            ->pluck('time')
+            ->map(fn($time) => Carbon::parse($time)->format('H:i'))
+            ->values()
+            ->toArray();
+
+        foreach ($this->deviceList as $device) {
+            $data = $historyDataRaw[$device] ?? [];
+            $series[] = [
+                'name' => ucfirst($device),
+                'data' => array_map(fn($val) => is_numeric($val) ? round($val, 2) : null, $data),
+            ];
+        }
+
+        return [
+            'labels' => $labels,
+            'series' => $series,
         ];
     }
 

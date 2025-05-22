@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
             ['email' => 'admin@gmail.com'],
             [
                 'name' => 'Admin',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('12345678'),
                 'role' => 'admin',
                 'status' => 1,
                 'profile_picture' => null,
@@ -34,8 +34,23 @@ class UserSeeder extends Seeder
             ['email' => 'owner@gmail.com'],
             [
                 'name' => 'Owner',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('12345678'),
                 'role' => 'owner',
+                'status' => 1,
+                'profile_picture' => null,
+                'api_token' => Str::random(60),
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]
+        );
+
+        // User
+        User::updateOrCreate(
+            ['email' => 'ipanrossi2@gmail.com'],
+            [
+                'name' => 'User',
+                'password' => Hash::make('12345678'),
+                'role' => 'user',
                 'status' => 1,
                 'profile_picture' => null,
                 'api_token' => Str::random(60),

@@ -20,9 +20,16 @@ class Tanaman extends Model
         'status',
     ];
 
+    // Ganti casting jadi timestamp (alias datetime)
     protected $casts = [
-        'tanggal_tanam' => 'date',
+        'tanggal_tanam' => 'datetime',
     ];
+
+    // Optional: accessor untuk format tampilannya
+    public function getTanggalTanamFormattedAttribute()
+    {
+        return $this->tanggal_tanam ? $this->tanggal_tanam->format('d-m-Y H:i:s') : null;
+    }
 
     public function getActivitylogOptions(): LogOptions
     {
