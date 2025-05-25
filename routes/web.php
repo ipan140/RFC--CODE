@@ -26,7 +26,9 @@ use App\Http\Controllers\{
     PeriodeTanamController,
     DashboardOwnerController,
     ChartController,
-    InputanHarianController
+    InputanHarianController,
+    KategoriSampelController,
+    TanamanSampelController
 };
 use App\Http\Controllers\ActivityLogController;
 
@@ -79,6 +81,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         'periode_tanam' => PeriodeTanamController::class,
         'input_harian' => InputanHarianController::class, // Tambahkan resource ini di sini
     ]);
+    Route::resource('kategori_sampel', KategoriSampelController::class);
+    Route::resource('tanaman-sampel', TanamanSampelController::class);
+    Route::get('/kategori-pengamatan/{id}', [TanamanSampelController::class, 'getKategoriPengamatan']);
 });
 
 Route::get('/logaktivitas', [ActivityLogController::class, 'index'])->name('logaktivitas.index');
@@ -123,6 +128,7 @@ Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->grou
         'sensor_Nitrogen' => SensorNitrogenController::class,
         'input_harian' => InputanHarianController::class, // Tambahkan resource ini di sini
     ]);
+    Route::resource('kategori_sampel', KategoriSampelController::class);
 });
 /*
 |--------------------------------------------------------------------------
@@ -158,6 +164,7 @@ Route::middleware(['auth', 'role:user'])->prefix('user')->name('user.')->group(f
         'sensor_Nitrogen' => SensorNitrogenController::class,
         'input_harian' => InputanHarianController::class, // Tambahkan resource ini di sini
     ]);
+    Route::resource('kategori_sampel', KategoriSampelController::class);
 });
 
 Route::middleware(['auth', 'role:admin,owner,user'])->group(function () {
@@ -217,6 +224,9 @@ Route::middleware(['auth', 'role:admin,owner,user'])->group(function () {
     Route::resource('tanaman', TanamanController::class);
     Route::resource('input_harian', InputanHarianController::class);
     Route::get('/periode_tanam/export', [PeriodeTanamController::class, 'export'])->name('periode_tanam.export');
+    Route::resource('kategori_sampel', KategoriSampelController::class);
+    Route::get('/sampel/export', [TanamanSampelController::class, 'export'])->name('sampel.export');
+    Route::get('/sampel', [TanamanSampelController::class, 'index'])->name('sampel.index');
 });
 
 Route::middleware(['auth'])->group(function () {

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Mitra;
+use App\Models\Proyek; // pastikan ini sesuai dengan nama model proyek kamu
 
 class DashboardUserController extends Controller
 {
@@ -28,7 +31,19 @@ class DashboardUserController extends Controller
         $chartData = $this->prepareChartData($results);
         $reportSeries = $this->prepareReportSeries($historyData);
 
-        return view('dashboardadmin.index', compact('results', 'chartData', 'reportSeries'));
+        // Ambil jumlah user, mitra, dan proyek
+        $jumlahUser = User::count();
+        $jumlahUserMitra = Mitra::count();
+        $jumlahProyek = Proyek::count(); // atau set = 0 jika tidak ada
+
+        return view('dashboarduser.index', compact(
+            'results',
+            'chartData',
+            'reportSeries',
+            'jumlahUserMitra',
+            'jumlahProyek',
+            'jumlahUser'
+        ));
     }
 
     private function fetchLatestData($device)

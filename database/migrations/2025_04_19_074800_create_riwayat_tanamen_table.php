@@ -13,11 +13,9 @@ return new class extends Migration
     {
         Schema::create('riwayat_tanaman', function (Blueprint $table) {
             $table->id();
-
             // Foreign key ke tabel tanaman
-            $table->foreignId('tanaman_id')->constrained('tanaman')->onDelete('cascade');
             $table->foreignId('periode_tanam_id')->nullable()->constrained('periode_tanams')->onDelete('set null'); 
-
+            // $table->foreignId('tanaman_id')->constrained('tanaman')->onDelete('cascade');
             $table->string('nama_periode')->nullable();
             $table->dateTime('waktu')->nullable();
             $table->string('pupuk')->nullable();

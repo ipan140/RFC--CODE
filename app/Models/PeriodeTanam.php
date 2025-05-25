@@ -11,43 +11,51 @@ class PeriodeTanam extends Model
 {
     use HasFactory, LogsActivity;
 
+    // Nama tabel yang benar di database
     protected $table = 'periode_tanams';
 
+    // Kolom yang boleh diisi mass assignment
     protected $fillable = [
-        'tanaman_id',
-        'nama_periode',
-        'waktu',
-        'pupuk',
-        'panjang_daun',
-        'lebar_daun',
-        'ph',
-        'pota',
-        'phospor',
-        'EC',
-        'Nitrogen',
-        'humidity',
-        'temp',
-        'foto',
+        'nama_tanaman',
+        'deskripsi',
+        'tanggal_tanam',
+        'status',
     ];
 
+    // Casting atribut tanggal ke objek Carbon (datetime)
+    protected $casts = [
+        'tanggal_tanam' => 'datetime',
+    ];
+
+    // Aksesori custom untuk format tanggal tanam
+    public function getTanggalTanamFormattedAttribute()
+    {
+        return $this->tanggal_tanam ? $this->tanggal_tanam->format('d-m-Y H:i:s') : null;
+    }
+
+    // Relasi ke Sampel (one-to-many)
+    public function sampels()
+    {
+        return $this->hasMany(Sampel::class, 'periode_tanam_id');
+    }
+
+    // Relasi ke Tanaman (many-to-one)
+    public function tanaman()
+    {
+        return $this->belongsTo(Tanaman::class, 'tanaman_id');
+    }
+
+    // Konfigurasi Spatie activity log
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly($this->fillable)
-            ->useLogName('Periodetanam')
-            ->logOnlyDirty()
-            ->setDescriptionForEvent(fn(string $eventName) => "Periode Tanam telah di-{$eventName}");
-    }
-
-    // Relasi: PeriodeTanam milik satu Tanaman
-    public function tanaman()
-    {
-        return $this->belongsTo(Tanaman::class);
-    }
-
-    // Relasi: PeriodeTanam memiliki banyak InputHarian
-    public function inputHarian()
-    {
-        return $this->hasMany(InputHarian::class, 'periode_tanam_id');
+            ->useLogName('periode_tanam')
+            ->logOnly([
+                'nama_tanaman',
+                'deskripsi',
+                'tanggal_tanam',
+                'status',
+            ])
+            ->logOnlyDirty();
     }
 }

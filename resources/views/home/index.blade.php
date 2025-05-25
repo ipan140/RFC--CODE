@@ -24,9 +24,9 @@
             box-sizing: border-box;
             background-color: white;
         }
-        
+
         #services {
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'><path fill='%230099ff' fill-opacity='1' d='M0,128L48,144C96,160,192,192,288,213.3C384,235,480,245,576,234.7C672,224,768,192,864,192C960,192,1056,224,1152,202.7C1248,181,1344,107,1392,69.3L1440,32L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'/></svg>");
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'><path fill='rgb(7, 255, 40)' fill-opacity='1' d='M0,128L48,144C96,160,192,192,288,213.3C384,235,480,245,576,234.7C672,224,768,192,864,192C960,192,1056,224,1152,202.7C1248,181,1344,107,1392,69.3L1440,32L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'/></svg>");
             background-size: cover;
             background-position: bottom;
             background-repeat: no-repeat;
@@ -198,6 +198,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Navbar -->
     @include('Header&footer.header')
@@ -209,7 +210,8 @@
                     <div class="col-md-6 text-center text-md-start">
                         <h1 class="display-4 fw-bold text-green">Selamat Datang di Rooftop Farming Center</h1>
                         <p class="lead fs-4 text-green">Transforming rooftops into sustainable green spaces</p>
-                        <button class="btn btn-primary" id="playVideoBtn" data-bs-toggle="modal" data-bs-target="#videoModal">Tonton Video</button>
+                        <button class="btn btn-primary" id="playVideoBtn" data-bs-toggle="modal"
+                            data-bs-target="#videoModal">Tonton Video</button>
                     </div>
                     <!-- Bagian Gambar -->
                     <div class="col-md-6 text-center">
@@ -229,8 +231,8 @@
                 <div class="modal-content">
                     <div class="modal-body">
                         <div class="ratio ratio-16x9">
-                            <iframe id="youtube-video" src=""
-                                title="YouTube video player" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+                            <iframe id="youtube-video" src="" title="YouTube video player" frameborder="0"
+                                allow="autoplay; encrypted-media" allowfullscreen>
                             </iframe>
                         </div>
                     </div>
@@ -248,12 +250,12 @@
             var videoUrl = "https://www.youtube.com/embed/YItnSlgapmM";
 
             // Saat tombol ditekan, set src iframe
-            playVideoBtn.addEventListener("click", function() {
+            playVideoBtn.addEventListener("click", function () {
                 youtubeVideo.src = videoUrl;
             });
 
             // Saat modal ditutup, reset src agar video berhenti
-            videoModal.addEventListener('hidden.bs.modal', function() {
+            videoModal.addEventListener('hidden.bs.modal', function () {
                 youtubeVideo.src = "";
             });
         </script>
@@ -265,78 +267,55 @@
                         <div class="slide-"></div>
                     </div>
                     <div class="col-md-6">
-                        <h2 class="display-4 fw-bold text-green">Tentang Kami</h2>
-                        <p class="display-4 fw-bold text-green">Kami adalah sebuah pusat pertanian rooftop (rooftop farming center) yang berbasis Internet of Things (IoT). Kami percaya bahwa dengan menggabungkan inovasi pertanian perkotaan dan teknologi IoT, kita dapat mengatasi tantangan pangan dan lingkungan yang dihadapi oleh kota-kota modern.</p>
-                        <p class="display-4 fw-bold text-green">Dengan teknologi IoT yang terintegrasi dalam sistem pertanian rooftop kami, kami dapat secara otomatis memantau dan mengontrol aspek penting seperti irigasi, nutrisi, suhu, dan pencahayaan tanaman. Hal ini memungkinkan kami menciptakan kondisi pertumbuhan yang optimal, meningkatkan produktivitas, dan mengurangi penggunaan sumber daya secara efisien.</p>
-                        <p class="display-4 fw-bold text-green">Komitmen kami tidak hanya terbatas pada pertanian berkelanjutan, tetapi juga pada edukasi dan pelatihan masyarakat tentang manfaat pertanian perkotaan dan teknologi IoT. Dengan demikian, kami ingin meningkatkan kesadaran akan pentingnya memperkuat ketahanan pangan dan menjaga keseimbangan ekosistem di kota-kota masa depan. Bergabunglah dengan kami dalam mengubah cara kita memandang pertanian dan lingkungan perkotaan!</p>
+                        <h2 class="fw-bold text-green" style="font-size: 2rem;">Tentang Kami</h2>
+                        <p class="text-green" style="font-size: 1.1rem; font-weight: 500;">
+                            Kami adalah sebuah pusat pertanian rooftop (rooftop farming center) yang berbasis Internet
+                            of Things (IoT). Kami percaya bahwa dengan menggabungkan inovasi pertanian perkotaan dan
+                            teknologi IoT, kita dapat mengatasi tantangan pangan dan lingkungan yang dihadapi oleh
+                            kota-kota modern.
+                        </p>
+                        <p class="text-green" style="font-size: 1.1rem; font-weight: 500;">
+                            Dengan teknologi IoT yang terintegrasi dalam sistem pertanian rooftop kami, kami dapat
+                            secara otomatis memantau dan mengontrol aspek penting seperti irigasi, nutrisi, suhu, dan
+                            pencahayaan tanaman. Hal ini memungkinkan kami menciptakan kondisi pertumbuhan yang optimal,
+                            meningkatkan produktivitas, dan mengurangi penggunaan sumber daya secara efisien.
+                        </p>
+                        <p class="text-green" style="font-size: 1.1rem; font-weight: 500;">
+                            Komitmen kami tidak hanya terbatas pada pertanian berkelanjutan, tetapi juga pada edukasi
+                            dan pelatihan masyarakat tentang manfaat pertanian perkotaan dan teknologi IoT. Dengan
+                            demikian, kami ingin meningkatkan kesadaran akan pentingnya memperkuat ketahanan pangan dan
+                            menjaga keseimbangan ekosistem di kota-kota masa depan. Bergabunglah dengan kami dalam
+                            mengubah cara kita memandang pertanian dan lingkungan perkotaan!
+                        </p>
                     </div>
                 </div>
             </div>
         </section>
+
 
         <!-- Services Section -->
         <section id="services" class="py-5 bg-services">
             <div class="container">
-                <h2 class="text-center mb-5">PROJEK</h2>
+                <h2 class="text-center mb-5">PROYEK</h2>
                 <div class="row">
-                    <!-- Budi Daya Tanaman Anggur -->
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card slide-right">
-                            <img src="asset/image/pohonanggur.jpg" alt="Budi Daya Anggur" class="card-img-top">
-                            <div class="card-body">
-                                <h5 class="card-title text-uppercase">Budi Daya Tanaman Anggur</h5>
-                                <p class="card-text">
-                                    Anggur ditanam pada rooftop dengan teknologi IoT, memungkinkan penyiraman dan
-                                    perawatan otomatis.
-                                </p>
+                    @foreach ($proyeks as $index => $proyek)
+                        <div class="col-md-6 col-lg-3 mb-4">
+                            <div class="card {{ $index % 2 == 0 ? 'slide-right' : 'slide-left' }}">
+                                <img src="{{ $proyek->foto_proyek ? asset('storage/' . $proyek->foto_proyek) : asset('asset/image/default.jpg') }}"
+                                    alt="{{ $proyek->nama }}" class="card-img-top">
+                                <div class="card-body">
+                                    <h5 class="card-title text-uppercase">{{ $proyek->nama }}</h5>
+                                    <p class="card-text">
+                                        {{ Str::limit($proyek->deskripsi, 150) }}
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Smart Green House Melon -->
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card slide-left">
-                            <img src="asset/image/goldenmelon.jpg" alt="Smart Green House Melon" class="card-img-top">
-                            <div class="card-body">
-                                <h5 class="card-title text-uppercase">Smart Green House untuk Melon</h5>
-                                <p class="card-text">
-                                    Melon ditanam di Smart Green House berbasis IoT. "Golden Melon" adalah varietas
-                                    unggulan yang kami kembangkan.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Budi Daya Pohon Jeruk & Pepaya -->
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card slide-right">
-                            <img src="asset/image/pohonjeruk.jpg" alt="Budi Daya Jeruk & Pepaya" class="card-img-top">
-                            <div class="card-body">
-                                <h5 class="card-title text-uppercase">Budidaya Pohon Jeruk & Pepaya</h5>
-                                <p class="card-text">
-                                    Tanaman jeruk dan pepaya dibudidayakan di Smart Rooftop Kampus Telkom Surabaya untuk
-                                    penelitian dan inovasi IoT.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Budi Daya Pohon Pisang & Mangga -->
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card slide-left">
-                            <img src="asset/image/pohonpisang.jpg" alt="Budi Daya Pisang & Mangga" class="card-img-top">
-                            <div class="card-body">
-                                <h5 class="card-title text-uppercase">Budidaya Pohon Pisang & Mangga</h5>
-                                <p class="card-text">
-                                    Pohon pisang tumbuh di dekat "Smart Pond", kolam ikan otomatis berbasis IoT. Pohon
-                                    mangga juga mulai berbuah dengan baik.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
             </div>
         </section>
+
 
         <!-- mitra section -->
         <section id="mitra" class="py-5">
@@ -344,25 +323,21 @@
                 <h2>MITRA</h2>
                 <div class="row">
                     @foreach($mitras as $mitra)
-                    <div class="col-md-4">
-                        <div class="card mb-4">
-                            <div class="video-container2">
-                                <video autoplay muted loop>
-                                    <source src="{{ asset('asset/video/default.mp4') }}" type="video/mp4">
-                                    Your browser does not support the video tag.
-                                </video>
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title">{{ $mitra->nama }}</h5>
-                                <p class="card-text">{{ $mitra->lokasi }}</p>
-                                <p class="card-text">{{ $mitra->email }}</p>
-                                <p class="card-text">{{ $mitra->telepon }}</p>
-                                @if($mitra->foto_mitra)
-                                <img src="{{ asset('storage/' . $mitra->foto_mitra) }}" class="img-fluid mt-2" alt="Foto Mitra">
-                                @endif
+                        <div class="col-md-4">
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    @if($mitra->foto_mitra)
+                                        <img src="{{ asset('storage/' . $mitra->foto_mitra) }}" class="img-fluid mt-2"
+                                            alt="Foto Mitra">
+                                    @endif
+                                    <h5 class="card-title">{{ $mitra->nama }}</h5>
+                                    <p class="card-text">{{ $mitra->lokasi }}</p>
+                                    <p class="card-text">{{ $mitra->email }}</p>
+                                    <p class="card-text">{{ $mitra->telepon }}</p>
+                                    
+                                </div>
                             </div>
                         </div>
-                    </div>
                     @endforeach
                 </div>
             </div>
@@ -377,7 +352,8 @@
                     <div class="col-md-5">
                         <div class="contact-info">
                             <h2>Contact Info</h2>
-                            <p>Praesent sapien massa, convallis a pellentesque nec, egestas non nisi. Vestibulum ante ipsum primis.</p>
+                            <p>Praesent sapien massa, convallis a pellentesque nec, egestas non nisi. Vestibulum ante
+                                ipsum primis.</p>
 
                             <div class="info-item">
                                 <i class="bi bi-geo-alt"></i>
@@ -409,7 +385,8 @@
                     <div class="col-md-7">
                         <div class="card p-4">
                             <h2 class="text-center mb-4">Get In Touch</h2>
-                            <p class="text-center">Praesent sapien massa, convallis a pellentesque nec, egestas non nisi. Vestibulum ante ipsum primis.</p>
+                            <p class="text-center">Praesent sapien massa, convallis a pellentesque nec, egestas non
+                                nisi. Vestibulum ante ipsum primis.</p>
                             <form>
                                 <div class="row mb-3">
                                     <div class="col-md-6">
@@ -432,7 +409,9 @@
                 </div>
             </div>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
-                <path fill="#28a745" fill-opacity="1" d="M0,128L40,138.7C80,149,160,171,240,165.3C320,160,400,128,480,112C560,96,640,96,720,122.7C800,149,880,203,960,202.7C1040,203,1120,149,1200,133.3C1280,117,1360,139,1400,149.3L1440,160L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z"></path>
+                <path fill="#28a745" fill-opacity="1"
+                    d="M0,128L40,138.7C80,149,160,171,240,165.3C320,160,400,128,480,112C560,96,640,96,720,122.7C800,149,880,203,960,202.7C1040,203,1120,149,1200,133.3C1280,117,1360,139,1400,149.3L1440,160L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z">
+                </path>
             </svg>
         </section>
         @extends('Header&footer.footer')
@@ -443,7 +422,7 @@
         <script src="js/script.js"></script>
 
         <script>
-            document.addEventListener("DOMContentLoaded", function() {
+            document.addEventListener("DOMContentLoaded", function () {
                 const themeSwitch = document.getElementById("theme-switch");
                 const body = document.body;
                 const navbar = document.querySelector(".navbar");
@@ -459,7 +438,7 @@
                     footer.classList.add("footer-light"); // Default ke putih
                 }
 
-                themeSwitch.addEventListener("click", function() {
+                themeSwitch.addEventListener("click", function () {
                     if (body.classList.contains("darkmode")) {
                         body.classList.remove("darkmode");
                         navbar.classList.remove("darkmode-navbar");
