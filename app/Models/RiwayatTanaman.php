@@ -13,7 +13,7 @@ class RiwayatTanaman extends Model
 
     protected $fillable = [
         'tanaman_id',
-        'periode_tanam_id', // tambahkan ini
+        'periode_tanam_id',
         'nama_periode',
         'waktu',
         'pupuk',
@@ -34,8 +34,8 @@ class RiwayatTanaman extends Model
         return $this->belongsTo(Tanaman::class);
     }
 
-    public function InputHarian()
+    public function periode()
     {
-        return $this->belongsTo(PeriodeTanam::class);
+        return $this->belongsTo(PeriodeTanam::class, 'periode_tanam_id');
     }
 }

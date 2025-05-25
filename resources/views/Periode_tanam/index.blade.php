@@ -1,116 +1,208 @@
 @extends('partials.headerFooter')
-
 @section('content')
-    @include('partials.sidebar')
+@include('partials.sidebar')
 
-    <div class="pagetitle d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h1><i class="bi bi-calendar-plus"></i> Periodde Tanam</h1>
-            <nav>
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/"><i class="bi bi-house-door-fill"></i> Home</a></li>
-                    <li class="breadcrumb-item active">Preiode Tanam</li>
-                </ol>
-            </nav>
-        </div>
-    </div>
+<div class="pagetitle">
+    <h1><i class="bi bi-calendar3"></i> Periode Tanam</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/"><i class="bi bi-house-door-fill"></i> Home</a></li>
+            <li class="breadcrumb-item active">Periode Tanam</li>
+        </ol>
+    </nav>
+</div>
 
-    <section class="section">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h5 class="card-title mb-3"><i class="bi bi-list-ul"></i> Periode tanam</h5>
+<section class="section">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title"><i class="bi bi-calendar3"></i> Data Periode Tanam</h5>
 
-                <div class="d-flex justify-content-start align-items-center mb-3 flex-wrap gap-2">
-                    <form method="GET" action="{{ route('periode_tanam.index') }}"
-                        class="d-flex align-items-center gap-2 flex-wrap">
-                        <a href="{{ route('periode_tanam.export', request()->all()) }}" class="btn btn-success">
-                            <i class="bi bi-download"></i> Export Data
-                        </a>
-                        <!-- Filter Tanaman -->
-                            {{-- <select name="filter_tanaman_id" class="form-select w-auto">
-                                <option value="">-- Semua Tanaman --</option>
-                                @foreach ($tanamans as $tanaman)
-                                    <option value="{{ $tanaman->id }}" {{ request('filter_tanaman_id') == $tanaman->id ? 'selected' : '' }}>
-                                        {{ $tanaman->nama_tanaman }}
-                                    </option>
-                                @endforeach
-                            </select> --}}
-                        <!-- Filter Tanggal Mulai -->
-                        <input type="date" name="tanggal_mulai" class="form-control w-auto"
-                            value="{{ request('tanggal_mulai') }}">
+            <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#tambahPeriodeModal">
+                <i class="bi bi-plus-circle"></i> Tambah Periode
+            </button>
 
-                        <!-- Filter Tanggal Akhir -->
-                        <input type="date" name="tanggal_akhir" class="form-control w-auto"
-                            value="{{ request('tanggal_akhir') }}">
-
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-funnel-fill"></i> Filter
-                        </button>
-                        <a href="{{ route('riwayat_tanaman.index') }}" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-counterclockwise"></i> Reset
-                        </a>
-                    </form>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped text-center align-middle">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>#</th>
-                                <th>Nama Tanaman</th>
-                                <th>Nama Periode</th>
-                                <th>Waktu</th>
-                                <th>Pupuk</th>
-                                <th>Panjang Daun</th>
-                                <th>Lebar Daun</th>
-                                <th>pH</th>
-                                <th>Potasium</th>
-                                <th>Phospor</th>
-                                <th>EC</th>
-                                <th>Nitrogen</th>
-                                <th>Humidity</th>
-                                <th>Suhu</th>
-                                <th>Foto</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($inputHarians as $inputHarian)
-                                <tr>
-                                    <td>{{ $loop->iteration + ($inputHarians->currentPage() - 1) * $inputHarians->perPage() }}</td>
-                                    <td>{{ $inputHarian->tanaman->nama_tanaman ?? '-' }}</td>
-                                    <td>{{ $inputHarian->nama_periode ?? '-' }}</td>
-                                    <td>{{ $inputHarian->waktu ?? '-' }}</td>
-                                    <td>{{ $inputHarian->pupuk ?? '-' }}</td>
-                                    <td>{{ $inputHarian->panjang_daun ?? '-' }}</td>
-                                    <td>{{ $inputHarian->lebar_daun ?? '-' }}</td>
-                                    <td>{{ $inputHarian->ph ?? '-' }}</td>
-                                    <td>{{ $inputHarian->pota ?? '-' }}</td>
-                                    <td>{{ $inputHarian->phospor ?? '-' }}</td>
-                                    <td>{{ $inputHarian->EC ?? '-' }}</td>
-                                    <td>{{ $inputHarian->Nitrogen ?? '-' }}</td>
-                                    <td>{{ $inputHarian->humidity ?? '-' }}</td>
-                                    <td>{{ $inputHarian->temp ?? '-' }}</td>
-                                    <td>
-                                        @if ($inputHarian->foto)
-                                            <img src="{{ asset('uploads/foto_periode/' . $inputHarian->foto) }}" alt="Foto Periode"
-                                                class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
-                                        @else
-                                            <span class="text-muted">-</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="15" class="text-center">Belum ada data periode tanam.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                    <div class="mt-3">
-                        {{ $inputHarians->withQueryString()->links() }}
+            {{-- Modal Tambah --}}
+            <div class="modal fade" id="tambahPeriodeModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form action="{{ route('periode_tanam.store') }}" method="POST">
+                            @csrf
+                            <div class="modal-header bg-success text-white">
+                                <h5 class="modal-title">Tambah Periode Tanam</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Nama Tanaman</label>
+                                    <input type="text" name="nama_tanaman" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Deskripsi</label>
+                                    <textarea name="deskripsi" class="form-control" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Tanggal Tanam</label>
+                                    <input type="date" name="tanggal_tanam" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Status</label>
+                                    <select name="status" class="form-control" required>
+                                        <option value="on going">On Going</option>
+                                        <option value="selesai">Selesai</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-success">Simpan</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
+
+            {{-- Tabel --}}
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered align-middle">
+                    <thead class="table-dark text-center">
+                        <tr>
+                            <th>#</th>
+                            <th>Nama Tanaman</th>
+                            <th>Deskripsi</th>
+                            <th>Tanggal Tanam</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($periodeTanams as $index => $periode)
+                        <tr>
+                            <td class="text-center">{{ $periodeTanams->firstItem() + $index }}</td>
+                            <td>{{ $periode->nama_tanaman }}</td>
+                            <td>{{ $periode->deskripsi }}</td>
+                            <td class="text-center">
+                                {{ \Carbon\Carbon::parse($periode->tanggal_tanam)->format('Y-m-d') }}
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-{{ $periode->status == 'on going' ? 'success' : 'secondary' }}">
+                                    {{ ucfirst($periode->status) }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#detailModal{{ $periode->id }}">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ $periode->id }}">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $periode->id }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+
+                        {{-- Modal Detail --}}
+                        <div class="modal fade" id="detailModal{{ $periode->id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Detail Periode Tanam</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p><strong>Nama:</strong> {{ $periode->nama_tanaman }}</p>
+                                        <p><strong>Deskripsi:</strong> {{ $periode->deskripsi }}</p>
+                                        <p><strong>Tanggal Tanam:</strong>
+                                            {{ \Carbon\Carbon::parse($periode->tanggal_tanam)->format('d-m-Y') }}
+                                        </p>
+                                        <p><strong>Status:</strong> {{ ucfirst($periode->status) }}</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Modal Edit --}}
+                        <div class="modal fade" id="editModal{{ $periode->id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form action="{{ route('periode_tanam.update', $periode->id) }}" method="POST">
+                                        @csrf
+                                        @method('PUT')
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Edit Periode Tanam</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label class="form-label">Nama Tanaman</label>
+                                                <input type="text" name="nama_tanaman" class="form-control" value="{{ $periode->nama_tanaman }}" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Deskripsi</label>
+                                                <textarea name="deskripsi" class="form-control" required>{{ $periode->deskripsi }}</textarea>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Tanggal Tanam</label>
+                                                <input type="date" name="tanggal_tanam" class="form-control" value="{{ \Carbon\Carbon::parse($periode->tanggal_tanam)->format('Y-m-d') }}" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Status</label>
+                                                <select name="status" class="form-control" required>
+                                                    <option value="on going" {{ $periode->status == 'on going' ? 'selected' : '' }}>On Going</option>
+                                                    <option value="selesai" {{ $periode->status == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                            <button type="submit" class="btn btn-primary">Simpan</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Modal Hapus --}}
+                        <div class="modal fade" id="deleteModal{{ $periode->id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-danger text-white">
+                                        <h5 class="modal-title">Konfirmasi Hapus</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Yakin ingin menghapus periode tanam <strong>{{ $periode->nama_tanaman }}</strong>?</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <form action="{{ route('periode_tanam.destroy', $periode->id) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                            <button type="submit" class="btn btn-danger">Hapus</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        @empty
+                        <tr>
+                            <td colspan="6" class="text-center">Belum ada data periode tanam.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- Pagination --}}
+            <div class="mt-3">
+                {{ $periodeTanams->withQueryString()->links('pagination::bootstrap-5') }}
+            </div>
+
         </div>
-    </section>
+    </div>
+</section>
 @endsection

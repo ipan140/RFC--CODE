@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Mitra;
+use App\Models\Proyek; // pastikan ini sesuai dengan nama model proyek kamu
+
 
 class DashboardAdminController extends Controller
 {
@@ -12,7 +16,13 @@ class DashboardAdminController extends Controller
     protected $appName = 'interest';
 
     protected $deviceList = [
-        'ph', 'pota', 'phospor', 'EC', 'Nitrogen', 'humidity', 'temp'
+        'ph',
+        'pota',
+        'phospor',
+        'EC',
+        'Nitrogen',
+        'humidity',
+        'temp'
     ];
 
     public function index()
@@ -28,9 +38,20 @@ class DashboardAdminController extends Controller
         $chartData = $this->prepareChartData($results);
         $reportSeries = $this->prepareReportSeries($historyData);
 
-        return view('dashboardadmin.index', compact('results', 'chartData', 'reportSeries'));
-    }
+        // Ambil jumlah user, mitra, dan proyek
+        $jumlahUser = User::count();
+        $jumlahUserMitra = Mitra::count();
+        $jumlahProyek = Proyek::count(); // atau set = 0 jika tidak ada
 
+        return view('dashboardadmin.index', compact(
+            'results',
+            'chartData',
+            'reportSeries',
+            'jumlahUserMitra',
+            'jumlahProyek',
+            'jumlahUser'
+        ));
+    }
     private function fetchLatestData($device)
     {
         $url = "https://platform.antares.id:8443/~/antares-cse/antares-id/{$this->appName}/{$device}/la";

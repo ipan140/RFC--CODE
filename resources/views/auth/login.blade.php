@@ -10,7 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     :root {
-      --accent-color: #8672FF;
+      --accent-color: #28a745;
       --base-color: #fff;
       --text-color: #2E2B41;
       --input-color: #F3F0FF;
@@ -193,7 +193,7 @@
       </div>
       <button type="submit">Login</button>
     </form>
-
+<br>
     <p>Belum punya akun? <a href="{{ route('register') }}">Daftar sekarang</a></p>
   </div>
 

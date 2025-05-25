@@ -64,10 +64,9 @@
           I agree all statements in Terms of service
         </div>
       </div>
-
       <button type="submit">Register</button>
     </form>
-
+<br>
     <p>Sudah punya akun? <a href="{{ route('login') }}">Login</a></p>
   </div>
 </body>
@@ -78,7 +77,7 @@
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;900&display=swap');
 
   :root {
-    --accent-color: #8672FF;
+    --accent-color: #28a745;
     --base-color: #fff;
     --text-color: #2E2B41;
     --input-color: #F3F0FF;

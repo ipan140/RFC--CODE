@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             TanamanSeeder::class,
             ProyekSeeder::class,
             MitraSeeder::class,
+            PeriodeTanamSeeder::class,
         ]);
     }
 }

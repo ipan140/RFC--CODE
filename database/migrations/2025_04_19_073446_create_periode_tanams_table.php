@@ -10,21 +10,11 @@ return new class extends Migration
     {
         Schema::create('periode_tanams', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tanaman_id')->constrained('tanaman')->onDelete('cascade');
-            $table->string('nama_periode');
-            $table->timestamp('waktu');  
-            $table->text('pupuk')->nullable();
-            $table->float('panjang_daun')->nullable();        // Panjang daun (dalam cm)
-            $table->float('lebar_daun')->nullable();          // Lebar daun (dalam cm)
-            $table->string('foto')->nullable(); // Menyimpan nama file foto
-            $table->float('ph')->nullable();
-            $table->float('pota')->nullable();
-            $table->float('phospor')->nullable();
-            $table->float('EC')->nullable();
-            $table->float('Nitrogen')->nullable();
-            $table->float('humidity')->nullable();
-            $table->float('temp')->nullable();
-            $table->timestamps();
+            $table->string('nama_tanaman');
+            $table->text('deskripsi')->nullable();
+            $table->timestamp('tanggal_tanam')->nullable(); // ubah date ke timestamp nullable
+            $table->enum('status', ['on going', 'selesai'])->default('on going');
+            $table->timestamps(); // created_at & updated_at
         });
     }
 
