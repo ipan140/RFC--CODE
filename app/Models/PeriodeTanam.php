@@ -44,6 +44,10 @@ class PeriodeTanam extends Model
     {
         return $this->belongsTo(Tanaman::class, 'tanaman_id');
     }
+    public function kategoriSampels()
+    {
+        return $this->hasMany(KategoriSampel::class);
+    }
 
     // Konfigurasi Spatie activity log
     public function getActivitylogOptions(): LogOptions

@@ -15,10 +15,11 @@
         </div>
     </div>
 
+    <!-- Tabel Daftar Periode Tanam -->
     <section class="section">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h5 class="card-title mb-3"><i class="bi bi-list-ul"></i> Tanaman</h5>
+                <h5 class="card-title mb-3"><i class="bi bi-list-ul"></i> Daftar Periode Tanam</h5>
 
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped text-center align-middle">
@@ -27,7 +28,8 @@
                                 <th>#</th>
                                 <th>Nama Tanaman</th>
                                 <th>Status</th>
-                                <th>Sampel</th>
+                                <th>Jumlah Sampel</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -36,38 +38,48 @@
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $periode->nama_tanaman ?? '-' }}</td>
                                     <td>
-                                        @if ($periode->status === 'On going')
+                                        @php
+                                            $status = strtolower($periode->status);
+                                        @endphp
+                                        @if ($status === 'on going')
                                             <span class="badge bg-success">On going</span>
-                                        @elseif ($periode->status === 'Selesai')
+                                        @elseif ($status === 'selesai')
                                             <span class="badge bg-secondary">Selesai</span>
                                         @else
-                                            <span class="badge bg-warning">Tidak diketahui</span>
+                                            <span class="badge bg-warning text-dark">Tidak diketahui</span>
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="{{ route('sampel.index', ['periode_tanam_id' => $periode->id]) }}" class="btn btn-info btn-sm">
-                                            <i class="bi bi-eye-fill"></i> Sampel
-                                        </a>
-                                        <a href="{{ route('kategori_sampel.index', ['periode_tanam_id' => $periode->id]) }}" class="btn btn-success btn-sm">
+                                        <span class="badge bg-primary">
+                                            {{ $periode->kategori_sampels_count ?? 0 }} Sampel
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {{-- <a href="{{ route('sampel.index', ['periode_tanam_id' => $periode->id]) }}" class="btn btn-info btn-sm mb-1">
+                                            <i class="bi bi-eye-fill"></i> Lihat Sampel
+                                        </a> --}}
+                                        <a href="{{ route('kategori_sampel.index', ['periode_tanam_id' => $periode->id]) }}" class="btn btn-success btn-sm mb-1">
                                             <i class="bi bi-plus-circle-fill"></i> Tambah Sampel
                                         </a>
-                                        <a href="{{ route('input_harian.index', ['periode_tanam_id' => $periode->id]) }}" class="btn btn-success btn-sm">
-                                            <i class="bi bi-plus-circle-fill"></i> Tambah Harian
+                                        <a href="{{ route('input_harian.index', ['periode_tanam_id' => $periode->id]) }}" class="btn btn-primary btn-sm mb-1">
+                                            <i class="bi bi-journal-plus"></i> Input Harian
                                         </a>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="text-center">Belum ada data periode tanam.</td>
+                                    <td colspan="5" class="text-center text-muted">Belum ada data periode tanam.</td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
+                </div>
 
+                @if ($inputHarians->hasPages())
                     <div class="mt-3">
                         {{ $inputHarians->withQueryString()->links() }}
                     </div>
-                </div>
+                @endif
             </div>
         </div>
     </section>

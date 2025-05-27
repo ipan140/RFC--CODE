@@ -14,7 +14,6 @@ class RiwayatTanamanController extends Controller
     {
         $query = InputHarian::with('periode');
 
-        // Filter logika...
         if ($request->filled('filter_periode_id')) {
             $query->where('periode_tanam_id', $request->filter_periode_id);
         }
@@ -25,23 +24,26 @@ class RiwayatTanamanController extends Controller
 
         if ($request->filled('tanggal_akhir')) {
             $query->whereDate('waktu', '<=', $request->tanggal_akhir);
+        }
+
+        // 🔽 Tambahkan filter kategori jika dipilih
+        if ($request->filled('kategori')) {
+            $query->where('kategori', $request->kategori);
         }
 
         $inputHarians = $query->orderBy('waktu', 'desc')->paginate(10);
-
-        // ✅ Pastikan ini ada:
         $periodeTanams = PeriodeTanam::all();
 
-        return view('riwayat_tanaman.index', compact('inputHarians', 'periodeTanams'));
-    }
+        // 🔽 List kategori untuk dropdown (bisa juga dari DB jika dinamis)
+        $kategoriList = ['daun', 'tanah', 'air', 'udara'];
 
+        return view('riwayat_tanaman.index', compact('inputHarians', 'periodeTanams', 'kategoriList'));
+    }
 
     public function export(Request $request)
     {
-        // Ambil data dengan relasi periode tanam
         $query = InputHarian::with('periode');
 
-        // Filter berdasarkan periode tanam (bukan tanaman)
         if ($request->filled('filter_periode_id')) {
             $query->where('periode_tanam_id', $request->filter_periode_id);
         }
@@ -52,6 +54,11 @@ class RiwayatTanamanController extends Controller
 
         if ($request->filled('tanggal_akhir')) {
             $query->whereDate('waktu', '<=', $request->tanggal_akhir);
+        }
+
+        // 🔽 Tambahkan filter kategori ke ekspor
+        if ($request->filled('kategori')) {
+            $query->where('kategori', $request->kategori);
         }
 
         $input_harians = $query->orderBy('waktu', 'desc')->get();
@@ -60,14 +67,13 @@ class RiwayatTanamanController extends Controller
             return back()->with('error', 'Tidak ada data untuk diekspor.');
         }
 
-        // Buat file CSV
         $filePath = storage_path('app/public/riwayat_tanam.csv');
         $writer = SimpleExcelWriter::create($filePath);
 
-        // Header CSV
         $writer->addRow([
             'Nama Tanaman',
             'Nama Periode',
+            'Kategori',
             'Waktu',
             'Pupuk',
             'Panjang Daun',
@@ -81,11 +87,11 @@ class RiwayatTanamanController extends Controller
             'Suhu',
         ]);
 
-        // Data baris
         foreach ($input_harians as $inputHarian) {
             $writer->addRow([
                 $inputHarian->periode->nama_tanaman ?? '-',
                 $inputHarian->periode->nama_periode ?? '-',
+                $inputHarian->kategori ?? '-', // Tambahkan kolom kategori di CSV
                 $inputHarian->waktu ?? '-',
                 $inputHarian->pupuk ?? '-',
                 $inputHarian->panjang_daun ?? '-',
@@ -100,7 +106,6 @@ class RiwayatTanamanController extends Controller
             ]);
         }
 
-        // Unduh dan hapus setelah dikirim
         return response()->download($filePath)->deleteFileAfterSend();
     }
 }

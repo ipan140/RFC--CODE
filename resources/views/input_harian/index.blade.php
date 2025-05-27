@@ -81,9 +81,7 @@
                                     <td>{{ $inputHarian->pota ?? '-' }}</td>
                                     <td>
                                         @if ($inputHarian->foto)
-                                            <img src="{{ asset('uploads/foto_periode/' . $inputHarian->foto) }}"
-                                                alt="Foto Periode" class="rounded"
-                                                style="width: 60px; height: 60px; object-fit: cover;">
+                                            <img src="{{ asset('storage/' . $inputHarian->foto) }}" alt="Foto Sampel" style="max-width: 200px;">
                                         @else
                                             <span class="text-muted">-</span>
                                         @endif
@@ -145,7 +143,7 @@
                                                         <li class="list-group-item">
                                                             <strong>Foto:</strong><br>
                                                             @if ($inputHarian->foto)
-                                                                <img src="{{ asset('uploads/foto_periode/' . $inputHarian->foto) }}" alt="Foto" class="img-fluid mt-2 rounded" style="max-width: 300px;">
+                                                                <img src="{{ asset('storage/' . $inputHarian->foto) }}" alt="Foto" class="img-fluid mt-2 rounded" style="max-width: 300px;">
                                                             @else
                                                                 Tidak ada foto.
                                                             @endif
@@ -177,17 +175,15 @@
                                                 <div class="modal-body row g-3">
                                                     <div class="col-md-6">
                                                         <label>Tanaman</label>
-                                                        <select name="filter_tanaman_id" class="form-select w-auto">
-                                                            <option value="">-- Semua Tanaman --</option>
+                                                        <select name="periode_tanam_id" class="form-select" required>
+                                                            <option value="">-- Pilih Periode Tanam --</option>
                                                             @foreach ($periodeTanams as $periode)
-                                                                <option value="{{ $periode->id }}" {{ request('filter_tanaman_id') == $periode->id ? 'selected' : '' }}>
-                                                                    {{ $periode->nama_tanaman ?? 'Tanaman Tidak Diketahui' }} - 
-                                                                    {{ \Carbon\Carbon::parse($periode->tanggal_tanam)->format('d M Y') }}
+                                                                <option value="{{ $periode->id }}" {{ request('periode_tanam_id') == $periode->id ? 'selected' : '' }}>
+                                                                    {{ $periode->nama_tanaman ?? 'Tanaman Tidak Diketahui' }}
                                                                 </option>
                                                             @endforeach
                                                         </select>
                                                     </div>
-
                                                     <div class="col-md-6">
                                                         <label>Waktu</label>
                                                         <input type="datetime-local" class="form-control" 
@@ -319,12 +315,11 @@
                     <div class="modal-body row g-3">
                         <div class="col-md-6">
                             <label for="periode_tanam_id" class="form-label">Periode Tanam</label>
-                            <select name="periode_tanam_id" class="form-select w-auto" required>
+                            <select name="periode_tanam_id" class="form-select" required>
                                 <option value="">-- Pilih Periode Tanam --</option>
                                 @foreach ($periodeTanams as $periode)
-                                    <option value="{{ $periode->id }}" {{ old('periode_tanam_id') == $periode->id ? 'selected' : '' }}>
-                                        {{ $periode->nama_tanaman ?? 'Tanaman Tidak Diketahui' }} - 
-                                        {{ \Carbon\Carbon::parse($periode->tanggal_tanam)->format('d M Y') }}
+                                    <option value="{{ $periode->id }}" {{ request('periode_tanam_id') == $periode->id ? 'selected' : '' }}>
+                                        {{ $periode->nama_tanaman ?? 'Tanaman Tidak Diketahui' }}
                                     </option>
                                 @endforeach
                             </select>
