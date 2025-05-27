@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\InputHarian;
 use App\Models\PeriodeTanam;
 use App\Models\KategoriSampel;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
@@ -97,11 +98,23 @@ class InputanHarianController extends Controller
             }
         }
 
+        // Proses upload foto ke storage/app/public/uploads/[nama_tanaman]
         if ($request->hasFile('foto')) {
+            $periode = PeriodeTanam::find($request->periode_tanam_id);
+            $namaFolder = strtolower(str_replace(' ', '_', $periode->nama_tanaman)); // contoh: cabai_merah
+
+            // Ambil nama kategori dari database berdasarkan ID
+            $kategori = KategoriSampel::find($request->kategori_sampel_id);
+            $kategoriSampel = $kategori ? strtolower(str_replace(' ', '_', $kategori->nama)) : 'umum'; // contoh: sampel_1
+
             $foto = $request->file('foto');
-            $fotoName = time() . '.' . $foto->getClientOriginalExtension();
-            $foto->move(public_path('uploads/foto_periode'), $fotoName);
-            $data['foto'] = $fotoName;
+            $fotoName = time() . '_' . $foto->getClientOriginalName();
+
+            // Simpan file ke: storage/app/public/uploads/cabai_merah/sampel_1
+            $foto->storeAs("public/uploads/$namaFolder/$kategoriSampel", $fotoName);
+
+            // Simpan path relatif untuk digunakan di asset()
+            $data['foto'] = "uploads/$namaFolder/$kategoriSampel/$fotoName";
         }
 
         // Simpan ke database
@@ -112,6 +125,7 @@ class InputanHarianController extends Controller
             return back()->withErrors(['error' => 'Gagal menyimpan: ' . $e->getMessage()]);
         }
     }
+
 
     public function show(InputHarian $periodeTanam)
     {
@@ -128,35 +142,78 @@ class InputanHarianController extends Controller
     public function update(Request $request, InputHarian $input_harian)
     {
         $request->validate([
-            'periode_tanam_id' => 'nullable|exists:periode_tanam,id',
+            'periode_tanam_id' => 'required|exists:periode_tanams,id',
+            'kategori_sampel_id' => 'required|exists:kategori_sampel,id',
             'pupuk' => 'nullable|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'waktu' => 'nullable|date',
             'panjang_daun' => 'nullable|numeric',
             'lebar_daun' => 'nullable|numeric',
+            'ph' => 'nullable|numeric',
+            'pota' => 'nullable|numeric',
+            'phospor' => 'nullable|numeric',
+            'EC' => 'nullable|numeric',
+            'Nitrogen' => 'nullable|numeric',
+            'humidity' => 'nullable|numeric',
+            'temp' => 'nullable|numeric',
         ]);
 
-        $data = $request->only(['periode_tanam_id', 'pupuk', 'panjang_daun', 'lebar_daun']);
+        $mapping = [
+            'ph' => 'ph',
+            'pota' => 'pota',
+            'phospor' => 'phospor',
+            'EC' => 'EC',
+            'Nitrogen' => 'Nitrogen',
+            'humidity' => 'humidity',
+            'temp' => 'temp',
+        ];
 
-        if ($request->hasFile('foto')) {
-            if ($input_harian->foto && file_exists(public_path('uploads/foto_periode/' . $input_harian->foto))) {
-                unlink(public_path('uploads/foto_periode/' . $input_harian->foto));
+        $data = $request->only([
+            'periode_tanam_id',
+            'kategori_sampel_id',
+            'pupuk',
+            'panjang_daun',
+            'lebar_daun',
+        ]);
+
+        $data['waktu'] = $request->filled('waktu') ? Carbon::parse($request->waktu) : Carbon::now();
+
+        foreach ($mapping as $inputKey => $dbField) {
+            if ($request->filled($inputKey)) {
+                $data[$dbField] = $this->adjustValue($inputKey, $request->input($inputKey));
+            } else {
+                $sensorValue = $this->fetchSensorValueFromAntares($inputKey);
+                if ($sensorValue !== null) {
+                    $data[$dbField] = $this->adjustValue($inputKey, $sensorValue);
+                }
             }
+        }
+
+        // Proses upload foto ke storage/app/public/uploads/[nama_tanaman]/[kategori]
+        if ($request->hasFile('foto')) {
+            $periode = PeriodeTanam::find($request->periode_tanam_id);
+            $namaFolder = strtolower(str_replace(' ', '_', $periode->nama_tanaman));
+
+            $kategori = KategoriSampel::find($request->kategori_sampel_id);
+            $kategoriSampel = $kategori ? strtolower(str_replace(' ', '_', $kategori->nama)) : 'umum';
 
             $foto = $request->file('foto');
-            $fotoName = time() . '.' . $foto->getClientOriginalExtension();
-            $foto->move(public_path('uploads/foto_periode'), $fotoName);
-            $data['foto'] = $fotoName;
+            $fotoName = time() . '_' . $foto->getClientOriginalName();
+
+            $foto->storeAs("public/uploads/$namaFolder/$kategoriSampel", $fotoName);
+
+            $data['foto'] = "uploads/$namaFolder/$kategoriSampel/$fotoName";
         }
 
-        if ($request->filled('waktu')) {
-            $data['waktu'] = Carbon::parse($request->waktu);
+        // Update ke database
+        try {
+            $input_harian->update($data);
+            return redirect()->route('input_harian.index')->with('success', 'Data berhasil diperbarui!');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Gagal mengupdate: ' . $e->getMessage()]);
         }
-
-        $input_harian->update($data);
-
-        return redirect()->route('input_harian.index')->with('success', 'Input harian berhasil diperbarui.');
     }
+
 
     public function destroy(InputHarian $input_harian)
     {

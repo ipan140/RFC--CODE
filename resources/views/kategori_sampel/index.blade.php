@@ -103,15 +103,15 @@
                 </div>
                 <div class="modal-body">
                     {{-- Periode Tanam --}}
-                    <div class="mb-3">
-                        <label for="periode_tanam_id" class="form-label">Periode Tanam</label>
-                       <select name="periode_tanam_id" id="periode_tanam_id" class="form-select" required>
-                            <option value="">-- Pilih Periode Tanam --</option>
-                            @foreach ($periodeTanams as $periode)
-                                <option value="{{ $periode->id }}">{{ $periode->nama_tanaman ?? 'Periode ' . $periode->id }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                    <select name="periode_tanam_id" id="periode_tanam_id" class="form-select" required>
+                        <option value="">-- Pilih Periode Tanam --</option>
+                        @foreach ($periodeTanams as $periode)
+                            <option value="{{ $periode->id }}"
+                                {{ request('periode_tanam_id') == $periode->id ? 'selected' : '' }}>
+                                {{ $periode->nama_tanaman ?? 'Periode ' . $periode->id }}
+                            </option>
+                        @endforeach
+                    </select>
                     {{-- Nama Kategori --}}
                     <div class="mb-3">
                         <label for="nama" class="form-label">Nama Kategori</label>

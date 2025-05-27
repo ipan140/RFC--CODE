@@ -15,14 +15,15 @@ class TanamanController extends Controller
      */
     public function index()
     {
-        // Ambil semua periode tanam (beserta nama tanaman jika ada relasi)
-        $periodes = PeriodeTanam::all();
+        // Ambil semua periode tanam beserta jumlah kategori sampel (kategori_sampels_count)
+        $periodes = PeriodeTanam::withCount('kategoriSampels')->get();
 
-        // Ambil input harian beserta relasi tanaman (untuk pagination di view)
+        // Ambil input harian beserta relasi periode tanam (paginate)
         $inputHarians = InputHarian::with('periodeTanam')->paginate(10);
 
         return view('tanaman.index', compact('periodes', 'inputHarians'));
     }
+
     /**
      * Mengambil data kategori sampel berdasarkan ID periode tanam (AJAX).
      *
@@ -31,7 +32,7 @@ class TanamanController extends Controller
      */
     public function getKategoriPengamatan($id)
     {
-        $periode = PeriodeTanam::find($id);
+        $periode = PeriodeTanam::with('kategoriSampel')->find($id);
 
         if (!$periode) {
             return response()->json([
@@ -40,14 +41,12 @@ class TanamanController extends Controller
             ], 404);
         }
 
-        // Ambil kategori sampel yang terkait dengan periode tanam ini
-        // Misalnya: jika kategori_sampel punya relasi ke periode_tanam lewat periode_tanam_id
-        $kategoriSampel = $periode->kategoriSampel ?? [];
-
         return response()->json([
             'success' => true,
-            'kategori_sampel' => $kategoriSampel,
+            'kategori_sampel' => $periode->kategoriSampel ?? [],
             'status' => $periode->status,
+            'nama_tanaman' => $periode->nama_tanaman,
+            'tanggal_tanam' => $periode->tanggal_tanam,
         ]);
     }
 }
