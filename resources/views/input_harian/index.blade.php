@@ -315,6 +315,7 @@
                     <div class="modal-body row g-3">
                         <div class="col-md-6">
                             <label for="periode_tanam_id" class="form-label">Periode Tanam</label>
+                            {{-- <input type="text" readonly value="{{$periode->nama_tanaman}}" class="form-control"> --}}
                             <select name="periode_tanam_id" class="form-select" required>
                                 <option value="">-- Pilih Periode Tanam --</option>
                                 @foreach ($periodeTanams as $periode)
