@@ -24,7 +24,6 @@
         @endif
 
         <section class="section p-3 bg-white rounded shadow-sm mb-4">
-            {{-- Filter dan Tombol Tambah --}}
             <div class="d-flex justify-content-start align-items-center flex-wrap gap-2 mb-3">
                 <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#tambahKategoriModal">
                     <i class="bi bi-plus-circle"></i> Tambah Kategori
@@ -34,7 +33,9 @@
                     <select name="periode_tanam_id" class="form-select w-auto">
                         <option value="">-- Pilih Periode Tanam --</option>
                         @foreach ($periodeTanams as $periode)
-                            <option value="{{ $periode->id }}">{{ $periode->nama_tanaman ?? 'Periode ' . $periode->id }}</option>
+                            <option value="{{ $periode->id }}" {{ request('periode_tanam_id') == $periode->id ? 'selected' : '' }}>
+                                {{ $periode->nama_tanaman ?? 'Periode ' . $periode->id }}
+                            </option>
                         @endforeach
                     </select>
                     <button type="submit" class="btn btn-primary">
@@ -46,16 +47,15 @@
                 </form>
             </div>
 
-            {{-- Tabel Data --}}
             <div class="table-responsive">
                 <table class="table table-bordered table-striped table-hover align-middle text-center">
                     <thead class="table-dark">
                         <tr>
-                            <th style="width: 50px;">#</th>
+                            <th>#</th>
                             <th>Periode Tanam</th>
                             <th>Nama Kategori</th>
                             <th>Deskripsi</th>
-                            <th style="width: 160px;">Aksi</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -80,6 +80,36 @@
                                     </button>
                                 </td>
                             </tr>
+
+                            {{-- Modal Detail --}}
+                            <div class="modal fade" id="modalLihatKategori{{ $kategori->id }}" tabindex="-1" aria-labelledby="modalLabelKategori{{ $kategori->id }}" aria-hidden="true">
+                                <div class="modal-dialog modal-lg modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="modalLabelKategori{{ $kategori->id }}">
+                                                <i class="bi bi-eye"></i> Detail Kategori Sampel
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <ul class="list-group">
+                                                <li class="list-group-item">
+                                                    <strong>Periode Tanam:</strong> {{ $kategori->periodeTanam->nama_tanaman ?? '-' }}
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <strong>Nama Kategori:</strong> {{ $kategori->nama }}
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <strong>Deskripsi:</strong> {{ $kategori->deskripsi ?? '-' }}
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         @empty
                             <tr>
                                 <td colspan="5" class="text-center">Belum ada data kategori.</td>
@@ -89,51 +119,49 @@
                 </table>
             </div>
         </section>
+
+        <!-- Pagination -->
+        {{-- <div class="d-flex justify-content-center mt-4">
+    {{ $periodes->links('pagination::bootstrap-5') }}
+</div> --}}
     </div>
 
-    <!-- Modal Tambah -->
-<div class="modal fade" id="tambahKategoriModal" tabindex="-1" aria-labelledby="tambahKategoriModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form action="{{ route('kategori_sampel.store') }}" method="POST">
-                @csrf
-                <div class="modal-header">
-                    <h5 class="modal-title" id="tambahKategoriModalLabel">Tambah Kategori Sampel</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    {{-- Periode Tanam --}}
-                    <select name="periode_tanam_id" id="periode_tanam_id" class="form-select" required>
-                        <option value="">-- Pilih Periode Tanam --</option>
-                        @foreach ($periodeTanams as $periode)
-                            <option value="{{ $periode->id }}"
-                                {{ request('periode_tanam_id') == $periode->id ? 'selected' : '' }}>
-                                {{ $periode->nama_tanaman ?? 'Periode ' . $periode->id }}
-                            </option>
-                        @endforeach
-                    </select>
-                    {{-- Nama Kategori --}}
-                    <div class="mb-3">
-                        <label for="nama" class="form-label">Nama Kategori</label>
-                        <input type="text" id="nama" name="nama" class="form-control" required>
+    {{-- Modal Tambah --}}
+    <div class="modal fade" id="tambahKategoriModal" tabindex="-1" aria-labelledby="tambahKategoriModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ route('kategori_sampel.store') }}" method="POST">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="tambahKategoriModalLabel">Tambah Kategori Sampel</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-
-                    {{-- Deskripsi --}}
-                    <div class="mb-3">
-                        <label for="deskripsi" class="form-label">Deskripsi</label>
-                        <textarea name="deskripsi" id="deskripsi" class="form-control"></textarea>
+                    <div class="modal-body">
+                        <select name="periode_tanam_id" class="form-select mb-3" required>
+                            <option value="">-- Pilih Periode Tanam --</option>
+                            @foreach ($periodeTanams as $periode)
+                                <option value="{{ $periode->id }}">{{ $periode->nama_tanaman ?? 'Periode ' . $periode->id }}</option>
+                            @endforeach
+                        </select>
+                        <div class="mb-3">
+                            <label for="nama" class="form-label">Nama Kategori</label>
+                            <input type="text" id="nama" name="nama" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="deskripsi" class="form-label">Deskripsi</label>
+                            <textarea name="deskripsi" id="deskripsi" class="form-control"></textarea>
+                        </div>
                     </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
-    <!-- Modal Edit -->
+
+    {{-- Modal Edit --}}
     <div class="modal fade" id="editKategoriModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -172,7 +200,7 @@
         </div>
     </div>
 
-    <!-- Modal Hapus -->
+    {{-- Modal Hapus --}}
     <div class="modal fade" id="hapusKategoriModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -195,7 +223,7 @@
         </div>
     </div>
 
-    {{-- Script untuk modal Edit dan Hapus --}}
+    {{-- Script --}}
     <script>
         var editModal = document.getElementById('editKategoriModal');
         editModal.addEventListener('show.bs.modal', function (event) {
@@ -205,20 +233,20 @@
             var deskripsi = button.getAttribute('data-deskripsi');
             var periodeTanamId = button.getAttribute('data-periode_tanam_id');
 
-            var form = editModal.querySelector('#editKategoriForm');
-            form.action = '/kategori_sampel/' + id;
-            form.querySelector('#edit-nama').value = nama;
-            form.querySelector('#edit-deskripsi').value = deskripsi;
-            form.querySelector('#edit-periode_tanam').value = periodeTanamId;
+            var form = document.getElementById('editKategoriForm');
+            form.action = `/kategori_sampel/${id}`;
+
+            document.getElementById('edit-nama').value = nama;
+            document.getElementById('edit-deskripsi').value = deskripsi;
+            document.getElementById('edit-periode_tanam').value = periodeTanamId;
         });
 
         var hapusModal = document.getElementById('hapusKategoriModal');
         hapusModal.addEventListener('show.bs.modal', function (event) {
             var button = event.relatedTarget;
             var id = button.getAttribute('data-id');
-
-            var form = hapusModal.querySelector('#hapusKategoriForm');
-            form.action = '/kategori_sampel/' + id;
+            var form = document.getElementById('hapusKategoriForm');
+            form.action = `/kategori_sampel/${id}`;
         });
     </script>
 @endsection

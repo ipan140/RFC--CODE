@@ -42,7 +42,7 @@ class ChartController extends Controller
             'chartData' => $this->prepareChartData($results),
             'reportSeries' => $this->prepareReportSeries($historyData),
             'trafficChartData' => $this->prepareChartData($results),
-            'timeSeriesChart' => $this->prepareTimeSeriesChart($historyData),
+            'timeSeriesChart' => $this->prepareTimeSeriesChart($results),
         ]);
     }
 
@@ -72,10 +72,7 @@ class ChartController extends Controller
 
         if ($response->successful()) {
             $raw = $response->json('m2m:cin.con');
-
-            if (empty($raw)) {
-                return ['nilai' => null];
-            }
+            if (empty($raw)) return ['nilai' => null];
 
             $nilai = $this->parseRawValue($device, $raw);
 
@@ -104,12 +101,8 @@ class ChartController extends Controller
 
         $cinList = $response->json('m2m:cnt.m2m:cin') ?? [];
 
-        if (empty($cinList)) {
-            return [['info' => 'Belum ada data untuk device ini']];
-        }
-
-        return collect($cinList)->map(function ($item) {
-            $parsedValue = $this->parseRawValue(null, $item['con'] ?? null);
+        return collect($cinList)->map(function ($item) use ($device) {
+            $parsedValue = $this->parseRawValue($device, $item['con'] ?? null);
 
             return [
                 'ri' => $item['ri'] ?? 'no-ri',
@@ -121,24 +114,14 @@ class ChartController extends Controller
 
     private function fetchRecentValues(string $device): array
     {
-        $url = "https://platform.antares.id:8443/~/antares-cse/antares-id/{$this->appName}/{$device}?rcn=4";
+        $all = $this->fetchAllData($device);
 
-        $response = Http::withHeaders([
-            'X-M2M-Origin' => $this->apiKey,
-            'Content-Type' => 'application/json',
-            'Accept' => 'application/json'
-        ])->get($url);
-
-        if (!$response->successful()) {
-            return [];
-        }
-
-        $cinList = $response->json('m2m:cnt.m2m:cin') ?? [];
-
-        return collect(array_slice($cinList, -7))
+        return collect($all)
+            ->sortByDesc('time')
+            ->take(7)
             ->map(function ($item) use ($device) {
-                $nilai = $this->parseRawValue($device, $item['con'] ?? null);
-                return is_numeric($nilai) ? $this->adjustValue($device, $nilai) : null;
+                $value = is_array($item['value']) ? ($item['value']['nilai'] ?? $item['value'][$device] ?? null) : $item['value'];
+                return is_numeric($value) ? $this->adjustValue($device, $value) : null;
             })
             ->filter()
             ->values()
@@ -167,43 +150,91 @@ class ChartController extends Controller
         ];
     }
 
-    private function prepareTimeSeriesChart(array $historyDataRaw): array
+    private function prepareTimeSeriesChart(array $results): array
     {
-        $series = [];
         $labels = [];
+        $data = [];
 
-        $sampleDevice = 'ph';
-        $entries = $this->fetchAllData($sampleDevice);
+        $deviceMap = [
+            'ph' => 'pH',
+            'pota' => 'Potassium',
+            'phospor' => 'Phospor',
+            'EC' => 'EC',
+            'Nitrogen' => 'Nitrogen',
+            'humidity' => 'Kelembaban',
+            'temp' => 'Temperatur Tanah',
+        ];
 
-        $labels = collect($entries)
-            ->sortByDesc('time')
-            ->take(7)
-            ->reverse()
-            ->pluck('time')
-            ->map(fn($time) => Carbon::parse($time)->format('H:i'))
-            ->values()
-            ->toArray();
-
-        foreach ($this->deviceList as $device) {
-            $data = $historyDataRaw[$device] ?? [];
-            $series[] = [
-                'name' => ucfirst($device),
-                'data' => array_map(fn($val) => is_numeric($val) ? round($val, 2) : null, $data),
-            ];
+        foreach ($deviceMap as $key => $label) {
+            $labels[] = $label;
+            $nilai = $this->parseNumber($results[$key]['nilai'] ?? null);
+            $data[] = is_numeric($nilai) ? round($nilai, 2) : null;
         }
 
         return [
             'labels' => $labels,
-            'series' => $series,
+            'series' => [[
+                'name' => 'Data Sensor',
+                'data' => $data,
+            ]],
         ];
     }
+
+    public function getBarChartData()
+    {
+        $results = [];
+        foreach ($this->deviceList as $device) {
+            // Pastikan fetchLatestData mengembalikan array dengan kunci 'nilai' atau null jika tidak ada data
+            $data = $this->fetchLatestData($device);
+            $results[$device] = is_array($data) ? $data : ['nilai' => null];
+        }
+
+        $barChartData = $this->buildSensorBarChart($results);
+
+        return response()->json($barChartData);
+    }
+
+    private function buildSensorBarChart(array $results): array
+    {
+        $deviceMap = [
+            'ph' => 'pH',
+            'EC' => 'EC',
+            'temp' => 'Temperatur Tanah',
+            'Nitrogen' => 'Nitrogen',
+            'humidity' => 'Kelembaban',
+            'phospor' => 'Phospor',
+            'pota' => 'Potassium',
+        ];
+
+        $labels = [];
+        $data = [];
+
+        foreach ($deviceMap as $key => $label) {
+            $labels[] = $label;
+
+            // Pastikan index ada dan nilai valid angka
+            $nilai = isset($results[$key]['nilai']) && is_numeric($results[$key]['nilai'])
+                ? round($results[$key]['nilai'], 2)
+                : 0;
+
+            $data[] = $nilai;
+        }
+
+        return [
+            'labels' => $labels,
+            'series' => [[
+                'name' => 'Data Sensor',
+                'data' => $data,
+            ]]
+        ];
+    }
+
 
     private function adjustValue(string $device, $value)
     {
         if (!is_numeric($value)) return $value;
 
         $device = strtolower($device);
-
         $adjustments = [
             'ph' => 100,
             'ec' => 100,
@@ -211,7 +242,6 @@ class ChartController extends Controller
             'moisture' => 10,
             'temp' => 10,
         ];
-
         $integerDevices = ['pota', 'phospor', 'nitrogen'];
 
         if (isset($adjustments[$device])) {
@@ -254,7 +284,8 @@ class ChartController extends Controller
             $decoded = json_decode($cleaned, true);
 
             if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                return $decoded['nilai'] ?? $decoded[$device] ?? null;
+                $device = strtolower($device);
+                return $decoded['nilai'] ?? $decoded[$device] ?? collect($decoded)->first();
             }
 
             return $cleaned;
@@ -272,19 +303,18 @@ class ChartController extends Controller
             $allData = $this->fetchAllData($device);
 
             $formattedData = collect($allData)
-                ->filter(fn($item) => isset($item['time'], $item['value']) && is_array($item['value']))
+                ->filter(fn($item) => isset($item['time'], $item['value']))
                 ->sortByDesc('time')
                 ->take(10)
-                ->reverse()
-                ->values();
+                ->reverse();
 
             $labels = [];
             $values = [];
 
             foreach ($formattedData as $entry) {
                 $labels[] = Carbon::parse($entry['time'])->format('H:i');
-                $rawValue = $entry['value']['nilai'] ?? $entry['value'][$device] ?? 0;
-                $values[] = $this->adjustValue($device, $rawValue);
+                $value = is_array($entry['value']) ? ($entry['value']['nilai'] ?? $entry['value'][$device] ?? null) : $entry['value'];
+                $values[] = is_numeric($value) ? $this->adjustValue($device, $value) : null;
             }
 
             if (empty($chartLabels)) {
