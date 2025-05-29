@@ -39,8 +39,7 @@ class InputanHarianController extends Controller
             'kategoriSampels'
         ));
     }
-
-
+    
     public function create()
     {
         $periodeTanams = PeriodeTanam::with('periode_tanam')->where('status', 'on going')->get();
@@ -208,22 +207,32 @@ class InputanHarianController extends Controller
         // Update ke database
         try {
             $input_harian->update($data);
-            return redirect()->route('input_harian.index')->with('success', 'Data berhasil diperbarui!');
+
+            return redirect()
+                ->route('input_harian.index', ['periode_tanam_id' => $request->periode_tanam_id])
+                ->with('success', 'Data berhasil diperbarui!');
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Gagal mengupdate: ' . $e->getMessage()]);
         }
     }
 
-
     public function destroy(InputHarian $input_harian)
     {
-        if ($input_harian->foto && file_exists(public_path('uploads/foto_periode/' . $input_harian->foto))) {
-            unlink(public_path('uploads/foto_periode/' . $input_harian->foto));
+        // Hapus file foto jika ada
+        if ($input_harian->foto && file_exists(public_path($input_harian->foto))) {
+            unlink(public_path($input_harian->foto));
         }
 
+        // Simpan periode_tanam_id sebelum delete
+        $periodeTanamId = $input_harian->periode_tanam_id;
+
+        // Hapus data
         $input_harian->delete();
 
-        return redirect()->route('input_harian.index')->with('success', 'Periode Tanam berhasil dihapus.');
+        // Redirect dengan query periode_tanam_id
+        return redirect()
+            ->route('input_harian.index', ['periode_tanam_id' => $periodeTanamId])
+            ->with('success', 'Periode Tanam berhasil dihapus.');
     }
 
     private function fetchSensorValueFromAntares($device)

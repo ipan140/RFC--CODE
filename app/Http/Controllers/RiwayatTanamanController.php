@@ -4,66 +4,46 @@ namespace App\Http\Controllers;
 
 use App\Models\InputHarian;
 use App\Models\PeriodeTanam;
+use App\Models\KategoriSampel;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Spatie\SimpleExcel\SimpleExcelWriter;
 
 class RiwayatTanamanController extends Controller
 {
     public function index(Request $request)
     {
-        $query = InputHarian::with('periode');
+        $query = InputHarian::with(['periode', 'kategoriSampel']);
 
         if ($request->filled('filter_periode_id')) {
             $query->where('periode_tanam_id', $request->filter_periode_id);
         }
 
-        if ($request->filled('tanggal_mulai')) {
-            $query->whereDate('waktu', '>=', $request->tanggal_mulai);
-        }
-
-        if ($request->filled('tanggal_akhir')) {
-            $query->whereDate('waktu', '<=', $request->tanggal_akhir);
-        }
-
-        // 🔽 Tambahkan filter kategori jika dipilih
-        if ($request->filled('kategori')) {
-            $query->where('kategori', $request->kategori);
+        if ($request->filled('kategori_sampel_id')) {
+            $query->where('kategori_sampel_id', $request->kategori_sampel_id);
         }
 
         $inputHarians = $query->orderBy('waktu', 'desc')->paginate(10);
         $periodeTanams = PeriodeTanam::all();
+        $kategoriSampels = KategoriSampel::all();
 
-        // 🔽 List kategori untuk dropdown (bisa juga dari DB jika dinamis)
-        $kategoriList = ['daun', 'tanah', 'air', 'udara'];
-
-        return view('riwayat_tanaman.index', compact('inputHarians', 'periodeTanams', 'kategoriList'));
+        return view('riwayat_tanaman.index', compact('inputHarians', 'periodeTanams', 'kategoriSampels'));
     }
 
     public function export(Request $request)
     {
-        $query = InputHarian::with('periode');
+        $query = InputHarian::with(['periode', 'kategoriSampel']);
 
         if ($request->filled('filter_periode_id')) {
             $query->where('periode_tanam_id', $request->filter_periode_id);
         }
 
-        if ($request->filled('tanggal_mulai')) {
-            $query->whereDate('waktu', '>=', $request->tanggal_mulai);
+        if ($request->filled('kategori_sampel_id')) {
+            $query->where('kategori_sampel_id', $request->kategori_sampel_id);
         }
 
-        if ($request->filled('tanggal_akhir')) {
-            $query->whereDate('waktu', '<=', $request->tanggal_akhir);
-        }
+        $inputHarians = $query->orderBy('waktu', 'desc')->get();
 
-        // 🔽 Tambahkan filter kategori ke ekspor
-        if ($request->filled('kategori')) {
-            $query->where('kategori', $request->kategori);
-        }
-
-        $input_harians = $query->orderBy('waktu', 'desc')->get();
-
-        if ($input_harians->isEmpty()) {
+        if ($inputHarians->isEmpty()) {
             return back()->with('error', 'Tidak ada data untuk diekspor.');
         }
 
@@ -73,7 +53,7 @@ class RiwayatTanamanController extends Controller
         $writer->addRow([
             'Nama Tanaman',
             'Nama Periode',
-            'Kategori',
+            'Kategori Sampel',
             'Waktu',
             'Pupuk',
             'Panjang Daun',
@@ -87,11 +67,11 @@ class RiwayatTanamanController extends Controller
             'Suhu',
         ]);
 
-        foreach ($input_harians as $inputHarian) {
+        foreach ($inputHarians as $inputHarian) {
             $writer->addRow([
                 $inputHarian->periode->nama_tanaman ?? '-',
-                $inputHarian->periode->nama_periode ?? '-',
-                $inputHarian->kategori ?? '-', // Tambahkan kolom kategori di CSV
+                $inputHarian->kategoriSampel->nama ?? '-',
+                $inputHarian->kategoriSampel->nama ?? '-',
                 $inputHarian->waktu ?? '-',
                 $inputHarian->pupuk ?? '-',
                 $inputHarian->panjang_daun ?? '-',

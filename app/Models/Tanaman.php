@@ -34,14 +34,10 @@ class Tanaman extends Model
     // Relasi ke PeriodeTanam
     public function periodeTanams()
     {
-        return $this->hasMany(PeriodeTanam::class, 'tanaman_id');
+        return $this->hasMany(PeriodeTanam::class, 'periode_tanams_id');
     }
 
     // Relasi ke Sampel (jika memang tanaman punya banyak sampel)
-    public function sampels()
-    {
-        return $this->hasMany(Sampel::class, 'tanaman_id');
-    }
 
     // Logging activity
     public function getActivitylogOptions(): LogOptions

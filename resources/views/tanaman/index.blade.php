@@ -20,7 +20,6 @@
         <div class="card shadow-sm">
             <div class="card-body">
                 <h5 class="card-title mb-3"><i class="bi bi-list-ul"></i> Daftar Periode Tanam</h5>
-
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped text-center align-middle">
                         <thead class="table-dark">

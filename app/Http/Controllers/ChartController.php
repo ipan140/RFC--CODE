@@ -40,7 +40,7 @@ class ChartController extends Controller
         return view('chart.index', [
             'data' => $results,
             'chartData' => $this->prepareChartData($results),
-            'reportSeries' => $this->prepareReportSeries($historyData),
+            'reportSeries' => $this->prepareReportSeries($results),
             'trafficChartData' => $this->prepareChartData($results),
             'timeSeriesChart' => $this->prepareTimeSeriesChart($results),
         ]);
@@ -141,12 +141,35 @@ class ChartController extends Controller
         ];
     }
 
-    private function prepareReportSeries(array $historyData): array
+    private function prepareReportSeries(array $results): array
     {
+        $labels = [];
+        $data = [];
+
+        $deviceMap = [
+            'ph' => 'pH',
+            'pota' => 'Potassium',
+            'phospor' => 'Phospor',
+            'EC' => 'EC',
+            'Nitrogen' => 'Nitrogen',
+            'humidity' => 'Soil Moisture',
+            'temp' => 'Soil Temperature',
+        ];
+
+        foreach ($deviceMap as $key => $label) {
+            $labels[] = $label;
+            $value = $this->parseNumber($results[$key]['nilai'] ?? null);
+            $data[] = is_numeric($value) ? round($value, 2) : null;
+        }
+
         return [
-            ['name' => 'pH', 'data' => $historyData['ph'] ?? []],
-            ['name' => 'EC', 'data' => $historyData['EC'] ?? []],
-            ['name' => 'Soil Moisture', 'data' => $historyData['humidity'] ?? []],
+            'labels' => $labels,
+            'series' => [
+                [
+                    'name' => 'Sensor Terakhir',
+                    'data' => $data
+                ]
+            ]
         ];
     }
 
@@ -228,7 +251,6 @@ class ChartController extends Controller
             ]]
         ];
     }
-
 
     private function adjustValue(string $device, $value)
     {
