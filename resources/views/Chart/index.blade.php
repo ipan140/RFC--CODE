@@ -24,11 +24,14 @@
 
     <script>
     document.addEventListener("DOMContentLoaded", () => {
-      const series = @json($timeSeriesChart['series']);
       const categories = @json($timeSeriesChart['labels']);
+      const rawSeries = @json($timeSeriesChart['series'][0]['data']);
 
       const options = {
-      series: series,
+      series: [{
+        name: 'Nilai Sensor',
+        data: rawSeries
+      }],
       chart: {
         type: 'bar',
         height: 350
@@ -36,10 +39,12 @@
       plotOptions: {
         bar: {
         horizontal: false,
-        columnWidth: '50%',
-        endingShape: 'rounded'
+        columnWidth: '60%',
+        endingShape: 'rounded',
+        distributed: true // 💡 warna berbeda untuk tiap bar
         }
       },
+      colors: ['#008FFB', '#00E396', '#FEB019', '#FF4560', '#775DD0', '#3F51B5', '#F44336', '#4CAF50'],
       dataLabels: {
         enabled: true
       },
@@ -60,9 +65,6 @@
         title: {
         text: 'Nilai Sensor (0–100)'
         }
-      },
-      fill: {
-        opacity: 1
       },
       tooltip: {
         y: {
@@ -87,17 +89,14 @@
 
       <script>
         document.addEventListener("DOMContentLoaded", () => {
-        // chartData yang dikirim dari controller berupa array asosiatif {label: value, ...}
         const rawData = @json($chartData);
 
-        // Karena ApexCharts butuh array label dan array data, kita ekstrak:
         const labels = Object.keys(rawData);
         const data = Object.values(rawData).map(val => {
-          // Pastikan nilai number, fallback ke 0 jika null/NaN
           return (val !== null && !isNaN(val)) ? parseFloat(val) : 0;
         });
 
-        new ApexCharts(document.querySelector("#barChartSensors"), {
+        const options = {
           series: [{
           name: 'Data Sensor',
           data: data
@@ -109,21 +108,36 @@
           plotOptions: {
           bar: {
             borderRadius: 4,
-            horizontal: true
+            horizontal: true,
+            distributed: true // 💡 beda warna tiap bar
           }
           },
+          colors: ['#008FFB', '#00E396', '#FEB019', '#FF4560', '#775DD0', '#3F51B5', '#F44336', '#4CAF50'],
           dataLabels: {
-          enabled: false
+          enabled: true
           },
           xaxis: {
-          categories: labels
+          categories: labels,
+          title: {
+            text: 'Jenis Sensor'
           }
-        }).render();
+          },
+          tooltip: {
+          y: {
+            formatter: function (val) {
+            return val + " Sensor";
+            }
+          }
+          }
+        };
+
+        new ApexCharts(document.querySelector("#barChartSensors"), options).render();
         });
       </script>
       </div>
     </div>
     </div>
+
     <!-- Baris 1 End -->
 
     <!-- Baris 2 Start -->
@@ -158,26 +172,35 @@
     <div class="col-lg-6">
     <div class="card">
       <div class="card-body">
-      <h5 class="card-title">Hasil Panen</h5>
+      <h5 class="card-title">Hasil Panen per Kategori Sampel</h5>
       <div id="donutChart"></div>
-      <script>
-        document.addEventListener("DOMContentLoaded", () => {
-        new ApexCharts(document.querySelector("#donutChart"), {
-          series: [44, 55, 13, 43],
-          chart: {
-          height: 350,
-          type: 'donut',
-          toolbar: { show: true }
-          },
-          labels: ['Quartal 1', 'Quartal 2', 'Quartal 3', 'Quartal 4']
-        }).render();
-        });
-      </script>
       </div>
     </div>
     </div>
-    <!-- Baris 2 End -->
 
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const labels = @json($labels);
+      const series = @json($series);
+
+      if (labels.length && series.length) {
+      const chart = new ApexCharts(document.querySelector("#donutChart"), {
+        series: series,
+        chart: {
+        type: 'donut',
+        height: 350,
+        toolbar: { show: true }
+        },
+        labels: labels
+      });
+
+      chart.render();
+      } else {
+      document.querySelector("#donutChart").innerHTML = "<p class='text-center text-muted'>Data belum tersedia</p>";
+      }
+    });
+    </script>
+    <!-- Baris 2 End -->
     <!-- Baris 3 Start -->
     <!-- Line Chart -->
     <div class="row">
@@ -195,13 +218,28 @@
           const series = {!! json_encode($reportSeries['series']) !!};
           const categories = {!! json_encode($reportSeries['labels']) !!};
 
+          // Peta warna khusus per nama sensor
+          const sensorColors = {
+          "pH": "#008FFB",               // Biru
+          "Potassium": "#00E396",        // Hijau
+          "Phospor": "#FEB019",          // Kuning
+          "EC": "#FF4560",               // Merah muda
+          "Nitrogen": "#775DD0",         // Ungu
+          "Kelembaban": "#3F51B5",       // Biru tua
+          "Temperatur Tanah": "#F44336"  // Merah
+          };
+
+          // Ambil warna dari mapping berdasarkan nama sensor
+          const colors = series.map(item => sensorColors[item.name] || '#999');
+
           const options = {
           series: series,
           chart: {
-            type: 'scatter', // Bisa ganti ke 'line' atau 'bar'
+            type: 'scatter',
             height: 350,
             toolbar: { show: false }
           },
+          colors: colors,
           markers: {
             size: 8,
             shape: "circle"
@@ -222,6 +260,10 @@
             y: {
             formatter: (val) => val + ' Sensor'
             }
+          },
+          legend: {
+            show: true,
+            position: 'bottom'
           }
           };
 
@@ -230,8 +272,8 @@
         </script>
       </div>
       </div>
-
     </div>
+
 
     <!-- Pie Chart Card - Right -->
     <div class="col-lg-4">
