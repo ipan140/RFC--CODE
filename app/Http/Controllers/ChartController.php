@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use App\Models\InputHarian;
+use App\Models\KategoriSampel;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class ChartController extends Controller
@@ -37,12 +40,24 @@ class ChartController extends Controller
             $historyData[$device] = $this->fetchRecentValues($device);
         }
 
+        // Ambil data kategori sampel untuk donut chart
+        $panenData = DB::table('input_harians')
+            ->join('kategori_sampel', 'input_harians.kategori_sampel_id', '=', 'kategori_sampel.id')
+            ->select('kategori_sampel.nama', DB::raw('count(*) as total'))
+            ->groupBy('kategori_sampel.nama')
+            ->get();
+
+        $labels = $panenData->pluck('nama');
+        $series = $panenData->pluck('total');
+
         return view('chart.index', [
             'data' => $results,
             'chartData' => $this->prepareChartData($results),
             'reportSeries' => $this->prepareReportSeries($results),
             'trafficChartData' => $this->prepareChartData($results),
             'timeSeriesChart' => $this->prepareTimeSeriesChart($results),
+            'labels' => $labels,
+            'series' => $series,
         ]);
     }
 
@@ -143,35 +158,38 @@ class ChartController extends Controller
 
     private function prepareReportSeries(array $results): array
     {
-        $labels = [];
-        $data = [];
-
         $deviceMap = [
             'ph' => 'pH',
             'pota' => 'Potassium',
             'phospor' => 'Phospor',
             'EC' => 'EC',
             'Nitrogen' => 'Nitrogen',
-            'humidity' => 'Soil Moisture',
-            'temp' => 'Soil Temperature',
+            'humidity' => 'Kelembaban',
+            'temp' => 'Temperatur Tanah',
         ];
 
+        $series = [];
+        $labels = []; // opsional untuk label x-axis jika pakai custom tick formatter
+        $index = 0;
+
         foreach ($deviceMap as $key => $label) {
-            $labels[] = $label;
             $value = $this->parseNumber($results[$key]['nilai'] ?? null);
-            $data[] = is_numeric($value) ? round($value, 2) : null;
+            if (is_numeric($value)) {
+                $series[] = [
+                    'name' => $label,
+                    'data' => [[$index, round($value, 2)]]
+                ];
+                $labels[$index] = $label; // mapping index ke label
+                $index++;
+            }
         }
 
         return [
             'labels' => $labels,
-            'series' => [
-                [
-                    'name' => 'Sensor Terakhir',
-                    'data' => $data
-                ]
-            ]
+            'series' => $series
         ];
     }
+
 
     private function prepareTimeSeriesChart(array $results): array
     {

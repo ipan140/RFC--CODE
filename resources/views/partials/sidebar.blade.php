@@ -158,7 +158,7 @@
 
     @if(in_array(auth()->user()->role, ['admin', 'owner', 'user']))
       <li class="nav-item">
-        <a class="nav-link text-success" href="{{ url("/$prefix/peta") }}">
+        <a class="nav-link text-success" href="{{ url("/$prefix/denah_sensor") }}">
           <i class="bi bi-map text-success me-2"></i>
           <span>Denah Sensor</span>
         </a>

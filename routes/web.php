@@ -29,7 +29,8 @@ use App\Http\Controllers\{
     InputanHarianController,
     KategoriSampelController,
     TanamanSampelController,
-    SampelController
+    SampelController,
+    DenahSensorController
 };
 use App\Http\Controllers\ActivityLogController;
 
@@ -56,14 +57,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         'user' => UserController::class,
     ]);
 
-    Route::view('/peta', 'peta', [
-        "title" => "Denah Sensor",
-        "username" => "Admin",
-        "roles" => "Admin",
-        "image" => "pakdekan.png",
-        "nama_lengkap" => "Dr. Helmy Widyantara"
-    ]);
-
     Route::get('/table', [SensorChartController::class, 'index']);
     Route::view('/riwayat_sensor', 'riwayat_sensor');
     Route::get('/chart', [ChartController::class, 'index']);
@@ -85,6 +78,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('kategori_sampel', KategoriSampelController::class);
     Route::resource('sampel', SampelController::class);
     Route::get('/kategori-pengamatan/{id}', [TanamanSampelController::class, 'getKategoriPengamatan']);
+    Route::get('/denah_sensor', [DenahSensorController::class, 'index'])->name('denah.sensor');
 });
 
 Route::get('/logaktivitas', [ActivityLogController::class, 'index'])->name('logaktivitas.index');
@@ -101,14 +95,6 @@ Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->grou
         'mitra' => MitraController::class,
         'proyek' => ProyekController::class,
         'user' => UserController::class,
-    ]);
-
-    Route::view('/peta', 'peta', [
-        "title" => "Denah Sensor",
-        "username" => "Owner",
-        "roles" => "Owner",
-        "image" => "pakdekan.png",
-        "nama_lengkap" => "Dr. Helmy Widyantara"
     ]);
 
     Route::get('/table', [SensorChartController::class, 'index']);
@@ -131,6 +117,7 @@ Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->grou
     ]);
     Route::resource('kategori_sampel', KategoriSampelController::class);
     Route::resource('sampel', SampelController::class);
+    Route::get('/denah_sensor', [DenahSensorController::class, 'index'])->name('denah.sensor');
 });
 /*
 |--------------------------------------------------------------------------
@@ -146,13 +133,6 @@ Route::middleware(['auth', 'role:user'])->prefix('user')->name('user.')->group(f
         'periode_tanam' => PeriodeTanamController::class,
     ]);
     Route::get('/chart', [ChartController::class, 'index']);
-    Route::view('/peta', 'peta', [
-        "title" => "Denah Sensor",
-        "username" => "Owner",
-        "roles" => "Owner",
-        "image" => "pakdekan.png",
-        "nama_lengkap" => "Dr. Helmy Widyantara"
-    ]);
     // Route bersama
     Route::resources([
         'tanaman' => TanamanController::class,
@@ -168,6 +148,7 @@ Route::middleware(['auth', 'role:user'])->prefix('user')->name('user.')->group(f
     ]);
     Route::resource('kategori_sampel', KategoriSampelController::class);
     Route::resource('sampel', SampelController::class);
+    Route::get('/denah_sensor', [DenahSensorController::class, 'index'])->name('denah.sensor');
 });
 
 Route::middleware(['auth', 'role:admin,owner,user'])->group(function () {
@@ -231,6 +212,7 @@ Route::middleware(['auth', 'role:admin,owner,user'])->group(function () {
     Route::get('/sampel/export', [TanamanSampelController::class, 'export'])->name('sampel.export');
     Route::get('/sampel', [TanamanSampelController::class, 'index'])->name('sampel.index');
     Route::resource('sampel', SampelController::class);
+    Route::get('/denah_sensor', [DenahSensorController::class, 'index'])->name('denah.sensor');
 });
 
 Route::middleware(['auth'])->group(function () {
