@@ -10,14 +10,13 @@ class KategoriSampelController extends Controller
 {
     /**
      * Tampilkan daftar kategori sampel, dengan filter berdasarkan periode tanam (jika ada).
-     */
-    public function index(Request $request)
+     */ public function index(Request $request)
     {
         $request->validate([
             'periode_tanam_id' => 'nullable|exists:periode_tanams,id',
         ]);
 
-        $query = KategoriSampel::with('periodeTanam');
+        $query = KategoriSampel::with('periodeTanam.tanaman');
 
         if ($request->filled('periode_tanam_id')) {
             $query->where('periode_tanam_id', $request->periode_tanam_id);
@@ -28,6 +27,7 @@ class KategoriSampelController extends Controller
 
         return view('kategori_sampel.index', compact('kategoriSampels', 'periodeTanams'));
     }
+
 
     /**
      * Tampilkan form untuk menambahkan kategori sampel baru.
@@ -42,24 +42,24 @@ class KategoriSampelController extends Controller
      * Simpan data kategori sampel baru ke database.
      */
     public function store(Request $request)
-{
-    $validatedData = $request->validate([
-        'periode_tanam_id' => 'required|exists:periode_tanams,id', // Wajib sekarang
-        'nama' => 'required|string|max:255',
-        'deskripsi' => 'nullable|string',
-    ]);
+    {
+        $validatedData = $request->validate([
+            'periode_tanam_id' => 'required|exists:periode_tanams,id', // Wajib sekarang
+            'nama' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+        ]);
 
-    // Cek data yang tervalidasi
+        // Cek data yang tervalidasi
+        KategoriSampel::create([
+            'periode_tanam_id' => $validatedData['periode_tanam_id'],
+            'nama' => $validatedData['nama'],
+            'deskripsi' => $validatedData['deskripsi'] ?? null,
+        ]);
 
-
-    KategoriSampel::create([
-        'periode_tanam_id' => $validatedData['periode_tanam_id'],
-        'nama' => $validatedData['nama'],
-        'deskripsi' => $validatedData['deskripsi'] ?? null,
-    ]);
-
-    return redirect()->route('kategori_sampel.index')->with('success', 'Kategori Sampel berhasil ditambahkan.');
-}
+        return redirect()
+            ->route('kategori_sampel.index', ['periode_tanam_id' => $validatedData['periode_tanam_id']])
+            ->with('success', 'Kategori Sampel berhasil ditambahkan.');
+    }
     /**
      * Tampilkan form edit untuk kategori sampel tertentu.
      */
@@ -76,17 +76,20 @@ class KategoriSampelController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $validated = $request->validate([
+        $validatedData = $request->validate([
             'nama' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'periode_tanam_id' => 'required|exists:periode_tanams,id',
         ]);
 
         $kategori = KategoriSampel::findOrFail($id);
-        $kategori->update($validated);
+        $kategori->update($validatedData);
 
-        return redirect()->route('kategori_sampel.index')->with('success', 'Kategori berhasil diperbarui.');
+        return redirect()
+            ->route('kategori_sampel.index', ['periode_tanam_id' => $validatedData['periode_tanam_id']])
+            ->with('success', 'Kategori berhasil diperbarui.');
     }
+
 
     /**
      * Hapus kategori sampel berdasarkan ID.
@@ -94,9 +97,12 @@ class KategoriSampelController extends Controller
     public function destroy($id)
     {
         $kategori = KategoriSampel::findOrFail($id);
+        $periodeTanamId = $kategori->periode_tanam_id; // Ambil sebelum dihapus
         $kategori->delete();
 
-        return redirect()->route('kategori_sampel.index')->with('success', 'Kategori berhasil dihapus.');
+        return redirect()
+            ->route('kategori_sampel.index', ['periode_tanam_id' => $periodeTanamId])
+            ->with('success', 'Kategori berhasil dihapus.');
     }
 
     /**

@@ -9,6 +9,11 @@
             <nav>
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="/"><i class="bi bi-house-door-fill"></i> Home</a></li>
+                    <li class="breadcrumb-item">
+                        <a href="{{ route('tanaman.index') }}">
+                            <i class="bi bi-house-door-fill"></i> Tanaman
+                        </a>
+                    </li>
                     <li class="breadcrumb-item active">Kategori Sampel</li>
                 </ol>
             </nav>
@@ -24,11 +29,11 @@
         @endif
 
         <section class="section p-3 bg-white rounded shadow-sm mb-4">
+            <h5 class="card-title mb-3"><i class="bi bi-list-ul"></i> Kategori Sampel</h5>
             <div class="d-flex justify-content-start align-items-center flex-wrap gap-2 mb-3">
                 <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#tambahKategoriModal">
                     <i class="bi bi-plus-circle"></i> Tambah Kategori
                 </a>
-
                 <form method="GET" action="{{ route('kategori_sampel.index') }}" class="d-flex align-items-center gap-2 flex-wrap">
                     <select name="periode_tanam_id" class="form-select w-auto">
                         <option value="">-- Pilih Periode Tanam --</option>
@@ -41,12 +46,8 @@
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-funnel-fill"></i> Filter
                     </button>
-                    <a href="{{ route('kategori_sampel.index') }}" class="btn btn-secondary">
-                        <i class="bi bi-x-circle"></i> Reset
-                    </a>
                 </form>
             </div>
-
             <div class="table-responsive">
                 <table class="table table-bordered table-striped table-hover align-middle text-center">
                     <thead class="table-dark">
@@ -137,12 +138,20 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <select name="periode_tanam_id" class="form-select mb-3" required>
-                            <option value="">-- Pilih Periode Tanam --</option>
-                            @foreach ($periodeTanams as $periode)
-                                <option value="{{ $periode->id }}">{{ $periode->nama_tanaman ?? 'Periode ' . $periode->id }}</option>
-                            @endforeach
-                        </select>
+                       @php
+                            $selectedPeriodeId = request('periode_tanam_id');
+                            $selectedPeriode = $periodeTanams->firstWhere('id', $selectedPeriodeId);
+                        @endphp
+
+                        <div class="mb-3">
+                            <label for="periode_tanam_display" class="form-label fw-bold">Periode Tanam</label>
+                            <input type="text"
+                                id="periode_tanam_display"
+                                class="form-control"
+                                value="{{ $selectedPeriode ? ($selectedPeriode->nama_tanaman ?? 'Periode ' . $selectedPeriode->id) : 'Belum dipilih' }}"
+                                readonly>
+                            <input type="hidden" name="periode_tanam_id" value="{{ $selectedPeriodeId }}">
+                        </div>
                         <div class="mb-3">
                             <label for="nama" class="form-label">Nama Kategori</label>
                             <input type="text" id="nama" name="nama" class="form-control" required>
@@ -182,13 +191,20 @@
                             <textarea name="deskripsi" id="edit-deskripsi" class="form-control" required></textarea>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Periode Tanam</label>
-                            <select name="periode_tanam_id" id="edit-periode_tanam" class="form-select" required>
-                                <option value="">-- Pilih Periode Tanam --</option>
-                                @foreach ($periodeTanams as $periodeTanam)
-                                    <option value="{{ $periodeTanam->id }}">{{ $periodeTanam->nama_tanaman ?? 'Periode '.$periodeTanam->id }}</option>
-                                @endforeach
-                            </select>
+                            @php
+                            $selectedPeriodeId = request('periode_tanam_id');
+                            $selectedPeriode = $periodeTanams->firstWhere('id', $selectedPeriodeId);
+                        @endphp
+
+                        <div class="mb-3">
+                            <label for="periode_tanam_display" class="form-label fw-bold">Periode Tanam</label>
+                            <input type="text"
+                                id="periode_tanam_display"
+                                class="form-control"
+                                value="{{ $selectedPeriode ? ($selectedPeriode->nama_tanaman ?? 'Periode ' . $selectedPeriode->id) : 'Belum dipilih' }}"
+                                readonly>
+                            <input type="hidden" name="periode_tanam_id" value="{{ $selectedPeriodeId }}">
+                        </div>
                         </div>
                     </div>
                     <div class="modal-footer">

@@ -11,55 +11,64 @@ class PeriodeTanam extends Model
 {
     use HasFactory, LogsActivity;
 
-    // Nama tabel yang benar di database
     protected $table = 'periode_tanams';
 
-    // Kolom yang boleh diisi mass assignment
     protected $fillable = [
         'nama_tanaman',
         'deskripsi',
         'tanggal_tanam',
         'status',
+        'tanaman_id' // Ditambahkan karena digunakan di relasi
     ];
 
-    // Casting atribut tanggal ke objek Carbon (datetime)
     protected $casts = [
         'tanggal_tanam' => 'datetime',
+        'status' => 'string' // Untuk enum lebih eksplisit
     ];
 
-    // Aksesori custom untuk format tanggal tanam
-    public function getTanggalTanamFormattedAttribute()
-    {
-        return $this->tanggal_tanam ? $this->tanggal_tanam->format('d-m-Y H:i:s') : null;
-    }
+    protected $appends = [
+        'tanggal_tanam_formatted'
+    ];
 
-    // Relasi ke Sampel (one-to-many)
-    public function sampels()
-    {
-        return $this->hasMany(Sampel::class, 'periode_tanam_id');
-    }
-
-    // Relasi ke Tanaman (many-to-one)
+    // Relasi ke Tanaman
     public function tanaman()
     {
         return $this->belongsTo(Tanaman::class, 'tanaman_id');
     }
+
+    // Relasi ke KategoriSampel
     public function kategoriSampels()
     {
-        return $this->hasMany(KategoriSampel::class);
+        return $this->hasMany(KategoriSampel::class, 'periode_tanam_id');
     }
 
-    // Konfigurasi Spatie activity log
+    // Relasi ke InputHarian (jika diperlukan)
+    public function inputHarians()
+    {
+        return $this->hasManyThrough(
+            InputHarian::class,
+            KategoriSampel::class,
+            'periode_tanam_id', // Foreign key pada tabel kategori_sampel
+            'kategori_sampel_id', // Foreign key pada tabel input_harians
+            'id', // Local key pada tabel periode_tanams
+            'id' // Local key pada tabel kategori_sampel
+        );
+    }
+
+    // Format tanggal tanam
+    public function getTanggalTanamFormattedAttribute()
+    {
+        return $this->tanggal_tanam?->format('d-m-Y H:i:s');
+    }
+
+    // Konfigurasi Activity Log
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->useLogName('periode_tanam')
-            ->logOnly([
-                'nama_tanaman',
-                'deskripsi',
-                'tanggal_tanam',
-                'status',
-            ])
-            ->logOnlyDirty();
+            ->logOnly($this->fillable)
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(fn(string $eventName) => "Periode tanam telah {$eventName}")
+            ->dontSubmitEmptyLogs();
     }
 }

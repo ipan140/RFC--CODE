@@ -11,29 +11,27 @@ class KategoriSampel extends Model
 {
     use HasFactory, LogsActivity;
 
-    protected $table = 'kategori_sampel'; // Nama tabel khusus
+    protected $table = 'kategori_sampel';
 
     protected $fillable = ['periode_tanam_id', 'nama', 'deskripsi'];
 
-    // Relasi ke periode tanam (menentukan foreign key)
     public function periodeTanam()
     {
-        return $this->belongsTo(PeriodeTanam::class, 'periode_tanams_id');
+        // Perbaikan: Sesuaikan dengan nama kolom di database (periode_tanam_id)
+        return $this->belongsTo(PeriodeTanam::class, 'periode_tanam_id');
     }
 
-    // Relasi ke input harian
     public function inputHarians()
     {
-        return $this->hasMany(InputHarian::class);
+        return $this->hasMany(InputHarian::class, 'kategori_sampel_id');
     }
 
-    // Konfigurasi activity log
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->logOnly($this->fillable)
-            ->useLogName('Input_harian')
+            ->useLogName('kategori_sampel') // Diubah sesuai dengan model ini
             ->logOnlyDirty()
-            ->setDescriptionForEvent(fn(string $eventName) => "Input Harian telah di-{$eventName}");
+            ->setDescriptionForEvent(fn(string $eventName) => "Kategori Sampel telah di-{$eventName}");
     }
 }

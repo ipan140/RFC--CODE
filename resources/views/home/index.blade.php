@@ -263,7 +263,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-6">
-                        <img src="asset/image/tentangkami.jpg" alt="Tentang Kami" class="img-fluid">
+                        <img src="{{ asset('asset/image/OIP.jpg') }}" alt="Tentang Kami" class="img-fluid w-100 rounded">
                         <div class="slide-"></div>
                     </div>
                     <div class="col-md-6">

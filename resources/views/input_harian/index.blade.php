@@ -9,8 +9,12 @@
                 <h1><i class="bi bi-calendar-plus"></i> Input Harian tanaman</h1>
                 <nav>
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="/dashboard.index"><i class="bi bi-house-door-fill"></i> dashboard</a></li>
-                        <li class="breadcrumb-item"><a href="/tanaman.index"><i class="bi bi-house-door-fill"></i> Tanaman</a></li>
+                        <li class="breadcrumb-item"><a href="/"><i class="bi bi-house-door-fill"></i> Home</a></li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('tanaman.index') }}">
+                                <i class="bi bi-house-door-fill"></i> Tanaman
+                            </a>
+                        </li>
                         <li class="breadcrumb-item active"> Input Harian tanaman</li>
                     </ol>
                 </nav>
@@ -24,17 +28,23 @@
                         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalTambahPeriode">
                             <i class="bi bi-plus-circle"></i> Input Harian tanaman
                         </button>
-                        <form method="GET" action="{{ route('input_harian.index') }}"
-                            class="d-flex align-items-center gap-2 flex-wrap">
-                            <select name="filter_tanaman_id" class="form-select w-auto">
-                                <option value="">-- Semua Tanaman --</option>
-                                @foreach ($periodeTanams as $periode)
-                                    <option value="{{ $periode->id }}" {{ request('filter_tanaman_id') == $periode->id ? 'selected' : '' }}>
-                                        {{ $periode->nama_tanaman ?? 'Tanaman Tidak Diketahui' }} - 
-                                        {{ \Carbon\Carbon::parse($periode->tanggal_tanam)->format('d M Y') }}
-                                    </option>
-                                @endforeach
-                            </select>
+                        <form method="GET" action="{{ route('input_harian.index') }}" class="d-flex align-items-center gap-2 flex-wrap">
+                            <div class="input-group w-auto">
+                                <span class="input-group-text">
+                                    <i class="bi bi-calendar-date"></i>
+                                </span>
+                                <input type="date" name="tanggal_awal" class="form-control"
+                                    value="{{ request('tanggal_awal') }}" placeholder="Tanggal Awal">
+                            </div>
+
+                            <div class="input-group w-auto">
+                                <span class="input-group-text">
+                                    <i class="bi bi-calendar-date-fill"></i>
+                                </span>
+                                <input type="date" name="tanggal_akhir" class="form-control"
+                                    value="{{ request('tanggal_akhir') }}" placeholder="Tanggal Akhir">
+                            </div>
+
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-funnel-fill"></i> Filter
                             </button>
@@ -66,7 +76,7 @@
                                 @forelse ($inputHarians as $inputHarian)
                                     <tr>
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $inputHarian->periode->tanaman->nama_tanaman ?? '-' }}</td>
+                                    <td>{{ $inputHarian->periodeTanam->nama_tanaman ?? '-' }}</td>
                                     <td>{{ $inputHarian->kategoriSampel->nama ?? '-' }}</td>
                                     <td>{{ $inputHarian->waktu ?? '-' }}</td>
                                     <td>{{ $inputHarian->pupuk ?? '-' }}</td>
@@ -113,7 +123,9 @@
                                                 </div>
                                                 <div class="modal-body">
                                                     <ul class="list-group">
-                                                        <strong>Tanaman:</strong> {{ $inputHarian->periode->tanaman->nama_tanaman ?? '-' }}
+                                                        <li class="list-group-item">
+                                                            <strong>{{ $inputHarian->periodeTanam->nama_tanaman ?? '-' }}</strong>
+                                                        </li>
                                                         <li class="list-group-item">
                                                             <strong>Waktu:</strong> {{ $inputHarian->waktu }}
                                                         </li>
@@ -173,23 +185,30 @@
                                                 </div>
 
                                                 <div class="modal-body row g-3">
-                                                    <div class="col-md-6">
-                                                        <label>Tanaman</label>
-                                                        <select name="periode_tanam_id" class="form-select" required>
-                                                            <option value="">-- Pilih Periode Tanam --</option>
-                                                            @foreach ($periodeTanams as $periode)
-                                                                <option value="{{ $periode->id }}" {{ request('periode_tanam_id') == $periode->id ? 'selected' : '' }}>
-                                                                    {{ $periode->nama_tanaman ?? 'Tanaman Tidak Diketahui' }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
+                                                   <div class="col-md-6">
+                                                        <label>Periode Tanam</label>
+                                                        @php
+                                                            $selectedPeriodeId = request('periode_tanam_id');
+                                                            $selectedPeriode = $periodeTanams->firstWhere('id', $selectedPeriodeId);
+                                                        @endphp
+
+                                                        <div class="mb-3">
+                                                            <input 
+                                                                type="text"
+                                                                id="periode_tanam_display"
+                                                                class="form-control"
+                                                                value="{{ $selectedPeriode ? ($selectedPeriode->nama_tanaman ?? 'Periode ' . $selectedPeriode->id) : 'Belum dipilih' }}"
+                                                                readonly
+                                                            >
+                                                            <input type="hidden" name="periode_tanam_id" value="{{ $selectedPeriodeId }}">
+                                                        </div>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label>Waktu</label>
-                                                        <input type="datetime-local" class="form-control" 
-                                                            value="{{ \Carbon\Carbon::parse($inputHarian->waktu)->format('Y-m-d\TH:i') }}" disabled>
-                                                        <input type="hidden" name="waktu" 
-                                                            value="{{ \Carbon\Carbon::parse($inputHarian->waktu)->format('Y-m-d\TH:i') }}">
+                                                        <input type="datetime-local" class="form-control"
+                                                            value="{{ date('Y-m-d', strtotime($inputHarian->waktu)) . 'T00:00' }}" disabled>
+                                                        <input type="hidden" name="waktu"
+                                                            value="{{ date('Y-m-d', strtotime($inputHarian->waktu)) . 'T00:00' }}">
                                                     </div>
 
                                                     <div class="col-md-6">
@@ -247,16 +266,24 @@
                                                     </div>
 
                                                     <div class="col-md-12">
-                                                        <label>Kategori Sampel</label>
-                                                        <select name="kategori_sampel_id" class="form-select" required>
-                                                            <option value="">-- Pilih Kategori Sampel --</option>
-                                                            @foreach ($kategoriSampels as $kategoriSampel)
-                                                                <option value="{{ $kategoriSampel->id }}"
-                                                                    {{ $kategoriSampel->id == $inputHarian->kategori_sampel_id ? 'selected' : '' }}>
-                                                                    {{ $kategoriSampel->nama }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
+                                                        @php
+                                                            // Cek apakah ada kategori_sampel_id di URL
+                                                            $selectedKategoriId = request()->get('kategori_sampel_id');
+
+                                                            // Cari kategori berdasarkan ID yang dikirim
+                                                            $selectedKategori = $kategoriSampels->firstWhere('id', $selectedKategoriId);
+                                                        @endphp
+
+                                                        <div class="mb-3">
+                                                            <label for="kategori_sampel_display" class="form-label fw-bold">Kategori Sampel</label>
+                                                            <input type="text"
+                                                                id="kategori_sampel_display"
+                                                                class="form-control"
+                                                                value="{{ $selectedKategori ? ($selectedKategori->nama . ' - ' . ($selectedKategori->periodeTanam->nama_tanaman ?? '')) : 'Belum dipilih' }}"
+                                                                readonly>
+
+                                                            <input type="hidden" name="kategori_sampel_id" value="{{ $selectedKategori?->id }}">
+                                                        </div>
                                                     </div>
 
                                                     <div class="col-md-12">
@@ -265,14 +292,17 @@
                                                     </div>
 
                                                     <div class="col-md-12">
-                                                        <label>Foto Baru (jika ingin mengganti)</label>
-                                                        <input type="file" name="foto" class="form-control">
-                                                        @if ($inputHarian->foto)
-                                                            <div class="mt-2">
-                                                                <img src="{{ asset('uploads/foto_periode/' . $inputHarian->foto) }}" alt="Foto"
-                                                                    style="width: 100px;">
-                                                            </div>
-                                                        @endif
+                                                       <label for="foto" class="form-label">Foto Baru (jika ingin mengganti)</label>
+                                                        <input type="file" name="foto" id="foto" class="form-control mb-3">
+
+                                                        <li class="list-group-item">
+                                                            <strong>Foto Saat Ini:</strong><br>
+                                                            @if ($inputHarian->foto)
+                                                                <img src="{{ asset('storage/' . $inputHarian->foto) }}" alt="Foto" class="img-fluid mt-2 rounded" style="max-width: 300px;">
+                                                            @else
+                                                                <p class="text-muted">Tidak ada foto.</p>
+                                                            @endif
+                                                        </li>
                                                     </div>
                                                 </div>
 
@@ -314,16 +344,24 @@
                     </div>
                     <div class="modal-body row g-3">
                         <div class="col-md-6">
-                            <label for="periode_tanam_id" class="form-label">Periode Tanam</label>
-                            {{-- <input type="text" readonly value="{{$periode->nama_tanaman}}" class="form-control"> --}}
-                            <select name="periode_tanam_id" class="form-select" required>
-                                <option value="">-- Pilih Periode Tanam --</option>
-                                @foreach ($periodeTanams as $periode)
-                                    <option value="{{ $periode->id }}" {{ request('periode_tanam_id') == $periode->id ? 'selected' : '' }}>
-                                        {{ $periode->nama_tanaman ?? 'Tanaman Tidak Diketahui' }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            @php
+                                // Cek apakah ada periode_tanam_id di URL
+                                $selectedPeriodeId = request()->get('periode_tanam_id');
+
+                                // Cari periode berdasarkan ID yang dikirim
+                                $selectedPeriode = $periodeTanams->firstWhere('id', $selectedPeriodeId);
+                            @endphp
+
+                            <div class="mb-3">
+                                <label for="periode_tanam_display" class="form-label fw-bold">Periode Tanam</label>
+                                <input type="text"
+                                    id="periode_tanam_display"
+                                    class="form-control"
+                                    value="{{ $selectedPeriode ? ($selectedPeriode->nama_tanaman ?? 'Periode ' . $selectedPeriode->id) : 'Belum dipilih' }}"
+                                    readonly>
+
+                                <input type="hidden" name="periode_tanam_id" value="{{ $selectedPeriode?->id }}">
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label for="waktu" class="form-label">Tanggal Periode</label>
@@ -342,13 +380,24 @@
                             <textarea name="pupuk" id="pupuk" class="form-control" rows="2" placeholder="Contoh: NPK 16:16:16 sebanyak 2g/liter"></textarea>
                         </div>
                         <div class="col-md-12">
-                            <label for="kategori_sampel_id" class="form-label">Kategori Sampel</label>
-                            <select name="kategori_sampel_id" id="kategori_sampel_id" class="form-select" required>
-                                <option value="">-- Pilih Kategori Sampel --</option>
-                                @foreach ($kategoriSampels as $kategoriSampel)
-                                    <option value="{{ $kategoriSampel->id }}">{{ $kategoriSampel->nama }}</option>
-                                @endforeach
-                            </select>
+                            @php
+                                // Cek apakah ada kategori_sampel_id di URL
+                                $selectedKategoriId = request()->get('kategori_sampel_id');
+
+                                // Cari kategori berdasarkan ID yang dikirim
+                                $selectedKategori = $kategoriSampels->firstWhere('id', $selectedKategoriId);
+                            @endphp
+
+                            <div class="mb-3">
+                                <label for="kategori_sampel_display" class="form-label fw-bold">Kategori Sampel</label>
+                                <input type="text"
+                                    id="kategori_sampel_display"
+                                    class="form-control"
+                                    value="{{ $selectedKategori ? ($selectedKategori->nama . ' - ' . ($selectedKategori->periodeTanam->nama_tanaman ?? '')) : 'Belum dipilih' }}"
+                                    readonly>
+
+                                <input type="hidden" name="kategori_sampel_id" value="{{ $selectedKategori?->id }}">
+                            </div>
                         </div>
                         <div class="col-md-12">
                             <label for="foto" class="form-label">Foto</label>

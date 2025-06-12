@@ -8,8 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        Schema::create('tanaman', function (Blueprint $table) {
+            $table->id(); // Kolom id auto-increment
+        });
     }
-
     public function down(): void
     {
         Schema::dropIfExists('tanaman');

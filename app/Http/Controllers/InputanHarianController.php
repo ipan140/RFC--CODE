@@ -19,33 +19,58 @@ class InputanHarianController extends Controller
 
     public function index(Request $request)
     {
-        $query = InputHarian::with('periodeTanam');
+        $query = InputHarian::with(['periodeTanam', 'kategoriSampel']);
 
-        if ($request->filled('filter_periode_tanam_id')) {
-            $query->where('periode_tanam_id', $request->filter_periode_tanam_id);
+        // Filter berdasarkan periode tanam ID
+        if ($request->filled('periode_tanam_id')) {
+            $query->where('periode_tanam_id', $request->periode_tanam_id);
         }
 
-        // Ambil hasil query dengan sorting dan pagination, serta sertakan query string untuk menjaga filter saat pindah halaman
+        // Filter berdasarkan kategori sampel ID
+        if ($request->filled('kategori_sampel_id')) {
+            $query->where('kategori_sampel_id', $request->kategori_sampel_id);
+        }
+
+        // Filter berdasarkan tanggal waktu input harian
+        if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
+            $tglAwal = Carbon::parse($request->tanggal_awal)->startOfDay();
+            $tglAkhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
+
+            $query->whereBetween('waktu', [$tglAwal, $tglAkhir]);
+        }
+
         $inputHarians = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
 
-        // Ambil periode tanam yang sedang berlangsung, sertakan relasi ke tanaman jika perlu
+        // Ambil semua periode tanam yang statusnya on going
         $periodeTanams = PeriodeTanam::where('status', 'on going')->get();
 
-        $kategoriSampels = KategoriSampel::all();
+        // Ambil kategori hanya jika ada kategori_sampel_id
+        if ($request->filled('kategori_sampel_id')) {
+            $kategoriSampels = KategoriSampel::where('id', $request->kategori_sampel_id)->get();
+        } else {
+            $kategoriSampels = KategoriSampel::all();
+        }
+
+        $selectedPeriode = $request->filled('periode_tanam_id') ? PeriodeTanam::find($request->periode_tanam_id) : null;
+        $selectedKategori = $request->filled('kategori_sampel_id') ? KategoriSampel::find($request->kategori_sampel_id) : null;
 
         return view('input_harian.index', compact(
             'inputHarians',
             'periodeTanams',
-            'kategoriSampels'
+            'kategoriSampels',
+            'selectedPeriode',
+            'selectedKategori'
         ));
     }
 
-
-    public function create()
+    public function create(Request $request)
     {
-        $periodeTanams = PeriodeTanam::with('periode_tanam')->where('status', 'on going')->get();
+        $periodeTanams = PeriodeTanam::where('status', 'on going')->get();
         $kategoriSampels = KategoriSampel::all();
-        return view('input_harian.create', compact('periode_tanams', 'kategoriSampels'));
+
+        $selectedKategoriId = $request->kategori_sampel_id;
+
+        return view('input_harian.create', compact('periodeTanams', 'kategoriSampels', 'selectedKategoriId'));
     }
 
     public function store(Request $request)
@@ -208,22 +233,32 @@ class InputanHarianController extends Controller
         // Update ke database
         try {
             $input_harian->update($data);
-            return redirect()->route('input_harian.index')->with('success', 'Data berhasil diperbarui!');
+
+            return redirect()
+                ->route('input_harian.index', ['periode_tanam_id' => $request->periode_tanam_id])
+                ->with('success', 'Data berhasil diperbarui!');
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Gagal mengupdate: ' . $e->getMessage()]);
         }
     }
 
-
     public function destroy(InputHarian $input_harian)
     {
-        if ($input_harian->foto && file_exists(public_path('uploads/foto_periode/' . $input_harian->foto))) {
-            unlink(public_path('uploads/foto_periode/' . $input_harian->foto));
+        // Hapus file foto jika ada
+        if ($input_harian->foto && file_exists(public_path($input_harian->foto))) {
+            unlink(public_path($input_harian->foto));
         }
 
+        // Simpan periode_tanam_id sebelum delete
+        $periodeTanamId = $input_harian->periode_tanam_id;
+
+        // Hapus data
         $input_harian->delete();
 
-        return redirect()->route('input_harian.index')->with('success', 'Periode Tanam berhasil dihapus.');
+        // Redirect dengan query periode_tanam_id
+        return redirect()
+            ->route('input_harian.index', ['periode_tanam_id' => $periodeTanamId])
+            ->with('success', 'Periode Tanam berhasil dihapus.');
     }
 
     private function fetchSensorValueFromAntares($device)
