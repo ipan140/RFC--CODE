@@ -28,20 +28,26 @@
                         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalTambahPeriode">
                             <i class="bi bi-plus-circle"></i> Input Harian tanaman
                         </button>
-                        <form method="GET" action="{{ route('input_harian.index') }}"
-                            class="d-flex align-items-center gap-2 flex-wrap">
-                            {{-- <select name="filter_tanaman_id" class="form-select w-auto">
-                                <option value="">-- Semua Tanaman --</option>
-                                @foreach ($periodeTanams as $periode)
-                                    <option value="{{ $periode->id }}" {{ request('filter_tanaman_id') == $periode->id ? 'selected' : '' }}>
-                                        {{ $periode->nama_tanaman ?? 'Tanaman Tidak Diketahui' }} - 
-                                        {{ \Carbon\Carbon::parse($periode->tanggal_tanam)->format('d M Y') }}
-                                    </option>
-                                @endforeach
-                            </select>
+                        <form method="GET" action="{{ route('input_harian.index') }}" class="d-flex align-items-center gap-2 flex-wrap">
+                            <div class="input-group w-auto">
+                                <span class="input-group-text">
+                                    <i class="bi bi-calendar-date"></i>
+                                </span>
+                                <input type="date" name="tanggal_awal" class="form-control"
+                                    value="{{ request('tanggal_awal') }}" placeholder="Tanggal Awal">
+                            </div>
+
+                            <div class="input-group w-auto">
+                                <span class="input-group-text">
+                                    <i class="bi bi-calendar-date-fill"></i>
+                                </span>
+                                <input type="date" name="tanggal_akhir" class="form-control"
+                                    value="{{ request('tanggal_akhir') }}" placeholder="Tanggal Akhir">
+                            </div>
+
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-funnel-fill"></i> Filter
-                            </button> --}}
+                            </button>
                         </form>
                     </div>
                     <div class="table-responsive">
@@ -260,16 +266,24 @@
                                                     </div>
 
                                                     <div class="col-md-12">
-                                                        <label>Kategori Sampel</label>
-                                                        <select name="kategori_sampel_id" class="form-select" required>
-                                                            <option value="">-- Pilih Kategori Sampel --</option>
-                                                            @foreach ($kategoriSampels as $kategoriSampel)
-                                                                <option value="{{ $kategoriSampel->id }}"
-                                                                    {{ $kategoriSampel->id == $inputHarian->kategori_sampel_id ? 'selected' : '' }}>
-                                                                    {{ $kategoriSampel->nama }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
+                                                        @php
+                                                            // Cek apakah ada kategori_sampel_id di URL
+                                                            $selectedKategoriId = request()->get('kategori_sampel_id');
+
+                                                            // Cari kategori berdasarkan ID yang dikirim
+                                                            $selectedKategori = $kategoriSampels->firstWhere('id', $selectedKategoriId);
+                                                        @endphp
+
+                                                        <div class="mb-3">
+                                                            <label for="kategori_sampel_display" class="form-label fw-bold">Kategori Sampel</label>
+                                                            <input type="text"
+                                                                id="kategori_sampel_display"
+                                                                class="form-control"
+                                                                value="{{ $selectedKategori ? ($selectedKategori->nama . ' - ' . ($selectedKategori->periodeTanam->nama_tanaman ?? '')) : 'Belum dipilih' }}"
+                                                                readonly>
+
+                                                            <input type="hidden" name="kategori_sampel_id" value="{{ $selectedKategori?->id }}">
+                                                        </div>
                                                     </div>
 
                                                     <div class="col-md-12">
@@ -330,8 +344,11 @@
                     </div>
                     <div class="modal-body row g-3">
                         <div class="col-md-6">
-                             @php
-                                $selectedPeriodeId = request('periode_tanam_id');
+                            @php
+                                // Cek apakah ada periode_tanam_id di URL
+                                $selectedPeriodeId = request()->get('periode_tanam_id');
+
+                                // Cari periode berdasarkan ID yang dikirim
                                 $selectedPeriode = $periodeTanams->firstWhere('id', $selectedPeriodeId);
                             @endphp
 
@@ -342,7 +359,8 @@
                                     class="form-control"
                                     value="{{ $selectedPeriode ? ($selectedPeriode->nama_tanaman ?? 'Periode ' . $selectedPeriode->id) : 'Belum dipilih' }}"
                                     readonly>
-                                <input type="hidden" name="periode_tanam_id" value="{{ $selectedPeriodeId }}">
+
+                                <input type="hidden" name="periode_tanam_id" value="{{ $selectedPeriode?->id }}">
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -362,13 +380,24 @@
                             <textarea name="pupuk" id="pupuk" class="form-control" rows="2" placeholder="Contoh: NPK 16:16:16 sebanyak 2g/liter"></textarea>
                         </div>
                         <div class="col-md-12">
-                            <label for="kategori_sampel_id" class="form-label">Kategori Sampel</label>
-                            <select name="kategori_sampel_id" id="kategori_sampel_id" class="form-select" required>
-                                <option value="">-- Pilih Kategori Sampel --</option>
-                                @foreach ($kategoriSampels as $kategoriSampel)
-                                    <option value="{{ $kategoriSampel->id }}">{{ $kategoriSampel->nama }}</option>
-                                @endforeach
-                            </select>
+                            @php
+                                // Cek apakah ada kategori_sampel_id di URL
+                                $selectedKategoriId = request()->get('kategori_sampel_id');
+
+                                // Cari kategori berdasarkan ID yang dikirim
+                                $selectedKategori = $kategoriSampels->firstWhere('id', $selectedKategoriId);
+                            @endphp
+
+                            <div class="mb-3">
+                                <label for="kategori_sampel_display" class="form-label fw-bold">Kategori Sampel</label>
+                                <input type="text"
+                                    id="kategori_sampel_display"
+                                    class="form-control"
+                                    value="{{ $selectedKategori ? ($selectedKategori->nama . ' - ' . ($selectedKategori->periodeTanam->nama_tanaman ?? '')) : 'Belum dipilih' }}"
+                                    readonly>
+
+                                <input type="hidden" name="kategori_sampel_id" value="{{ $selectedKategori?->id }}">
+                            </div>
                         </div>
                         <div class="col-md-12">
                             <label for="foto" class="form-label">Foto</label>

@@ -5,11 +5,11 @@
 
     <div class="pagetitle d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h1><i class="bi bi-calendar-plus"></i> Tanaman</h1>
+            <h1><i class="bi bi-calendar-plus"></i> Daftar Periode Tanam</h1>
             <nav>
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="/"><i class="bi bi-house-door-fill"></i> Home</a></li>
-                    <li class="breadcrumb-item active">Tanaman</li>
+                    <li class="breadcrumb-item active"> Daftar Periode Tanam</li>
                 </ol>
             </nav>
         </div>
@@ -27,6 +27,7 @@
                                 <th>#</th>
                                 <th>Nama Tanaman</th>
                                 <th>Status</th>
+                                <th>Tanggal Tanam</th> {{-- ✅ Tambahan --}}
                                 <th>Jumlah Sampel</th>
                                 <th>Aksi</th>
                             </tr>
@@ -49,28 +50,30 @@
                                         @endif
                                     </td>
                                     <td>
+                                        {{ \Carbon\Carbon::parse($periode->tanggal_tanam)->translatedFormat('d F Y') ?? '-' }}
+                                    </td>
+                                    <td>
                                         <span class="badge bg-primary">
                                             {{ $periode->kategori_sampels_count ?? 0 }} Sampel
                                         </span>
                                     </td>
                                     <td>
-                                        {{-- <a href="{{ route('sampel.index', ['periode_tanam_id' => $periode->id]) }}" class="btn btn-info btn-sm mb-1">
-                                            <i class="bi bi-eye-fill"></i> Lihat Sampel
-                                        </a> --}}
-                                        <a href="{{ route('kategori_sampel.index', ['periode_tanam_id' => $periode->id]) }}" class="btn btn-success btn-sm mb-1">
-                                            <i class="bi bi-plus-circle-fill"></i> Tambah Sampel
+                                        <a href="{{ route('sampel.index', ['periode_tanam_id' => $periode->id]) }}" class="btn btn-primary btn-sm mb-1">
+                                            <i class="bi bi-search"></i> Lihat Sampel
                                         </a>
-                                        <a href="{{ route('input_harian.index', ['periode_tanam_id' => $periode->id]) }}" class="btn btn-primary btn-sm mb-1">
-                                            <i class="bi bi-journal-plus"></i> Input Harian
+
+                                        <a href="{{ route('kategori_sampel.index', ['periode_tanam_id' => $periode->id]) }}" class="btn btn-success btn-sm mb-1">
+                                            <i class="bi bi-plus-lg"></i> Tambah Sampel
                                         </a>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="text-center text-muted">Belum ada data periode tanam.</td>
+                                    <td colspan="6" class="text-center text-muted">Belum ada data periode tanam.</td>
                                 </tr>
                             @endforelse
                         </tbody>
+
                     </table>
                 </div>
 

@@ -6,6 +6,7 @@ use App\Models\InputHarian;
 use App\Models\PeriodeTanam;
 use App\Models\KategoriSampel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Spatie\SimpleExcel\SimpleExcelWriter;
 
 class RiwayatTanamanController extends Controller
@@ -22,7 +23,15 @@ class RiwayatTanamanController extends Controller
             $query->where('kategori_sampel_id', $request->kategori_sampel_id);
         }
 
-        $inputHarians = $query->orderBy('waktu', 'desc')->paginate(10);
+        // Filter tanggal berdasarkan kolom waktu
+        if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
+            $tglAwal = Carbon::parse($request->tanggal_awal)->startOfDay();
+            $tglAkhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
+
+            $query->whereBetween('waktu', [$tglAwal, $tglAkhir]);
+        }
+
+        $inputHarians = $query->orderBy('waktu', 'desc')->paginate(10)->withQueryString();
         $periodeTanams = PeriodeTanam::all();
         $kategoriSampels = KategoriSampel::all();
 
@@ -41,6 +50,14 @@ class RiwayatTanamanController extends Controller
             $query->where('kategori_sampel_id', $request->kategori_sampel_id);
         }
 
+        // Filter tanggal berdasarkan kolom waktu
+        if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
+            $tglAwal = Carbon::parse($request->tanggal_awal)->startOfDay();
+            $tglAkhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
+
+            $query->whereBetween('waktu', [$tglAwal, $tglAkhir]);
+        }
+
         $inputHarians = $query->orderBy('waktu', 'desc')->get();
 
         if ($inputHarians->isEmpty()) {
@@ -52,7 +69,6 @@ class RiwayatTanamanController extends Controller
 
         $writer->addRow([
             'Nama Tanaman',
-            'Nama Periode',
             'Kategori Sampel',
             'Waktu',
             'Pupuk',
@@ -70,7 +86,6 @@ class RiwayatTanamanController extends Controller
         foreach ($inputHarians as $inputHarian) {
             $writer->addRow([
                 $inputHarian->periode->nama_tanaman ?? '-',
-                $inputHarian->kategoriSampel->nama ?? '-',
                 $inputHarian->kategoriSampel->nama ?? '-',
                 $inputHarian->waktu ?? '-',
                 $inputHarian->pupuk ?? '-',

@@ -19,32 +19,58 @@ class InputanHarianController extends Controller
 
     public function index(Request $request)
     {
-        $query = InputHarian::with('periodeTanam');
+        $query = InputHarian::with(['periodeTanam', 'kategoriSampel']);
 
-        if ($request->filled('filter_periode_tanam_id')) {
-            $query->where('periode_tanam_id', $request->filter_periode_tanam_id);
+        // Filter berdasarkan periode tanam ID
+        if ($request->filled('periode_tanam_id')) {
+            $query->where('periode_tanam_id', $request->periode_tanam_id);
         }
 
-        // Ambil hasil query dengan sorting dan pagination, serta sertakan query string untuk menjaga filter saat pindah halaman
+        // Filter berdasarkan kategori sampel ID
+        if ($request->filled('kategori_sampel_id')) {
+            $query->where('kategori_sampel_id', $request->kategori_sampel_id);
+        }
+
+        // Filter berdasarkan tanggal waktu input harian
+        if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
+            $tglAwal = Carbon::parse($request->tanggal_awal)->startOfDay();
+            $tglAkhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
+
+            $query->whereBetween('waktu', [$tglAwal, $tglAkhir]);
+        }
+
         $inputHarians = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
 
-        // Ambil periode tanam yang sedang berlangsung, sertakan relasi ke tanaman jika perlu
+        // Ambil semua periode tanam yang statusnya on going
         $periodeTanams = PeriodeTanam::where('status', 'on going')->get();
 
-        $kategoriSampels = KategoriSampel::all();
+        // Ambil kategori hanya jika ada kategori_sampel_id
+        if ($request->filled('kategori_sampel_id')) {
+            $kategoriSampels = KategoriSampel::where('id', $request->kategori_sampel_id)->get();
+        } else {
+            $kategoriSampels = KategoriSampel::all();
+        }
+
+        $selectedPeriode = $request->filled('periode_tanam_id') ? PeriodeTanam::find($request->periode_tanam_id) : null;
+        $selectedKategori = $request->filled('kategori_sampel_id') ? KategoriSampel::find($request->kategori_sampel_id) : null;
 
         return view('input_harian.index', compact(
             'inputHarians',
             'periodeTanams',
-            'kategoriSampels'
+            'kategoriSampels',
+            'selectedPeriode',
+            'selectedKategori'
         ));
     }
-    
-    public function create()
+
+    public function create(Request $request)
     {
-        $periodeTanams = PeriodeTanam::with('periode_tanam')->where('status', 'on going')->get();
+        $periodeTanams = PeriodeTanam::where('status', 'on going')->get();
         $kategoriSampels = KategoriSampel::all();
-        return view('input_harian.create', compact('periode_tanams', 'kategoriSampels'));
+
+        $selectedKategoriId = $request->kategori_sampel_id;
+
+        return view('input_harian.create', compact('periodeTanams', 'kategoriSampels', 'selectedKategoriId'));
     }
 
     public function store(Request $request)

@@ -28,7 +28,8 @@ use App\Http\Controllers\{
     ChartController,
     InputanHarianController,
     KategoriSampelController,
-    TanamanSampelController
+    TanamanSampelController,
+    SampelController
 };
 use App\Http\Controllers\ActivityLogController;
 
@@ -82,7 +83,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         'input_harian' => InputanHarianController::class, // Tambahkan resource ini di sini
     ]);
     Route::resource('kategori_sampel', KategoriSampelController::class);
-    Route::resource('tanaman-sampel', TanamanSampelController::class);
+    Route::resource('sampel', SampelController::class);
     Route::get('/kategori-pengamatan/{id}', [TanamanSampelController::class, 'getKategoriPengamatan']);
 });
 
@@ -129,6 +130,7 @@ Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->grou
         'input_harian' => InputanHarianController::class, // Tambahkan resource ini di sini
     ]);
     Route::resource('kategori_sampel', KategoriSampelController::class);
+    Route::resource('sampel', SampelController::class);
 });
 /*
 |--------------------------------------------------------------------------
@@ -165,6 +167,7 @@ Route::middleware(['auth', 'role:user'])->prefix('user')->name('user.')->group(f
         'input_harian' => InputanHarianController::class, // Tambahkan resource ini di sini
     ]);
     Route::resource('kategori_sampel', KategoriSampelController::class);
+    Route::resource('sampel', SampelController::class);
 });
 
 Route::middleware(['auth', 'role:admin,owner,user'])->group(function () {
@@ -227,6 +230,7 @@ Route::middleware(['auth', 'role:admin,owner,user'])->group(function () {
     Route::resource('kategori_sampel', KategoriSampelController::class);
     Route::get('/sampel/export', [TanamanSampelController::class, 'export'])->name('sampel.export');
     Route::get('/sampel', [TanamanSampelController::class, 'index'])->name('sampel.index');
+    Route::resource('sampel', SampelController::class);
 });
 
 Route::middleware(['auth'])->group(function () {

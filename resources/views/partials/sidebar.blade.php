@@ -102,7 +102,7 @@
         </li>
         <li>
           <a href="{{ url("/$prefix/tanaman") }}" class="text-success">
-            <i class="bi bi-tree me-2"></i> Tanaman
+            <i class="bi bi-tree me-2"></i> Daftar Periode Tanam
           </a>
         </li>
         {{-- <li>

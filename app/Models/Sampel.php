@@ -16,5 +16,22 @@ class Sampel extends Model
     {
         return $this->belongsTo(Tanaman::class);
     }
+    public function periodeTanam()
+    {
+        return $this->belongsTo(PeriodeTanam::class, 'periode_tanam_id');
+    }
+
+    // Relasi: InputHarian milik satu KategoriSampel
+    public function kategoriSampel()
+    {
+        return $this->belongsTo(KategoriSampel::class, 'kategori_sampel_id');
+    }
+
+    public function periode()
+    {
+        return $this->belongsTo(PeriodeTanam::class, 'periode_tanam_id');
+    }
+
+    // ✅ Tambahkan relasi ke Tanaman via PeriodeTanam
 }
 
