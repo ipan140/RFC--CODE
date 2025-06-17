@@ -26,7 +26,7 @@
         }
 
         #services {
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'><path fill='rgb(7, 255, 40)' fill-opacity='1' d='M0,128L48,144C96,160,192,192,288,213.3C384,235,480,245,576,234.7C672,224,768,192,864,192C960,192,1056,224,1152,202.7C1248,181,1344,107,1392,69.3L1440,32L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'/></svg>");
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'><path fill='%2328a745' fill-opacity='1' d='M0,128L48,144C96,160,192,192,288,213.3C384,235,480,245,576,234.7C672,224,768,192,864,192C960,192,1056,224,1152,202.7C1248,181,1344,107,1392,69.3L1440,32L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'/></svg>");
             background-size: cover;
             background-position: bottom;
             background-repeat: no-repeat;
@@ -72,31 +72,31 @@
             border-radius: 25px;
             font-size: 1.2rem;
             font-weight: 600;
-            border: 2px solid rgb(7, 255, 40);
+            border: 2px solid #28a745 ;
             transition: all 0.3s ease-in-out;
             cursor: pointer;
         }
 
         .btn-rfc {
-            background-color: rgb(7, 255, 40);
+            background-color: #28a745 ;
             color: white;
         }
 
         .btn-rfc:hover {
-            background-color: rgb(0, 255, 13);
+            background-color: #28a745;
             color: black;
-            box-shadow: 0 0 15px rgb(0, 255, 13);
+            box-shadow: 0 0 15px #28a745;
         }
 
         .btn-darkmode {
-            background-color: rgb(7, 255, 40);
+            background-color: #28a745 ;
             color: white;
         }
 
         .btn-darkmode:hover {
-            background-color: rgb(0, 255, 13);
+            background-color: #28a745;
             color: black;
-            box-shadow: 0 0 15px rgb(7, 255, 40);
+            box-shadow: 0 0 15px #28a745 ;
         }
 
         /* Dark Mode Styling */
@@ -210,8 +210,10 @@
                     <div class="col-md-6 text-center text-md-start">
                         <h1 class="display-4 fw-bold text-green">Selamat Datang di Rooftop Farming Center</h1>
                         <p class="lead fs-4 text-green">Transforming rooftops into sustainable green spaces</p>
-                        <button class="btn btn-primary" id="playVideoBtn" data-bs-toggle="modal"
-                            data-bs-target="#videoModal">Tonton Video</button>
+                        <button class="btn" style="background-color: #28a745; border-color: #28a745; color: #fff;" 
+                                id="playVideoBtn" data-bs-toggle="modal" data-bs-target="#videoModal">
+                            Tonton Video
+                        </button>
                     </div>
                     <!-- Bagian Gambar -->
                     <div class="col-md-6 text-center">
@@ -263,7 +265,8 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-6">
-                        <img src="{{ asset('asset/image/OIP.jpg') }}" alt="Tentang Kami" class="img-fluid w-100 rounded">
+                        <img src="{{ asset('asset/image/OIP.jpg') }}" alt="Tentang Kami"
+                            class="img-fluid w-100 rounded">
                         <div class="slide-"></div>
                     </div>
                     <div class="col-md-6">
@@ -292,11 +295,10 @@
             </div>
         </section>
 
-
         <!-- Services Section -->
         <section id="services" class="py-5 bg-services">
             <div class="container">
-                <h2 class="text-center mb-5">PROYEK</h2>
+                <h2 class="text-center mb-5" style="color: #000;">PROYEK</h2>
                 <div class="row">
                     @foreach ($proyeks as $index => $proyek)
                         <div class="col-md-6 col-lg-3 mb-4">
@@ -316,11 +318,10 @@
             </div>
         </section>
 
-
         <!-- mitra section -->
         <section id="mitra" class="py-5">
             <div class="container">
-                <h2>MITRA</h2>
+                <h2 class="text-center mb-5" style="color: #000;">MITRA</h2>
                 <div class="row">
                     @foreach($mitras as $mitra)
                         <div class="col-md-4">
@@ -334,7 +335,7 @@
                                     <p class="card-text">{{ $mitra->lokasi }}</p>
                                     <p class="card-text">{{ $mitra->email }}</p>
                                     <p class="card-text">{{ $mitra->telepon }}</p>
-                                    
+
                                 </div>
                             </div>
                         </div>
@@ -343,50 +344,14 @@
             </div>
         </section>
 
-
         <!-- Contact Section -->
         <section class="contact-us py-5">
             <div class="container">
-                <div class="row g-4">
-                    <!-- Contact Info -->
-                    <div class="col-md-5">
-                        <div class="contact-info">
-                            <h2>Contact Info</h2>
-                            <p>Praesent sapien massa, convallis a pellentesque nec, egestas non nisi. Vestibulum ante
-                                ipsum primis.</p>
-
-                            <div class="info-item">
-                                <i class="bi bi-geo-alt"></i>
-                                <div>
-                                    <strong>Our Location</strong><br>
-                                    Jl. Ketintang no.156<br>Surabaya, 60231<br>Jawa Timur, Indonesia
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <i class="bi bi-telephone"></i>
-                                <div>
-                                    <strong>Phone Number</strong><br>
-                                    +1 5589 55488 55<br>+1 6678 254445 41
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <i class="bi bi-envelope"></i>
-                                <div>
-                                    <strong>Email Address</strong><br>
-                                    info@example.com<br>contact@example.com
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+                <div class="row justify-content-center g-4"> <!-- center the column -->
                     <!-- Form -->
-                    <div class="col-md-7">
+                    <div class="col-md-7 mx-auto"> <!-- center the form -->
                         <div class="card p-4">
-                            <h2 class="text-center mb-4">Get In Touch</h2>
-                            <p class="text-center">Praesent sapien massa, convallis a pellentesque nec, egestas non
-                                nisi. Vestibulum ante ipsum primis.</p>
+                            <h2 class="text-center mb-4">Kontak</h2>
                             <form>
                                 <div class="row mb-3">
                                     <div class="col-md-6">
@@ -402,7 +367,7 @@
                                 <div class="mb-3">
                                     <textarea class="form-control" rows="4" placeholder="Message" required></textarea>
                                 </div>
-                                <button type="submit" class="btn btn-primary w-100">Send Message</button>
+                                <button type="submit" class="btn btn-primary w-100" style="background-color: #28a745; border-color: #28a745; color: #fff;">Send Message</button>
                             </form>
                         </div>
                     </div>
@@ -414,6 +379,7 @@
                 </path>
             </svg>
         </section>
+
         @extends('Header&footer.footer')
         <!-- Footer -->
         <!-- JS Bootstrap -->
@@ -464,13 +430,12 @@
                         themeSwitch.style.border = "2px solid black";
                     } else {
                         themeSwitch.innerHTML = "🌙"; // Bulan untuk mode gelap
-                        themeSwitch.style.backgroundColor = "rgb(7, 255, 40)";
+                        themeSwitch.style.backgroundColor = "#28a745 ";
                         themeSwitch.style.color = "#b74b4b";
-                        themeSwitch.style.border = "2px solid rgb(7, 255, 40)";
+                        themeSwitch.style.border = "2px solid #28a745 ";
                     }
                 }
             });
         </script>
 </body>
-
 </html>
