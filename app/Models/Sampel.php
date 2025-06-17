@@ -33,5 +33,10 @@ class Sampel extends Model
     }
 
     // ✅ Tambahkan relasi ke Tanaman via PeriodeTanam
+    public function inputHarians()
+    {
+        return $this->hasMany(InputHarian::class, 'kategori_sampel_id');
+    }
+
 }
 

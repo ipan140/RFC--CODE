@@ -1,5 +1,4 @@
 @extends('partials.headerFooter')
-
 @section('content')
     @include('partials.sidebar')
 
@@ -48,36 +47,43 @@
 
             <div class="table-responsive">
                 <table class="table table-bordered table-striped table-hover align-middle text-center">
-                    <thead class="table-dark">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Periode Tanam</th>
+                        <th>Nama Kategori</th>
+                        <th>Deskripsi</th>
+                        <th>Jumlah Input Harian</th> <!-- Tambahan -->
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($kategoriSampels as $kategori)
                         <tr>
-                            <th>#</th>
-                            <th>Periode Tanam</th>
-                            <th>Nama Kategori</th>
-                            <th>Deskripsi</th>
-                            <th>Aksi</th>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $kategori->periodeTanam->nama_tanaman ?? '-' }}</td>
+                            <td>{{ $kategori->nama }}</td>
+                            <td>{{ $kategori->deskripsi }}</td>
+                            <td>
+                                <span class="badge bg-primary">
+                                    {{ $kategori->input_harians_count ?? 0 }} Data
+                                </span>
+                            </td>
+                            <td class="d-flex justify-content-center gap-1">
+                                <a href="{{ route('input_harian.index', ['kategori_sampel_id' => $kategori->id, 'periode_tanam_id' => $kategori->periode_tanam_id]) }}"
+                                class="btn btn-warning btn-sm text-dark mb-1">
+                                    <i class="bi bi-pencil-square"></i> Input Harian
+                                </a>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($kategoriSampels as $kategori)
-                            <tr>
-                                <td>{{ $loop->iteration }}</td>
-                                <td>{{ $kategori->periodeTanam->nama_tanaman ?? '-' }}</td>
-                                <td>{{ $kategori->nama }}</td>
-                                <td>{{ $kategori->deskripsi }}</td>
-                                <td class="d-flex justify-content-center gap-1">
-                                    <a href="{{ route('input_harian.index', ['kategori_sampel_id' => $kategori->id, 'periode_tanam_id' => $kategori->periode_tanam_id]) }}"
-                                    class="btn btn-warning btn-sm text-dark mb-1">
-                                        <i class="bi bi-pencil-square"></i> Input Harian
-                                    </a>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="text-center">Belum ada data kategori.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center">Belum ada data kategori.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+
             </div>
         </section>
     </div>

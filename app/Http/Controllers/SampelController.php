@@ -18,8 +18,9 @@ class SampelController extends Controller
             'periode_tanam_id' => 'nullable|exists:periode_tanams,id',
         ]);
 
-        // Ambil data kategori sampel beserta relasi periode tanam dan tanaman
-        $query = KategoriSampel::with('periodeTanam.tanaman');
+        // Ambil data kategori sampel beserta relasi periode tanam, tanaman, dan hitung input harian
+        $query = KategoriSampel::with('periodeTanam.tanaman')
+            ->withCount('inputHarians');
 
         // Filter berdasarkan periode tanam jika disediakan
         if ($request->filled('periode_tanam_id')) {

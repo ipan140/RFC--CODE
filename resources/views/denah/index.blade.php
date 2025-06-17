@@ -106,7 +106,7 @@
   };
 
   var overlayMaps = {
-    "Sensor LoRa": sensorLora
+    "All Sensor": sensorLora
   };
 
   L.control.layers(baseLayers, overlayMaps).addTo(map);

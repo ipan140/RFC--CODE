@@ -10,7 +10,8 @@
         position: fixed;
         width: 100%;
         padding: 1rem 5%;
-        background-color: #f8f9fa; /* Menambahkan background untuk navbar */
+        background-color: #f8f9fa;
+        /* Menambahkan background untuk navbar */
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -35,7 +36,8 @@
 
     .navbar-nav .nav-link {
         font-size: 1.4rem;
-        color: #333; /* Mengubah warna teks menjadi hitam */
+        color: #333;
+        /* Mengubah warna teks menjadi hitam */
         font-weight: 500;
         transition: 0.3s ease-in-out;
         border-bottom: 2px solid transparent;
@@ -43,62 +45,73 @@
 
     .navbar-nav .nav-link:hover,
     .navbar-nav .nav-link.active {
-        color: #000; /* Mengubah warna hover menjadi hitam */
-        border-bottom: 2px solid rgb(7, 255, 40); /* Mengubah warna bawah menjadi hijau */
+        color: #000;
+        /* Mengubah warna hover menjadi hitam */
+        border-bottom: 2px solid #28a745;
+        /* Mengubah warna bawah menjadi hijau */
     }
+
     /* RFC-App Button */
     .btn-rfc {
         padding: 8px 16px;
-        background-color: rgb(7, 255, 40);
+        background-color: #28a745;
         border-radius: 25px;
         font-size: 1.4rem;
         color: rgb(255, 255, 255);
         font-weight: 600;
-        border: 2px solid rgb(7, 255, 40);
+        border: 2px solid #28a745;
         transition: 0.3s ease-in-out;
     }
+
     .btn-rfc:hover {
         background-color: #000;
         color: #fff;
     }
 
     .btn-rfc:hover {
-        background-color: rgb(0, 255, 13);
-        color: white; /* Tetap hitam */
-        box-shadow: 0 0 15px rgb(0, 255, 13);
+        background-color: #28a745;
+        color: white;
+        /* Tetap hitam */
+        box-shadow: 0 0 15px #28a745;
     }
-.btn-darkmode {
-    width: 50px; /* Lebar tombol */
-    height: 50px; /* Tinggi tombol */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: rgb(7, 255, 40);
-    border-radius: 50%; /* Membuat tombol bulat */
-    font-size: 1.4rem;
-    color: #b74b4b;
-    font-weight: 600;
-    border: 2px solid rgb(7, 255, 40);
-    transition: 0.3s ease-in-out;
-    cursor: pointer;
-}
 
-/* Hover Effect */
-.btn-darkmode:hover {
-    background-color: rgb(0, 255, 13);
-    color: black;
-    box-shadow: 0 0 15px rgb(0, 255, 13);
-}
+    .btn-darkmode {
+        width: 50px;
+        /* Lebar tombol */
+        height: 50px;
+        /* Tinggi tombol */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #28a745;
+        border-radius: 50%;
+        /* Membuat tombol bulat */
+        font-size: 1.4rem;
+        color: #b74b4b;
+        font-weight: 600;
+        border: 2px solid #28a745;
+        transition: 0.3s ease-in-out;
+        cursor: pointer;
+    }
+
+    /* Hover Effect */
+    .btn-darkmode:hover {
+        background-color: #28a745;
+        color: black;
+        box-shadow: 0 0 15px #28a745;
+    }
 
     /* Responsive Navbar */
     @media (max-width: 992px) {
         .navbar {
             padding: 1rem 3%;
         }
+
         .navbar-nav {
             gap: 10px;
             text-align: center;
         }
+
         .btn-rfc {
             font-size: 1.2rem;
             padding: 6px 14px;
@@ -106,13 +119,62 @@
     }
 
     .darkmode {
-        background-color: #222 !important;
-        color: white !important;
+        background-color: #000 !important;
+        color: #fff !important;
     }
 
-    .darkmode a, .darkmode p, .darkmode h1, .darkmode h2, .darkmode h5 {
-        color: white !important;
+    .darkmode a,
+    .darkmode p,
+    .darkmode h1,
+    .darkmode h2,
+    .darkmode h3,
+    .darkmode h4,
+    .darkmode h5,
+    .darkmode h6,
+    .darkmode span,
+    .darkmode li,
+    .darkmode div,
+    .darkmode section {
+        color: #fff !important;
     }
+
+    .darkmode .navbar {
+        background-color: #000 !important;
+    }
+
+    .darkmode .navbar-nav .nav-link {
+        color: #fff !important;
+        border-bottom-color: transparent;
+    }
+
+    .darkmode .navbar-nav .nav-link:hover,
+    .darkmode .navbar-nav .nav-link.active {
+        color: #28a745 !important;
+        border-bottom: 2px solid #28a745;
+    }
+
+    .darkmode .btn-rfc {
+        background-color: #fff !important;
+        color: #000 !important;
+        border-color: #fff !important;
+    }
+
+    .darkmode .btn-rfc:hover {
+        background-color: #ccc !important;
+        color: #000 !important;
+    }
+
+    .darkmode .btn-darkmode {
+        background-color: #28a745 !important;
+        color: #000 !important;
+        border-color: #28a745 !important;
+    }
+
+    .darkmode .jumbotron {
+        background-color: #000 !important;
+        color: #fff !important;
+    }
+
 
     /* Container Video */
     .video-container {
@@ -177,9 +239,9 @@
         border: 1px solid white;
     }
 
-    .darkmode .card p, 
-    .darkmode .card h5, 
-    .darkmode .card h1, 
+    .darkmode .card p,
+    .darkmode .card h5,
+    .darkmode .card h1,
     .darkmode .card h2 {
         color: white !important;
     }
@@ -190,6 +252,7 @@
             opacity: 0;
             transform: translateX(-50px);
         }
+
         to {
             opacity: 1;
             transform: translateX(0);
@@ -201,6 +264,7 @@
             opacity: 0;
             transform: translateX(50px);
         }
+
         to {
             opacity: 1;
             transform: translateX(0);
@@ -254,4 +318,3 @@
         </div>
     </div>
 </nav>
-
