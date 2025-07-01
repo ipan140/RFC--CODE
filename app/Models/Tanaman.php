@@ -52,4 +52,5 @@ class Tanaman extends Model
             ])
             ->logOnlyDirty();
     }
+    
 }

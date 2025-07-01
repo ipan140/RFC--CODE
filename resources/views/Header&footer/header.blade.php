@@ -285,6 +285,41 @@
             margin-bottom: 20px;
         }
     }
+
+    /* Responsive Navbar */
+    @media (max-width: 991.98px) {
+        .navbar-nav {
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+
+        .navbar-collapse {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 10px;
+        }
+
+        .darkmode .navbar-collapse {
+            background-color: #111 !important;
+        }
+    }
+
+    /* Toggle button style */
+    .navbar-toggler {
+        border: none;
+        background: none;
+        font-size: 1.5rem;
+    }
+
+    .navbar-toggler:focus {
+        outline: none;
+        box-shadow: none;
+    }
+
+    .darkmode .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='white' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+    }
 </style>
 <nav class="navbar navbar-expand-lg p-3">
     <div class="container">
@@ -295,10 +330,11 @@
         </a>
 
         <!-- Toggle Button for Mobile -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" aria-controls="navbarNav" aria-expanded="false"
+            aria-label="Toggle navigation" id="navbarToggleBtn">
             <span class="navbar-toggler-icon"></span>
         </button>
+
 
         <!-- Navbar Items -->
         <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
@@ -318,3 +354,30 @@
         </div>
     </div>
 </nav>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleBtn = document.getElementById('navbarToggleBtn');
+        const navbarCollapse = document.getElementById('navbarNav');
+
+        toggleBtn.addEventListener('click', function () {
+            const isShown = navbarCollapse.classList.contains('show');
+            const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse)
+                || new bootstrap.Collapse(navbarCollapse, { toggle: false });
+
+            if (isShown) {
+                bsCollapse.hide();
+            } else {
+                bsCollapse.show();
+            }
+        });
+
+        // Tambahan: Tutup saat link di dalamnya diklik (opsional)
+        document.querySelectorAll('#navbarNav .nav-link, #navbarNav .btn').forEach(function (link) {
+            link.addEventListener('click', function () {
+                const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                if (bsCollapse) bsCollapse.hide();
+            });
+        });
+    });
+</script>

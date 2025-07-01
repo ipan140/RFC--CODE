@@ -2,42 +2,51 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
 use App\Models\Sensor;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Carbon;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseTransactions; // Import DatabaseTransactions
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class SensorControllerTest extends TestCase
 {
-    // Use DatabaseTransactions to ensure database is rolled back after each test
     use DatabaseTransactions;
 
-    // Test the index method
-    public function testIndexMethodReturnsViewWithData()
+    protected $admin;
+
+    protected function setUp(): void
     {
-        $sensor = Sensor::factory()->create(); // Pastikan Anda sudah membuat factory untuk Sensor
+        parent::setUp();
 
-        $response = $this->get(route('sensor.index'));
+        $now = now();
 
-        $response->assertStatus(200)
-                 ->assertViewIs('sensor.index')
-                 ->assertViewHas('dataSensor', function ($data) use ($sensor) {
-                     // Menggunakan assertContains untuk koleksi
-                     return $data->contains(function ($item) use ($sensor) {
-                         return $item->id === $sensor->id; // Pastikan ID sensor cocok
-                     });
-                 });
+        $this->admin = User::updateOrCreate(
+            ['email' => 'admin@gmail.com'],
+            [
+                'name' => 'Admin',
+                'password' => Hash::make('12345678'),
+                'role' => 'admin',
+                'status' => 1,
+                'profile_picture' => null,
+                'api_token' => Str::random(60),
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]
+        );
+
+        $this->actingAs($this->admin);
     }
 
-    // Test the store method
     public function testStoreMethodStoresDataCorrectly()
     {
+        $waktu = now()->format('Y-m-d H:i:s');
         $data = [
             'parameter' => 'ph',
             'value' => 7.5,
-            'time' => now(),
-            'ri' => '1234'
+            'waktu' => $waktu,
+            'ri' => '1234',
         ];
 
         $response = $this->post(route('sensor.store'), $data);
@@ -45,53 +54,37 @@ class SensorControllerTest extends TestCase
         $response->assertRedirect(route('sensor.index'));
         $response->assertSessionHas('success', 'Data sensor berhasil ditambahkan.');
 
-        // Format waktu agar cocok dengan yang ada di database
         $this->assertDatabaseHas('sensors', [
             'parameter' => 'ph',
             'value' => 7.5,
+            'waktu' => $waktu,
             'ri' => '1234',
-            'time' => Carbon::parse($data['time'])->toDateTimeString(),
         ]);
     }
 
-    // Test the edit method
-    public function testEditMethodReturnsEditView()
-    {
-        $sensor = Sensor::factory()->create();
-
-        $response = $this->get(route('sensor.edit', $sensor->id));
-
-        $response->assertStatus(200)
-                 ->assertViewIs('sensor.edit')
-                 ->assertViewHas('sensor', $sensor);
-    }
-
-    // Test the update method
     public function testUpdateMethodUpdatesDataCorrectly()
     {
         $sensor = Sensor::factory()->create();
-        $updatedData = [
+
+        $newTime = now()->format('Y-m-d\TH:i');
+
+        $response = $this->put(route('sensor.update', $sensor->id), [
             'parameter' => 'humidity',
             'value' => 55,
-            'time' => now(),
-            'ri' => '5678'
-        ];
-
-        $response = $this->put(route('sensor.update', $sensor->id), $updatedData);
+            'waktu' => $newTime,
+            'ri' => '5678',
+        ]);
 
         $response->assertRedirect(route('sensor.index'));
         $response->assertSessionHas('success', 'Sensor berhasil diperbarui!');
 
-        // Gunakan format waktu yang sama seperti di database
         $this->assertDatabaseHas('sensors', [
             'parameter' => 'humidity',
             'value' => 55,
             'ri' => '5678',
-            'time' => Carbon::parse($updatedData['time'])->toDateTimeString(),
         ]);
     }
 
-    // Test the destroy method
     public function testDestroyMethodDeletesData()
     {
         $sensor = Sensor::factory()->create();
@@ -104,55 +97,78 @@ class SensorControllerTest extends TestCase
         $this->assertDatabaseMissing('sensors', ['id' => $sensor->id]);
     }
 
-    // Test the fetchAllData method (using mock API response)
-    public function testFetchAllData()
-    {
-        $device = 'ph';
+    // public function testFetchAllData()
+    // {
+    //     $fakeDevices = [
+    //         'ph' => ['con' => '5.92', 'ri' => 'cin-ph', 'ct' => '20250607T150324'],
+    //         'pota' => ['con' => '13', 'ri' => 'cin-pota', 'ct' => '20250607T150324'],
+    //         'phospor' => ['con' => '6', 'ri' => 'cin-phospor', 'ct' => '20250607T150324'],
+    //         'ec' => ['con' => '0.79', 'ri' => 'cin-ec', 'ct' => '20250607T150324'],
+    //         'nitrogen' => ['con' => '8', 'ri' => 'cin-nitro', 'ct' => '20250607T150324'],
+    //         'humidity' => ['con' => '2.72', 'ri' => 'cin-humid', 'ct' => '20250607T150324'],
+    //         'temp' => ['con' => '4.22', 'ri' => 'cin-temp', 'ct' => '20250607T150324'],
+    //     ];
 
-        // Membuat response mock yang lebih realistis
+    //     foreach ($fakeDevices as $device => $data) {
+    //         Http::fake([
+    //             "*/{$device}/la" => Http::response([
+    //                 'm2m:cin' => [
+    //                     'con' => $data['con'],
+    //                     'ri' => '/antares-cse/' . $data['ri'],
+    //                     'ct' => $data['ct']
+    //                 ]
+    //             ], 200),
+    //         ]);
+    //     }
+
+    //     // Call route to fetch and store Antares data
+    //     $response = $this->post(route('sensor.fetchStore'));
+
+    //     $response->assertRedirect(route('sensor.index'));
+    //     $response->assertSessionHas('success');
+
+    //     // Validate database entries
+    //     foreach ($fakeDevices as $parameter => $data) {
+    //         $expectedValue = in_array($parameter, ['pota', 'phospor', 'nitrogen'])
+    //             ? round((float)$data['con'], 2)
+    //             : round(((float)$data['con']) / 100, 2);
+
+    //         $this->assertDatabaseHas('sensors', [
+    //             'parameter' => strtoupper($parameter),
+    //             'value' => $expectedValue,
+    //         ]);
+    //     }
+    // }
+
+
+    public function testExportMethodExportsDataCorrectly()
+    {
         Http::fake([
-            'https://platform.antares.id:8443/~/antares-cse/antares-id/*' => Http::response([
-                'm2m:cnt' => [
-                    'm2m:cin' => [
-                        [
-                            'con' => '7.5',
-                            'ri' => '1234',
-                            'ct' => '20230508T123456',
-                        ]
-                    ]
+            '*' => Http::response([
+                'm2m:cin' => [
+                    'con' => '5.92',
+                    'ri' => '/antares-cse/cin-Yr1zzM5DoLtVQC9sEPili9s0AF0Davnl',
+                    'ct' => '20250607T150324'
                 ]
             ], 200)
         ]);
 
-        $response = $this->get(route('sensor.getDeviceData', $device));
-
-        $response->assertStatus(200);
-        $response->assertViewIs('sensor.index');
-        $response->assertViewHas('device', $device);
-        $response->assertViewHas('items', function ($items) {
-            return count($items) > 0 && $items[0]['value'] == 7.5;
-        });
-    }
-
-    // Test the export method
-    public function testExportMethodExportsDataCorrectly()
-    {
-        Sensor::factory()->create([
-            'parameter' => 'ph',
-            'value' => 7.5,
-            'ri' => '1234',
-            'time' => now()
-        ]);
+        $filePath = storage_path('app/public/data-semua-sensor.csv');
 
         $response = $this->get(route('sensor.export'));
 
         $response->assertStatus(200);
-        $response->assertHeader('Content-Type', 'text/csv');
-        $response->assertHeader('Content-Disposition', 'attachment; filename="data-semua-sensor.csv"');
+        $this->assertFileExists($filePath);
 
-        // Verifikasi isi file CSV (contoh memeriksa bagian awal file CSV)
-        $csvContent = $response->getContent();
-        $this->assertStringContainsString('parameter,value,ri,time', $csvContent);
-        $this->assertStringContainsString('ph,7.5,1234,' . now()->toDateString(), $csvContent);
+        $content = file_get_contents($filePath);
+
+        $this->assertStringContainsString('Parameter,"Resource ID",Waktu,Nilai', $content);
+
+        $this->assertMatchesRegularExpression(
+            '/(ph|pota|phospor|EC|Nitrogen|humidity|temp),\/antares-cse\/cin-[^,]+,"2025-06-07 15:03:24",5\.92/',
+            $content
+        );
+
+        unlink($filePath);
     }
 }

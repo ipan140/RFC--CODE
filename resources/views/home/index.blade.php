@@ -41,13 +41,11 @@
             color: white;
         }
 
-        /* Container inside #services */
         #services .container {
             position: relative;
             z-index: 2;
         }
 
-        /* Card Styling */
         .card {
             transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
             border-radius: 15px;
@@ -65,20 +63,19 @@
             border-radius: 10px;
         }
 
-        /* Button Styling */
         .btn-rfc,
         .btn-darkmode {
             padding: 10px 20px;
             border-radius: 25px;
             font-size: 1.2rem;
             font-weight: 600;
-            border: 2px solid #28a745 ;
+            border: 2px solid #28a745;
             transition: all 0.3s ease-in-out;
             cursor: pointer;
         }
 
         .btn-rfc {
-            background-color: #28a745 ;
+            background-color: #28a745;
             color: white;
         }
 
@@ -89,17 +86,16 @@
         }
 
         .btn-darkmode {
-            background-color: #28a745 ;
+            background-color: #28a745;
             color: white;
         }
 
         .btn-darkmode:hover {
             background-color: #28a745;
             color: black;
-            box-shadow: 0 0 15px #28a745 ;
+            box-shadow: 0 0 15px #28a745;
         }
 
-        /* Dark Mode Styling */
         .darkmode {
             background-color: #222 !important;
             color: white !important;
@@ -113,17 +109,14 @@
             color: white !important;
         }
 
-        /* Jumbotron Styling */
         .jumbotron {
             background-color: transparent;
-            /* HAPUS background putih */
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
             padding: 50px 5%;
             color: #28a745;
-            /* TAMBAHKAN teks hijau */
         }
 
         .jumbotron .video-container,
@@ -132,7 +125,6 @@
             max-width: 50%;
         }
 
-        /* Pastikan heading dan paragraf tetap hijau */
         .jumbotron h1,
         .jumbotron p {
             color: #28a745 !important;
@@ -142,7 +134,6 @@
             text-align: left;
         }
 
-        /* Slide Animations */
         @keyframes slideRight {
             from {
                 opacity: 0;
@@ -175,7 +166,6 @@
             animation: slideLeft 1s ease-in-out;
         }
 
-        /* Footer Styling */
         .footer-light {
             background-color: white !important;
             color: black !important;
@@ -190,11 +180,83 @@
 
         .contact-form {
             background-color: #ffffff;
-            /* Atau warna lain seperti #f9f9f9 */
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            /* Efek bayangan */
+        }
+
+        /* ===================== */
+        /* Tambahan CSS Responsif */
+        /* ===================== */
+        @media (max-width: 768px) {
+            .jumbotron {
+                flex-direction: column-reverse;
+                text-align: center;
+                padding: 30px 15px;
+            }
+
+            .jumbotron .content-overlay,
+            .jumbotron .video-container {
+                max-width: 100%;
+            }
+
+            .jumbotron h1.display-4 {
+                font-size: 2rem;
+            }
+
+            .jumbotron .lead {
+                font-size: 1rem;
+            }
+
+            .btn-rfc,
+            .btn-darkmode {
+                width: 100%;
+                font-size: 1rem;
+                margin-bottom: 10px;
+            }
+
+            #about .col-md-6 {
+                margin-bottom: 2rem;
+            }
+
+            #services .col-md-6,
+            #services .col-lg-3 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            #mitra .col-md-4 {
+                flex: 0 0 100%;
+                max-width: 100%;
+                margin-bottom: 1.5rem;
+            }
+
+            .contact-us form input,
+            .contact-us form textarea {
+                font-size: 1rem;
+            }
+
+            .contact-us .btn {
+                font-size: 1rem;
+                padding: 10px;
+            }
+
+            footer {
+                text-align: center;
+                padding: 20px 10px;
+            }
+
+            .navbar-nav {
+                text-align: center;
+            }
+
+            .card-title {
+                font-size: 1.2rem;
+            }
+
+            .card-text {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
@@ -202,45 +264,39 @@
 <body>
     <!-- Navbar -->
     @include('Header&footer.header')
-    <div id="page-content" class="py-5">
-        <section class="jumbotron position-relative py-5">
+    <div id="page-content">
+        <section class="jumbotron py-5">
             <div class="container">
                 <div class="row align-items-center">
-                    <!-- Bagian Teks -->
-                    <div class="col-md-6 text-center text-md-start">
+                    <div class="col-sm-12 col-md-6 order-2 order-md-1 text-center text-md-start">
                         <h1 class="display-4 fw-bold text-green">Selamat Datang di Rooftop Farming Center</h1>
                         <p class="lead fs-4 text-green">Transforming rooftops into sustainable green spaces</p>
-                        <button class="btn" style="background-color: #28a745; border-color: #28a745; color: #fff;" 
-                                id="playVideoBtn" data-bs-toggle="modal" data-bs-target="#videoModal">
-                            Tonton Video
-                        </button>
+                        <button class="btn btn-rfc" id="playVideoBtn" data-bs-toggle="modal"
+                            data-bs-target="#videoModal">Tonton Video</button>
                     </div>
-                    <!-- Bagian Gambar -->
-                    <div class="col-md-6 text-center">
+                    <div class="col-sm-12 col-md-6 order-1 order-md-2 text-center">
                         <img src="asset/image/tentangkami.jpg" alt="About Us" class="img-fluid rounded">
                     </div>
                 </div>
             </div>
         </section>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
-            <path fill="#008000" fill-opacity="1"
-                d="M0,32L48,48C96,64,192,96,288,101.3C384,107,480,85,576,96C672,107,768,149,864,144C960,139,1056,85,1152,53.3C1248,21,1344,11,1392,5.3L1440,0L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z">
-            </path>
-        </svg>
-        <!-- Modal Video dengan Background Hitam -->
         <div class="modal fade" id="videoModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-body">
                         <div class="ratio ratio-16x9">
-                            <iframe id="youtube-video" src="" title="YouTube video player" frameborder="0"
-                                allow="autoplay; encrypted-media" allowfullscreen>
-                            </iframe>
+                            <iframe id="youtube-video" src="" allow="autoplay; encrypted-media"
+                                allowfullscreen></iframe>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+            <path fill="#008000" fill-opacity="1"
+                d="M0,32L48,48C96,64,192,96,288,101.3C384,107,480,85,576,96C672,107,768,149,864,144C960,139,1056,85,1152,53.3C1248,21,1344,11,1392,5.3L1440,0L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z">
+            </path>
+        </svg>
 
         <!-- Script untuk mengontrol video -->
         <script>
@@ -264,12 +320,11 @@
         <section id="about" class="py-5">
             <div class="container">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-sm-12 col-md-6">
                         <img src="{{ asset('asset/image/OIP.jpg') }}" alt="Tentang Kami"
                             class="img-fluid w-100 rounded">
-                        <div class="slide-"></div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-sm-12 col-md-6">
                         <h2 class="fw-bold text-green" style="font-size: 2rem;">Tentang Kami</h2>
                         <p class="text-green" style="font-size: 1.1rem; font-weight: 500;">
                             Kami adalah sebuah pusat pertanian rooftop (rooftop farming center) yang berbasis Internet
@@ -345,7 +400,7 @@
         </section>
 
         <!-- Contact Section -->
-        <section class="contact-us py-5">
+        <section id="contact" class="contact-us py-5">
             <div class="container">
                 <div class="row justify-content-center g-4"> <!-- center the column -->
                     <!-- Form -->
@@ -367,7 +422,9 @@
                                 <div class="mb-3">
                                     <textarea class="form-control" rows="4" placeholder="Message" required></textarea>
                                 </div>
-                                <button type="submit" class="btn btn-primary w-100" style="background-color: #28a745; border-color: #28a745; color: #fff;">Send Message</button>
+                                <button type="submit" class="btn btn-primary w-100"
+                                    style="background-color: #28a745; border-color: #28a745; color: #fff;">Send
+                                    Message</button>
                             </form>
                         </div>
                     </div>
@@ -379,7 +436,6 @@
                 </path>
             </svg>
         </section>
-
         @extends('Header&footer.footer')
         <!-- Footer -->
         <!-- JS Bootstrap -->
@@ -438,4 +494,5 @@
             });
         </script>
 </body>
+
 </html>

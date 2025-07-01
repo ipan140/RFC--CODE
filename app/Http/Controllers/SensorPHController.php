@@ -102,7 +102,7 @@ class SensorPHController extends Controller
         }
 
         $cin = $response['m2m:cin'] ?? null;
-
+        //dd($cin);
         if (!$cin) {
             return [
                 'value' => 'no-value',

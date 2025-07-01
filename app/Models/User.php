@@ -7,6 +7,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class User extends Authenticatable
@@ -36,6 +37,14 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+    public static function booted()
+    {
+        static::creating(function ($user) {
+            if (empty($user->api_token)) {
+                $user->api_token = Str::random(60);
+            }
+        });
+    }
 
     public function getActivitylogOptions(): LogOptions
     {

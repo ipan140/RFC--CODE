@@ -61,6 +61,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::view('/riwayat_sensor', 'riwayat_sensor');
     Route::get('/chart', [ChartController::class, 'index']);
 
+    Route::get('/sensor/device/{device}', [SensorController::class, 'getDeviceData'])->name('sensor.getDeviceData');
+    Route::get('/sensor/export', [SensorController::class, 'export'])->name('sensor.export');
+    
+
+
     Route::resources([
         'tanaman' => TanamanController::class,
         'sensor' => SensorController::class,
@@ -79,6 +84,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('sampel', SampelController::class);
     Route::get('/kategori-pengamatan/{id}', [TanamanSampelController::class, 'getKategoriPengamatan']);
     Route::get('/denah_sensor', [DenahSensorController::class, 'index'])->name('denah.sensor');
+    Route::post('/sensor/fetch', [SensorController::class, 'fetchAndStoreAll'])->name('sensor.fetchStore');
 });
 
 Route::get('/logaktivitas', [ActivityLogController::class, 'index'])->name('logaktivitas.index');
@@ -213,6 +219,7 @@ Route::middleware(['auth', 'role:admin,owner,user'])->group(function () {
     Route::get('/sampel', [TanamanSampelController::class, 'index'])->name('sampel.index');
     Route::resource('sampel', SampelController::class);
     Route::get('/denah_sensor', [DenahSensorController::class, 'index'])->name('denah.sensor');
+     Route::post('/sensor/fetch', [SensorController::class, 'fetchAndStore'])->name('sensor.fetchStore');
 });
 
 Route::middleware(['auth'])->group(function () {

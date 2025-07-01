@@ -38,8 +38,8 @@
                                     <i class="bi bi-cloud-download-fill"></i> Fetch & Simpan Data
                                 </button>
                             @endif
-                        </div>
 
+                        </div>
                         <div class="table-responsive">
                             <table class="table table-striped table-bordered text-center">
                                 <thead class="table-dark">
