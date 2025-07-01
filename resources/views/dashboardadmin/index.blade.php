@@ -146,4 +146,18 @@
         </div><!-- End Row -->
     </section>
     </main><!-- End Main -->
+    @if(session('login_success'))
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            Swal.fire({
+                icon: 'success',
+                title: 'Login Berhasil!',
+                text: 'Selamat datang di dashboard.',
+                showConfirmButton: false,
+                timer: 2000
+            });
+        });
+    </script>
+@endif
 @endsection

@@ -237,7 +237,27 @@
           chart: {
             type: 'scatter',
             height: 350,
-            toolbar: { show: false }
+            toolbar: {
+            show: true,
+            tools: {
+              download: true,
+              selection: false,
+              zoom: false,
+              zoomin: false,
+              zoomout: false,
+              pan: false,
+              reset: false,
+            },
+            export: {
+              csv: {
+              filename: "laporan-sensor",
+              headerCategory: "Jenis Sensor",
+              headerValue: "Nilai",
+              },
+              svg: { filename: "laporan-sensor" },
+              png: { filename: "laporan-sensor" },
+            }
+            }
           },
           colors: colors,
           markers: {
@@ -274,54 +294,90 @@
       </div>
     </div>
 
-
     <!-- Pie Chart Card - Right -->
-    <div class="col-lg-4">
-      <div class="card">
-      <div class="card-body pb-0">
-        <h5 class="card-title">Sensor Traffic <span>| Today</span></h5>
-        <div id="trafficChart" style="min-height: 400px;" class="echart"></div>
-        <script>
+    <div class="col-lg-4 position-relative">
+  <div class="card">
+    <div class="card-body pb-0">
+      <h5 class="card-title">Sensor Traffic <span>| Today</span></h5>
+
+      <!-- Dropdown Export Icon -->
+      <div class="dropdown position-absolute" style="top: 20px; right: 20px;">
+        <button class="btn btn-light dropdown-toggle" type="button" id="exportMenu" data-bs-toggle="dropdown" aria-expanded="false">
+          &#9776; <!-- Hamburger Icon -->
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="exportMenu">
+          <li><a class="dropdown-item" href="#" id="download-svg">Download SVG</a></li>
+          <li><a class="dropdown-item" href="#" id="download-png">Download PNG</a></li>
+          <li><a class="dropdown-item" href="#" id="download-csv">Download CSV</a></li>
+        </ul>
+      </div>
+
+      <div id="trafficChart" style="min-height: 400px;"></div>
+
+      <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+      <script>
         document.addEventListener("DOMContentLoaded", () => {
-          var chartDom = document.getElementById('trafficChart');
-          var myChart = echarts.init(chartDom);
-          var option = {
-          tooltip: { trigger: 'item' },
-          legend: {
-            top: '5%',
-            left: 'center'
-          },
-          series: [{
-            name: 'Sensor',
-            type: 'pie',
-            radius: ['40%', '70%'],
-            avoidLabelOverlap: false,
-            label: { show: false, position: 'center' },
-            emphasis: {
-            label: {
-              show: true,
-              fontSize: '18',
-              fontWeight: 'bold'
-            }
-            },
-            labelLine: { show: false },
-            data: [
+          const chartData = [
             @foreach($trafficChartData as $key => $value)
-        {
-            value: {{ $value ?? 0 }},
-            name: "{{ $key }}"
+              { name: "{{ $key }}", y: {{ $value ?? 0 }} },
+            @endforeach
+          ];
+
+          const chart = new ApexCharts(document.querySelector("#trafficChart"), {
+            chart: {
+              type: 'donut',
+              height: 400,
+              id: 'sensorChart'
             },
-        @endforeach
-      ]
-          }]
-          };
-          myChart.setOption(option);
+            series: chartData.map(item => item.y),
+            labels: chartData.map(item => item.name),
+            legend: {
+              position: 'bottom'
+            }
+          });
+
+          chart.render();
+
+          // Download PNG
+          document.getElementById('download-png').addEventListener('click', () => {
+            chart.dataURI().then(({ imgURI }) => {
+              const link = document.createElement('a');
+              link.href = imgURI;
+              link.download = 'laporan-sensor.png';
+              link.click();
+            });
+          });
+
+          // Download SVG
+          document.getElementById('download-svg').addEventListener('click', () => {
+            chart.dataURI().then(({ svgURI }) => {
+              const link = document.createElement('a');
+              link.href = svgURI;
+              link.download = 'laporan-sensor.svg';
+              link.click();
+            });
+          });
+
+          // Download CSV
+          document.getElementById('download-csv').addEventListener('click', () => {
+            let csv = 'Jenis Sensor,Nilai\n';
+            chartData.forEach(row => {
+              csv += `${row.name},${row.y}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'laporan-sensor.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          });
         });
-        </script>
-      </div>
-      </div>
+      </script>
     </div>
-    </div>
+  </div>
+</div>
 
   @endsection
   @section('scripts')

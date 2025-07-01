@@ -55,7 +55,7 @@
         <nav class="header-nav ms-auto">
             <ul class="d-flex align-items-center">
                 <li class="nav-item d-block d-lg-none">
-                    <a class="nav-link nav-icon search-bar-toggle" href="#"><i class="bi bi-search"></i></a>
+                    <a class="nav-link nav-icon search-bar-toggle" href="#"></a>
                 </li>
 
                 {{-- Notifications --}}
@@ -103,11 +103,11 @@
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        <li>
+                        {{-- <li>
                             <a class="dropdown-item d-flex align-items-center" href="#">
                                 <i class="bi bi-question-circle"></i> <span>Need Help?</span>
                             </a>
-                        </li>
+                        </li> --}}
                         <li>
                             <hr class="dropdown-divider">
                         </li>

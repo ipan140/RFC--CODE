@@ -198,6 +198,22 @@
   </div>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  {{-- @if (session('login_success'))
+<script>
+  Swal.fire({
+    icon: 'success',
+    title: 'Login Berhasil!',
+    text: 'Mengarahkan ke dashboard...',
+    showConfirmButton: false,
+    timer: 2000
+  });
+
+  setTimeout(() => {
+    window.location.href = "/dashboard";
+  }, 2000);
+</script>
+@endif --}}
   <!-- <script>
     $(document).ready(function () {
         $.ajaxSetup({
@@ -268,7 +284,7 @@
             });
         });
     });
-  </script> -->
+  </scrip> -->
 </body>
 
 </html>

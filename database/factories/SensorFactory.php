@@ -8,25 +8,15 @@ use Carbon\Carbon;
 
 class SensorFactory extends Factory
 {
-    /**
-     * Nama model yang terkait dengan factory.
-     *
-     * @var string
-     */
     protected $model = Sensor::class;
 
-    /**
-     * Definisikan data default untuk model `Sensor`.
-     *
-     * @return array
-     */
-    public function definition()
+    public function definition(): array
     {
         return [
-            'parameter' => $this->faker->randomElement(['ph', 'pota', 'phospor', 'EC', 'Nitrogen', 'humidity', 'temp']),
-            'value' => $this->faker->randomFloat(2, 0, 10),  // Misalnya nilai antara 0 dan 10 dengan 2 desimal
-            'time' => Carbon::now()->format('Y-m-d H:i:s'),
-            'ri' => $this->faker->uuid,  // Menggunakan UUID sebagai nilai acak
+            'parameter' => $this->faker->randomElement(['PH', 'POTA', 'PHOSPHOR', 'EC', 'NITROGEN', 'HUMIDITY', 'TEMP']),
+            'value' => $this->faker->randomFloat(2, 0, 14),
+            'waktu' => Carbon::now()->format('Y-m-d H:i:s'),
+            'ri' => '/antares-cse/cin-' . $this->faker->uuid,
         ];
     }
 }

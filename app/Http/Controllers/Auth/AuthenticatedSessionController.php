@@ -23,20 +23,22 @@ class AuthenticatedSessionController extends Controller
      * Tangani permintaan login.
      */
     public function store(LoginRequest $request): RedirectResponse
-    {
-        $request->authenticate();
+{
+    $request->authenticate();
+    $request->session()->regenerate();
 
-        $request->session()->regenerate();
+    $user = Auth::user();
 
-        $user = Auth::user();
+    // Simpan flash session sebelum redirect
+    session()->flash('login_success', true);
 
-        // Redirect berdasarkan role
-        return match ($user->role) {
-            'admin' => redirect()->route('admin.dashboard'),
-            'owner' => redirect()->route('owner.dashboard'),
-            default => redirect()->route('user.dashboard'),
-        };
-    }
+    // Redirect berdasarkan role
+    return match ($user->role) {
+        'admin' => redirect()->route('admin.dashboard'),
+        'owner' => redirect()->route('owner.dashboard'),
+        default => redirect()->route('user.dashboard'),
+    };
+}
 
     /**
      * Logout user dan hancurkan session.
