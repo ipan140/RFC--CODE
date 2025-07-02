@@ -39,77 +39,73 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
-  var map = L.map('map').setView([-7.310828, 112.729189], 20);
+document.addEventListener('DOMContentLoaded', function() {
+    var map = L.map('map').setView([-7.310828, 112.729189], 20);
 
-  // Tile layers
-  var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-  });
+    // Base Layers
+    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
-  var darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; CARTO',
-    maxZoom: 30
-  });
-
-  var googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-    maxZoom: 30,
-    subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-  });
-
-  var googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-    maxZoom: 30,
-    subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-  });
-
-  osm.addTo(map);
-
-  // Custom icon merah (tidak respon)
-  const iconMerah = new L.Icon({
-    iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
-    iconSize: [32, 32],
-    iconAnchor: [16, 32]
-  });
-
-  // Layer group untuk sensor
-  var sensorLora = L.layerGroup();
-
-  @foreach($sensors as $index => $sensor)
-    var icon = "{{ $sensor['status'] }}" === "Respon" ? new L.Icon.Default() : iconMerah;
-
-    var popupContent = `
-      <b>Nomor Sensor:</b> {{ $index + 1 }}<br>
-      <b>Jenis:</b> Sensor LoRa<br>
-      <b>Nama:</b> {{ ucfirst($sensor['name']) }}<br>
-      <b>Status:</b> {{ $sensor['status'] }}<br>
-      <b>Data:</b> {!! json_encode($sensor['data']) !!}
-    `;
-
-    var marker = L.marker(
-      [{{ $sensor['lat'] }}, {{ $sensor['lng'] }}],
-      { icon: icon }
-    ).bindPopup(popupContent, {
-      autoPan: true,
-      keepInView: true,
-      maxWidth: 250
+    var googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        maxZoom: 30,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
     });
 
-    sensorLora.addLayer(marker);
-  @endforeach
+    var googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+        maxZoom: 30,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+    });
 
-  sensorLora.addTo(map);
+    var darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; CARTO',
+        maxZoom: 30
+    });
 
-  // Layer controls
-  var baseLayers = {
-    "OpenStreetMap": osm,
-    "Google Streets": googleStreets,
-    "Google Satellite": googleSat,
-  };
+    // Custom red icon
+    var redIcon = new L.Icon({
+        iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32]
+    });
 
-  var overlayMaps = {
-    "All Sensor": sensorLora
-  };
+    var sensorLayer = L.layerGroup().addTo(map);
 
-  L.control.layers(baseLayers, overlayMaps).addTo(map);
+    // Data sensor dari controller
+    var sensors = @json($sensors);
+
+    sensors.forEach((sensor, index) => {
+        const isActive = sensor.status.toLowerCase() === 'respon';
+        const icon = isActive ? new L.Icon.Default() : redIcon;
+        const dataValue = sensor.data && sensor.data.formatted ? sensor.data.formatted : 'N/A';
+
+        const popupContent = `
+            <b>Sensor #${index + 1}</b><br>
+            <b>Jenis:</b> Sensor LoRa<br>
+            <b>Nama:</b> ${sensor.name.toUpperCase()}<br>
+            <b>Status:</b> ${sensor.status}<br>
+            <b>Data:</b> ${dataValue}
+        `;
+
+        L.marker([sensor.lat, sensor.lng], { icon: icon })
+            .addTo(sensorLayer)
+            .bindPopup(popupContent);
+    });
+
+    // Layer control
+    var baseLayers = {
+        "OpenStreetMap": osm,
+        "Google Streets": googleStreets,
+        "Google Satellite": googleSat,
+        // "Dark Mode": darkLayer
+    };
+
+    var overlayMaps = {
+        "All Sensor ": sensorLayer
+    };
+
+    L.control.layers(baseLayers, overlayMaps).addTo(map);
+});
 </script>
 
 @endsection
