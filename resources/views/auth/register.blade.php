@@ -54,7 +54,7 @@
       </div>
 
       <div class="input-group">
-        <label for="phone"><span>📞</span></label>
+        <label for="phone"><span>ðŸ“ž</span></label>
         <input type="tel" name="phone" id="phone" placeholder="Phone Number" required value="{{ old('phone') }}">
       </div>
 
@@ -130,7 +130,7 @@
     gap: 18px;
   }
 
-  form>div {
+  form > div {
     display: flex;
     width: 100%;
     max-width: 400px;
@@ -246,6 +246,7 @@
     display: none;
   }
 
+  /* Responsif Tablet */
   @media (max-width: 768px) {
     .wrapper {
       width: 100%;
@@ -253,7 +254,7 @@
       border-radius: 15px;
     }
 
-    form>div {
+    form > div {
       max-width: 100%;
       flex-direction: row;
     }
@@ -269,6 +270,55 @@
 
     form button {
       width: 100%;
+    }
+  }
+
+  /* Responsif Mobile Kecil */
+  @media (max-width: 480px) {
+    html {
+      font-size: 10pt;
+    }
+
+    .wrapper {
+      padding: 25px 10px;
+      border-radius: 10px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+    }
+
+    form label,
+    form input,
+    input[type="file"] {
+      height: 40px;
+      font-size: 0.9rem;
+    }
+
+    form input {
+      padding: 0 0.8em;
+    }
+
+    form button {
+      font-size: 0.9rem;
+      padding: 0.75em 2em;
+    }
+
+    #error-message {
+      font-size: 0.8rem;
+    }
+
+    .role-selection {
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.85rem;
+      align-items: center;
+      text-align: center;
+    }
+
+    svg {
+      width: 20px;
+      height: 20px;
     }
   }
 </style>
