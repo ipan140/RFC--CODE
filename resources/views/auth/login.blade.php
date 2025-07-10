@@ -9,158 +9,200 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;900&display=swap">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
-    :root {
-      --accent-color: #28a745;
-      --base-color: #fff;
-      --text-color: #2E2B41;
-      --input-color: #F3F0FF;
-      --error-color: #f06272;
-    }
+  :root {
+    --accent-color: #28a745;
+    --base-color: #fff;
+    --text-color: #2E2B41;
+    --input-color: #F3F0FF;
+    --error-color: #f06272;
+  }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-    html {
-      font-family: 'Poppins', sans-serif;
-      font-size: 12pt;
-      color: var(--text-color);
-    }
+  html {
+    font-family: 'Poppins', sans-serif;
+    font-size: 12pt;
+    color: var(--text-color);
+  }
 
-    body {
-      min-height: 100vh;
-      background-color: var(--accent-color);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      overflow: auto;
-    }
+  body {
+    min-height: 100vh;
+    background-color: var(--accent-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    overflow: auto;
+  }
 
+  .wrapper {
+    background-color: var(--base-color);
+    width: 100%;
+    max-width: 500px;
+    padding: 40px 20px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 2.2rem;
+    font-weight: 900;
+    margin-bottom: 10px;
+  }
+
+  form {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+
+  form > div {
+    display: flex;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  form label {
+    width: 50px;
+    height: 50px;
+    background-color: var(--accent-color);
+    color: var(--base-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px 0 0 10px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  form input {
+    flex: 1;
+    height: 50px;
+    padding: 0 1em;
+    border: 2px solid var(--input-color);
+    border-left: none;
+    border-radius: 0 10px 10px 0;
+    font: inherit;
+    background-color: var(--input-color);
+    transition: border 0.2s;
+  }
+
+  form input:focus {
+    outline: none;
+    border-color: var(--text-color);
+  }
+
+  form div:has(input:focus) label {
+    background-color: var(--text-color);
+  }
+
+  form button {
+    margin-top: 10px;
+    padding: 0.85em 4em;
+    border: none;
+    border-radius: 1000px;
+    background-color: var(--accent-color);
+    color: var(--base-color);
+    font-weight: 600;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  form button:hover,
+  form button:focus {
+    background-color: var(--text-color);
+    transform: scale(1.02);
+    outline: none;
+  }
+
+  a {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  #error-message {
+    color: var(--error-color);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+  }
+
+  /* Responsif Tablet */
+  @media (max-width: 768px) {
     .wrapper {
-      background-color: var(--base-color);
       width: 100%;
-      max-width: 500px;
-      padding: 40px 20px;
-      border-radius: 20px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-      text-align: center;
-    }
-
-    h1 {
-      font-size: 2.2rem;
-      font-weight: 900;
-      margin-bottom: 10px;
-    }
-
-    form {
-      margin-top: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 18px;
+      padding: 30px 15px;
+      border-radius: 15px;
     }
 
     form > div {
-      display: flex;
-      width: 100%;
-      max-width: 400px;
+      max-width: 100%;
+      flex-direction: row;
     }
 
+    form input,
     form label {
-      width: 50px;
-      height: 50px;
-      background-color: var(--accent-color);
-      color: var(--base-color);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 10px 0 0 10px;
-      flex-shrink: 0;
-      cursor: pointer;
-    }
-
-    form input {
-      flex: 1;
-      height: 50px;
-      padding: 0 1em;
-      border: 2px solid var(--input-color);
-      border-left: none;
-      border-radius: 0 10px 10px 0;
-      font: inherit;
-      background-color: var(--input-color);
-      transition: border 0.2s;
-    }
-
-    form input:focus {
-      outline: none;
-      border-color: var(--text-color);
-    }
-
-    form div:has(input:focus) label {
-      background-color: var(--text-color);
+      height: 45px;
     }
 
     form button {
-      margin-top: 10px;
-      padding: 0.85em 4em;
-      border: none;
-      border-radius: 1000px;
-      background-color: var(--accent-color);
-      color: var(--base-color);
-      font-weight: 600;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.2s;
+      width: 100%;
+    }
+  }
+
+  /* Responsif Mobile Kecil */
+  @media (max-width: 480px) {
+    html {
+      font-size: 10pt;
     }
 
-    form button:hover,
-    form button:focus {
-      background-color: var(--text-color);
-      transform: scale(1.02);
-      outline: none;
+    .wrapper {
+      padding: 25px 10px;
+      border-radius: 10px;
     }
 
-    a {
-      color: var(--accent-color);
-      text-decoration: none;
-      font-weight: 500;
+    h1 {
+      font-size: 1.8rem;
     }
 
-    a:hover {
-      text-decoration: underline;
+    form label,
+    form input {
+      height: 40px;
+      font-size: 0.9rem;
+    }
+
+    form input {
+      padding: 0 0.8em;
+    }
+
+    form button {
+      font-size: 0.9rem;
+      padding: 0.75em 2em;
     }
 
     #error-message {
-      color: var(--error-color);
-      font-size: 0.9rem;
-      margin-bottom: 10px;
+      font-size: 0.8rem;
     }
 
-    @media (max-width: 768px) {
-      .wrapper {
-        width: 100%;
-        padding: 30px 15px;
-        border-radius: 15px;
-      }
-
-      form > div {
-        max-width: 100%;
-        flex-direction: row;
-      }
-
-      form input,
-      form label {
-        height: 45px;
-      }
-
-      form button {
-        width: 100%;
-      }
+    svg {
+      width: 20px;
+      height: 20px;
     }
-  </style>
+  }
+</style>
+
 </head>
 
 <body>
