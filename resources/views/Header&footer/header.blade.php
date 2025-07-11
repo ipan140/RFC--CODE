@@ -3,22 +3,23 @@
 
     body {
         font-family: 'Poppins', sans-serif;
+        padding-top: 80px;
+        /* Untuk menghindari tumpukan karena navbar fixed */
     }
 
-    /* Navbar */
     .navbar {
         position: fixed;
         width: 100%;
+        top: 0;
         padding: 1rem 5%;
         background-color: #f8f9fa;
-        /* Menambahkan background untuk navbar */
         display: flex;
         justify-content: space-between;
         align-items: center;
         z-index: 1000;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
-    /* Logo */
     .navbar-brand img {
         transition: 0.3s ease-in-out;
     }
@@ -27,7 +28,6 @@
         transform: scale(1.1);
     }
 
-    /* Navbar Links */
     .navbar-nav {
         display: flex;
         align-items: center;
@@ -37,7 +37,6 @@
     .navbar-nav .nav-link {
         font-size: 1.4rem;
         color: #333;
-        /* Mengubah warna teks menjadi hitam */
         font-weight: 500;
         transition: 0.3s ease-in-out;
         border-bottom: 2px solid transparent;
@@ -46,46 +45,34 @@
     .navbar-nav .nav-link:hover,
     .navbar-nav .nav-link.active {
         color: #000;
-        /* Mengubah warna hover menjadi hitam */
         border-bottom: 2px solid #28a745;
-        /* Mengubah warna bawah menjadi hijau */
     }
 
-    /* RFC-App Button */
     .btn-rfc {
         padding: 8px 16px;
         background-color: #28a745;
         border-radius: 25px;
         font-size: 1.4rem;
-        color: rgb(255, 255, 255);
+        color: #fff;
         font-weight: 600;
         border: 2px solid #28a745;
         transition: 0.3s ease-in-out;
     }
 
     .btn-rfc:hover {
-        background-color: #000;
-        color: #fff;
-    }
-
-    .btn-rfc:hover {
         background-color: #28a745;
-        color: white;
-        /* Tetap hitam */
+        color: #fff;
         box-shadow: 0 0 15px #28a745;
     }
 
     .btn-darkmode {
         width: 50px;
-        /* Lebar tombol */
         height: 50px;
-        /* Tinggi tombol */
         display: flex;
         justify-content: center;
         align-items: center;
         background-color: #28a745;
         border-radius: 50%;
-        /* Membuat tombol bulat */
         font-size: 1.4rem;
         color: #b74b4b;
         font-weight: 600;
@@ -94,28 +81,91 @@
         cursor: pointer;
     }
 
-    /* Hover Effect */
     .btn-darkmode:hover {
         background-color: #28a745;
         color: black;
         box-shadow: 0 0 15px #28a745;
     }
 
-    /* Responsive Navbar */
-    @media (max-width: 992px) {
-        .navbar {
-            padding: 1rem 3%;
+    .jumbotron {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px 40px;
+        min-height: auto;
+        text-align: center;
+    }
+
+    .content-overlay {
+        position: relative;
+        z-index: 1;
+        color: white;
+        text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: auto;
+        padding: 20px;
+    }
+
+    .video-container {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .video-container video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .card {
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        border-radius: 15px;
+        overflow: hidden;
+        background-color: white;
+        color: black;
+    }
+
+    .card:hover {
+        transform: scale(1.05);
+        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    @keyframes slideRight {
+        from {
+            opacity: 0;
+            transform: translateX(-50px);
         }
 
-        .navbar-nav {
-            gap: 10px;
-            text-align: center;
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slideLeft {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
         }
 
-        .btn-rfc {
-            font-size: 1.2rem;
-            padding: 6px 14px;
+        to {
+            opacity: 1;
+            transform: translateX(0);
         }
+    }
+
+    .slide-right {
+        animation: slideRight 1s ease-in-out;
+    }
+
+    .slide-left {
+        animation: slideLeft 1s ease-in-out;
     }
 
     .darkmode {
@@ -175,64 +225,6 @@
         color: #fff !important;
     }
 
-
-    /* Container Video */
-    .video-container {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-    }
-
-    /* Video Full Width */
-    .video-container video {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    /* Overlay untuk Teks */
-    .content-overlay {
-        position: relative;
-        z-index: 1;
-        color: white;
-        text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: 20vh;
-        padding: 20px;
-    }
-
-    /* Jumbotron Styling */
-    .jumbotron {
-        position: relative;
-        height: 70vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .custom-margin {
-        margin-bottom: 350px;
-    }
-
-    /* Efek hover untuk card */
-    .card {
-        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-        border-radius: 15px;
-        overflow: hidden;
-        background-color: white;
-        color: black;
-    }
-
-    .card:hover {
-        transform: scale(1.05);
-        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Mode Gelap untuk Card */
     .darkmode .card {
         background-color: #222 !important;
         color: white !important;
@@ -246,47 +238,7 @@
         color: white !important;
     }
 
-    /* Animasi Slide */
-    @keyframes slideRight {
-        from {
-            opacity: 0;
-            transform: translateX(-50px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-
-    @keyframes slideLeft {
-        from {
-            opacity: 0;
-            transform: translateX(50px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-
-    .slide-right {
-        animation: slideRight 1s ease-in-out;
-    }
-
-    .slide-left {
-        animation: slideLeft 1s ease-in-out;
-    }
-
-    /* Responsive Grid */
-    @media (max-width: 768px) {
-        .card {
-            margin-bottom: 20px;
-        }
-    }
-
-    /* Responsive Navbar */
+    /* Responsive Styles */
     @media (max-width: 991.98px) {
         .navbar-nav {
             flex-direction: column;
@@ -302,6 +254,41 @@
 
         .darkmode .navbar-collapse {
             background-color: #111 !important;
+        }
+
+        .navbar {
+            padding: 1rem 3%;
+        }
+
+        .btn-rfc {
+            font-size: 1.2rem;
+            padding: 6px 14px;
+        }
+
+        .btn-darkmode {
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+        }
+
+        .jumbotron {
+            flex-direction: column;
+            padding-top: 20px;
+            height: auto !important;
+        }
+
+        .content-overlay {
+            padding-top: 10px;
+            text-align: center;
+            height: auto;
+        }
+
+        .card {
+            margin-bottom: 20px;
         }
     }
 
